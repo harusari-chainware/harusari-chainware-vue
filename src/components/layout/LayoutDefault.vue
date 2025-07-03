@@ -25,7 +25,7 @@ import { ref, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 
 const route = useRoute()
-const selectedMenu = ref('대시보드')
+const selectedMenu = ref('')
 
 // TODO: 추후 백엔드 연동 시 사용자 권한 값 주입
 // const userRole = 'FRANCHISE_MANAGER'
