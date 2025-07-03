@@ -3,7 +3,7 @@
     <div class="logo">
       <img :src="logo" alt="Chainware 로고" class="logo-img"  />
     </div>
-    <nav>
+    <nav class="sidebar-area">
       <SidebarSection :groups="sidebarMap[selectedMenu]" />
     </nav>
   </aside>
@@ -25,7 +25,8 @@ defineProps({
 
 <style scoped>
 .sidebar {
-  width: 240px;
+  width: 250px;
+  box-sizing: border-box;
   background-color: #fff;
   padding: 1.5rem;
   border-right: 1px solid #e3e7ec;
@@ -34,10 +35,14 @@ defineProps({
 .sidebar .logo {
   display: flex;
   justify-content: center;
-  margin-bottom: 2rem;
+  margin-bottom: 3rem;
 }
 
 .sidebar .logo img {
   width: 180px;
+}
+
+.sidebar-area{
+  margin-left: 0.3rem;
 }
 </style>

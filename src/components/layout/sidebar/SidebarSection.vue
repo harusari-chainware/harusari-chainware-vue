@@ -17,9 +17,8 @@ defineProps({ groups: Array })
 .sidebar-section {
   list-style: none;
   padding: 0;
-  margin: 0;
   display: flex;
   flex-direction: column;
-  gap: 2rem;
+  gap: 1.3rem;
 }
 </style>

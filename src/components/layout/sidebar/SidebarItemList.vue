@@ -26,12 +26,8 @@ const props = defineProps({
 
 <style scoped>
 .submenu {
-  padding-left: 0.5rem;
+  padding-left: 1.1rem;
   list-style: none;
-}
-
-.submenu li {
-  margin-bottom: 0.2rem; /* 간격 주기 */
 }
 
 .menu-link {
