@@ -1,8 +1,5 @@
 <template>
   <aside class="sidebar">
-    <div class="logo">
-      <img :src="logo" alt="Chainware 로고" class="logo-img"  />
-    </div>
     <nav class="sidebar-area">
       <SidebarSection :groups="sidebarMap[selectedMenu]" />
 <!--      <SidebarSection :groups="filteredSidebarMap[selectedMenu]" />-->
@@ -14,7 +11,6 @@
 import SidebarSection from './sidebar/SidebarSection.vue'
 import { sidebarMap } from '@/constants/sidebarMap'
 // import { getFilteredSidebarMap } from '@/utils/filteredSidebarMap'
-import logo from '@/assets/images/chainware-logo.png';
 import { defineProps, computed } from 'vue'
 
 defineProps({
@@ -38,16 +34,6 @@ defineProps({
   background-color: #fff;
   padding: 1.5rem;
   border-right: 1px solid #e3e7ec;
-}
-
-.sidebar .logo {
-  display: flex;
-  justify-content: center;
-  margin-bottom: 3rem;
-}
-
-.sidebar .logo img {
-  width: 180px;
 }
 
 .sidebar-area{

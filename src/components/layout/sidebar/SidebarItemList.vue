@@ -1,7 +1,11 @@
 <template>
   <ul class="submenu">
     <li v-for="item in items" :key="item.name">
-      <RouterLink :to="item.route" class="menu-link" active-class="active-link">
+      <RouterLink
+          :to="item.route"
+          class="menu-link"
+          :class="{ 'active-link': isActive(item.route) }"
+      >
         {{ item.name }}
       </RouterLink>
     </li>
@@ -10,7 +14,8 @@
 
 <script setup>
 import { computed } from 'vue'
-// import { useUserStore } from '@/stores/user' // 사용자 role 불러오기
+import { useRoute } from 'vue-router'
+// import { useUserStore } from '@/stores/user'
 
 const props = defineProps({
   items: Array
@@ -22,6 +27,13 @@ const props = defineProps({
 // const filteredItems = computed(() =>
 //     props.items.filter(item => item.roles.includes(userRole))
 // )
+
+const route = useRoute()
+
+const isActive = (itemRoute) => {
+  if (!itemRoute) return false
+  return route.path.startsWith(itemRoute)
+}
 </script>
 
 <style scoped>
@@ -33,6 +45,7 @@ const props = defineProps({
 .menu-link {
   display: block;
   padding: 0.4rem 0.6rem;
+  margin-bottom: 0.1rem;
   text-decoration: none;
   font-size: 0.9rem;
   color: #4a5662;
@@ -40,12 +53,12 @@ const props = defineProps({
   transition: background-color 0.2s;
 }
 
-.menu-link:hover {
+.menu-link:not(.active-link):hover {
   background-color: #f1f4f6;
 }
 
 .active-link {
-  background-color: #3aaed8;
-  color: #fff;
+  background-color: #e9f5fa;
+  color: #3aaed8;
 }
 </style>
