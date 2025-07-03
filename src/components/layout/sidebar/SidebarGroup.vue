@@ -1,7 +1,7 @@
 <template>
   <div class="sidebar-group">
     <div class="menu-title">
-      <i class="fas fa-caret-right"></i> {{ group.title }}
+      <i :class="group.icon" class="menu-icon" /> {{ group.title }}
     </div>
     <SidebarItemList :items="group.items" />
   </div>
@@ -20,5 +20,11 @@ defineProps({
   font-weight: 600;
   color: #3aaed8;
   margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+}
+
+.menu-icon {
+  margin-right: 0.5rem;
 }
 </style>

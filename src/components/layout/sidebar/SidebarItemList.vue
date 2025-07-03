@@ -1,7 +1,7 @@
 <template>
   <ul class="submenu">
     <li v-for="item in items" :key="item.name">
-      <RouterLink :to="item.route">
+      <RouterLink :to="item.route" class="menu-link" active-class="active-link">
         {{ item.name }}
       </RouterLink>
     </li>
@@ -27,19 +27,28 @@ const props = defineProps({
 <style scoped>
 .submenu {
   padding-left: 0.5rem;
-  margin-bottom: 1.5rem;
+  list-style: none;
 }
 
-.submenu li a {
-  text-decoration: none;
-  color: #4a5662;
-  font-size: 0.9rem;
-  padding: 0.4rem 0.6rem;
+.submenu li {
+  margin-bottom: 0.2rem; /* 간격 주기 */
+}
+
+.menu-link {
   display: block;
+  padding: 0.4rem 0.6rem;
+  text-decoration: none;
+  font-size: 0.9rem;
+  color: #4a5662;
   border-radius: 6px;
+  transition: background-color 0.2s;
 }
 
-.submenu li a.router-link-active {
+.menu-link:hover {
+  background-color: #f1f4f6;
+}
+
+.active-link {
   background-color: #3aaed8;
   color: #fff;
 }
