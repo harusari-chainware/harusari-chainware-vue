@@ -1,12 +1,15 @@
 <template>
   <div class="sidebar-group">
-    <div class="menu-title">
+    <div class="menu-title" @click="emitToggle">
+      <span class="arrow-wrapper">
+        <i :class="isOpen ? 'fa-solid fa-chevron-down' : 'fa-solid fa-chevron-right'" class="arrow-icon" />
+      </span>
       <span class="icon-wrapper">
         <i :class="group.icon" class="menu-icon" />
       </span>
       <span class="menu-text">{{ group.title }}</span>
     </div>
-    <SidebarItemList :items="group.items" />
+    <SidebarItemList v-if="isOpen" :items="group.items" />
   </div>
 </template>
 
@@ -14,8 +17,15 @@
 import SidebarItemList from './SidebarItemList.vue'
 
 defineProps({
-  group: Object
+  group: Object,
+  isOpen: Boolean
 })
+
+const emit = defineEmits(['toggle'])
+
+const emitToggle = () => {
+  emit('toggle')
+}
 </script>
 
 <style scoped>
@@ -25,19 +35,31 @@ defineProps({
   margin-bottom: 0.5rem;
   display: flex;
   align-items: center;
+  cursor: pointer;
 }
 
-/* 아이콘 감싸는 wrapper: 고정 폭, 정렬 */
+.arrow-wrapper {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  width: 14px;
+  min-width: 14px;
+  margin-right: 0.2rem;
+}
+
+.arrow-icon {
+  font-size: 0.7rem;
+}
+
 .icon-wrapper {
   display: inline-flex;
   justify-content: center;
   align-items: center;
-  width: 20px;  /* 고정 가로폭 */
+  width: 20px;
   min-width: 20px;
   margin-right: 0.5rem;
 }
 
-/* 아이콘 자체 스타일 */
 .menu-icon {
   font-size: 1rem;
   width: 1rem;

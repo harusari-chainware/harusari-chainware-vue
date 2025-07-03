@@ -13,7 +13,7 @@ export const sidebarMap = {
     "제품": [
         {
             title: "카테고리",
-            icon: 'fas fa-list',
+            icon: 'fas fa-folder-tree',
             items: [
                 { name: "카테고리 조회", route: "/category/list", roles: ["GENERAL_MANAGER", "SENIOR_MANAGER", "WAREHOUSE_MANAGER", "FRANCHISE_MANAGER"] },
                 { name: "카테고리 등록", route: "/category/register", roles: ["GENERAL_MANAGER", "SENIOR_MANAGER"] }
