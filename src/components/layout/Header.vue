@@ -2,6 +2,7 @@
   <header class="header">
     <div class="logo-title">Chainware SCM 시스템</div>
     <nav class="top-menu">
+      <!-- 추후 a 태그 안에 v-for="menu in accessibleMenus" 추가 -->
       <a
           v-for="menu in menuList"
           :key="menu"
@@ -16,12 +17,13 @@
 </template>
 
 <script setup>
-import { defineEmits, defineProps } from 'vue'
+import { defineEmits, defineProps, computed } from 'vue'
+import { useRouter } from 'vue-router'
 
 const emits = defineEmits(['selectMenu'])
-
 const props = defineProps({
-  selected: String
+  selected: String,
+  // userRole: String
 })
 
 const menuList = [
@@ -35,15 +37,38 @@ const menuList = [
   '마이페이지'
 ]
 
+// TODO: 추후 권한 기반 메뉴 노출
+// const accessibleMenus = computed(() =>
+//   getAccessibleHeaderMenus(props.userRole)
+// )
+
+
+const router = useRouter()
+
+const routeMap = {
+  '대시보드': '/dashboard/prediction',
+  '회원': '/members/list',
+  '제품': '/product/list',
+  '가맹점/거래처/창고': '/franchise/list',
+  '주문/반품/배송': '/order/list',
+  '폐기': '/franchise/dispose/list',
+  '마이페이지': '/mypage/info'
+}
+
 const selectMenu = (menu) => {
   emits('selectMenu', menu)
+  const route = routeMap[menu]
+  if (route) {
+    router.push(route)
+  }
 }
 </script>
 
 <style scoped>
 .header {
+  height: 70px;
+  box-sizing: border-box;
   background: #fff;
-  padding: 1.5rem 2rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -51,14 +76,14 @@ const selectMenu = (menu) => {
 }
 
 .logo-title {
-  font-size: 1.2rem;
+  font-size: 1.1rem;
   font-weight: 600;
-  color: #333;
+  color: #353945;
 }
 
 .top-menu {
   display: flex;
-  gap: 1.5rem;
+  gap: 0.5rem;
 }
 
 .top-menu a {

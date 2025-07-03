@@ -1,5 +1,7 @@
 <template>
   <div class="layout-default">
+    <!-- 권한에 따른 분기처리를 위해 추후 사이드바와 헤더 안에 :userRole="userRole" 추가-->
+
     <!-- 좌측 사이드바 -->
     <Sidebar class="sidebar" :selectedMenu="selectedMenu" />
 
@@ -23,6 +25,9 @@ import { ref } from 'vue'
 
 const selectedMenu = ref('대시보드')
 
+// TODO: 추후 백엔드 연동 시 사용자 권한 값 주입
+// const userRole = 'FRANCHISE_MANAGER'
+
 const handleSelectMenu = (menu) => {
   selectedMenu.value = menu
 }
@@ -42,7 +47,7 @@ const handleSelectMenu = (menu) => {
   width: 240px;
   background-color: #fff;
   border-right: 1px solid #e3e7ec;
-  padding: 1.5rem;
+  padding: 1rem 1.5rem;
 }
 
 /* 오른쪽 전체 */
@@ -57,7 +62,7 @@ const handleSelectMenu = (menu) => {
 /* 헤더는 위 */
 .content-wrapper > header {
   background: #fff;
-  padding: 1.5rem 2rem;
+  padding: 1.2rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
