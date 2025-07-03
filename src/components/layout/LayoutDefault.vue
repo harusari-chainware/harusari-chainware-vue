@@ -21,12 +21,46 @@
 <script setup>
 import Sidebar from '@/components/layout/Sidebar.vue'
 import Header from '@/components/layout/Header.vue'
-import { ref } from 'vue'
+import { ref, onMounted, watch } from 'vue'
+import { useRoute } from 'vue-router'
 
+const route = useRoute()
 const selectedMenu = ref('대시보드')
 
 // TODO: 추후 백엔드 연동 시 사용자 권한 값 주입
 // const userRole = 'FRANCHISE_MANAGER'
+
+const routeToMenuMap = [
+  { path: '/dashboard', menu: '대시보드' },
+  { path: '/members', menu: '회원' },
+  { path: '/category', menu: '제품' },
+  { path: '/product', menu: '제품' },
+  { path: '/contract', menu: '제품' },
+  { path: '/franchise', menu: '가맹점/거래처/창고' },
+  { path: '/vendor', menu: '가맹점/거래처/창고' },
+  { path: '/warehouse', menu: '가맹점/거래처/창고' },
+  { path: '/disposal', menu: '폐기' },
+  { path: '/order', menu: '주문/반품/배송' },
+  { path: '/takeback', menu: '주문/반품/배송' },
+  { path: '/delivery', menu: '주문/반품/배송' },
+  { path: '/requisition', menu: '품의/발주/입고' },
+  { path: '/purchase', menu: '품의/발주/입고' },
+  { path: '/stockin', menu: '품의/발주/입고' },
+  { path: '/mypage', menu: '마이페이지' }
+]
+
+const syncSelectedMenuWithRoute = () => {
+  const matched = routeToMenuMap.find(item => route.path.startsWith(item.path))
+  selectedMenu.value = matched ? matched.menu : ''
+}
+
+onMounted(() => {
+  syncSelectedMenuWithRoute()
+})
+
+watch(() => route.path, () => {
+  syncSelectedMenuWithRoute()
+})
 
 const handleSelectMenu = (menu) => {
   selectedMenu.value = menu

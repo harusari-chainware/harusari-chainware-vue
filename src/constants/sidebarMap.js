@@ -114,16 +114,16 @@ export const sidebarMap = {
             title: "가맹점 폐기",
             icon: 'fas fa-trash-can',
             items: [
-                { name: "가맹점 폐기 조회", route: "/franchise/dispose/list", roles: ["GENERAL_MANAGER", "SENIOR_MANAGER", "FRANCHISE_MANAGER"] },
-                { name: "가맹점 폐기 등록", route: "/franchise/dispose/register", roles: ["FRANCHISE_MANAGER"] }
+                { name: "가맹점 폐기 조회", route: "/disposal/franchise/list", roles: ["GENERAL_MANAGER", "SENIOR_MANAGER", "FRANCHISE_MANAGER"] },
+                { name: "가맹점 폐기 등록", route: "/disposal/franchise/register", roles: ["FRANCHISE_MANAGER"] }
             ]
         },
         {
             title: "창고 폐기",
             icon: 'fas fa-dumpster',
             items: [
-                { name: "창고 폐기 조회", route: "/warehouse/dispose/list", roles: ["GENERAL_MANAGER", "SENIOR_MANAGER", "WAREHOUSE_MANAGER"] },
-                { name: "창고 폐기 등록", route: "/warehouse/dispose/register", roles: ["WAREHOUSE_MANAGER"] }
+                { name: "창고 폐기 조회", route: "/disposal/warehouse/list", roles: ["GENERAL_MANAGER", "SENIOR_MANAGER", "WAREHOUSE_MANAGER"] },
+                { name: "창고 폐기 등록", route: "/disposal/warehouse/register", roles: ["WAREHOUSE_MANAGER"] }
             ]
         }
     ],
