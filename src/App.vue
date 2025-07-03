@@ -6,6 +6,9 @@ import LayoutDefault from './components/layout/LayoutDefault.vue'
   <LayoutDefault />
 </template>
 
-<style scoped>
-
+<style>
+body {
+  margin: 0;
+  padding: 0;
+}
 </style>

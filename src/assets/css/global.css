@@ -1,0 +1,24 @@
+/* Pretendard 웹폰트가 정상 로딩될 경우 우선 적용됨 */
+html, body {
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui,
+    Roboto, 'Helvetica Neue', 'Segoe UI', 'Apple SD Gothic Neo',
+    'Noto Sans KR', 'Malgun Gothic', sans-serif;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    background-color: #f9f9f9;
+    color: #222;
+    font-size: 16px;
+    line-height: 1.5;
+}
+
+/* 모든 요소에 box-sizing 적용 */
+*, *::before, *::after {
+    box-sizing: inherit;
+}
+
+/* 기본 링크 스타일 리셋 */
+a {
+    text-decoration: none;
+    color: inherit;
+}
