@@ -15,10 +15,11 @@ import { ref, watch } from 'vue'
 import SidebarGroup from './SidebarGroup.vue'
 
 const props = defineProps({
-  groups: Array
+  groups: Array,
+  default: () => []
 })
 
-const openGroups = ref(props.groups.map(group => group.title))
+const openGroups = ref(props.groups?.map(group => group.title) || [])
 
 const toggleGroup = (title) => {
   if (openGroups.value.includes(title)) {
@@ -31,7 +32,7 @@ const toggleGroup = (title) => {
 watch(
     () => props.groups,
     (newGroups) => {
-      openGroups.value = newGroups.map(g => g.title)
+      openGroups.value = newGroups?.map(g => g.title) || []
     },
     { immediate: true }
 )
