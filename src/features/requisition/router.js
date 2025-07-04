@@ -1,15 +1,15 @@
-import RequisitionDummyView from "@/features/requisition/views/RequisitionDummyView.vue";
+import RequisitionListView from "@/features/requisition/views/RequisitionListView.vue";
 
 export const requisitionRoutes = [
     {
         path: '/requisition/list',
-        name: 'RequisitionDummyView',
-        component: () => import('@/features/requisition/views/RequisitionDummyView.vue')
+        name: 'RequisitionListView',
+        component: () => import('@/features/requisition/views/RequisitionListView.vue')
     },
     {
         path: '/requisition/register',
-        name: 'Requisition1Dummy1View',
-        component: RequisitionDummyView,
-        meta: { requiresAuth: true }
+        name: 'RequisitionDetailView',
+        component: () => import('@/features/requisition/views/RequisitionDetailVeiw.vue'),
+        // meta: { requiresAuth: true }
     },
 ];

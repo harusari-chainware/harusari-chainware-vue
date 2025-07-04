@@ -2,7 +2,7 @@
 import { ref } from 'vue'
 import LayoutDefault from '@/components/layout/LayoutDefault.vue'
 
-// 필터 상태
+// 필터 상태 관리
 const filters = ref({
   drafter: '',
   code: '',
@@ -32,7 +32,7 @@ const goToCreate = () => {
   alert('새 품의서 작성 페이지로 이동합니다.')
 }
 
-// 페이지 변경
+// 현재 페이지 상태
 const currentPage = ref(1)
 const changePage = (page) => {
   currentPage.value = page
@@ -40,7 +40,6 @@ const changePage = (page) => {
 </script>
 
 <template>
-  <LayoutDefault>
     <main class="requisition-list">
       <section class="page-header">
         <h1 class="page-title">품의서 목록</h1>
@@ -94,9 +93,9 @@ const changePage = (page) => {
               <th>거래처명</th>
               <th>기안자</th>
               <th>결재자</th>
-              <th>제품 수</th>
-              <th>총 수량</th>
-              <th>총 금액</th>
+              <th class="text-center">제품 수</th>
+              <th class="text-right">총 수량</th>
+              <th class="text-right">총 금액</th>
               <th>품의 상태</th>
               <th>상신일</th>
               <th>검토일</th>
@@ -109,15 +108,15 @@ const changePage = (page) => {
               <td>테크솔루션 주식회사</td>
               <td>김철수</td>
               <td>박지영</td>
-              <td>3</td>
-              <td>225</td>
-              <td class="amount">7,375,000원</td>
+              <td class="text-center">3</td>
+              <td class="text-right">225</td>
+              <td class="text-right">7,375,000원</td>
               <td><span class="status-badge status-pending">승인 대기중</span></td>
               <td>2024-08-15</td>
               <td>-</td>
               <td><a href="#" class="detail-link">상세보기</a></td>
             </tr>
-            <!-- TODO: v-for로 동적 목록 구성 예정 -->
+            <!-- TODO: API 연동 후 v-for로 반복 -->
             </tbody>
           </table>
         </div>
@@ -131,7 +130,6 @@ const changePage = (page) => {
         </nav>
       </section>
     </main>
-  </LayoutDefault>
 </template>
 
 <style scoped>
@@ -239,8 +237,8 @@ table {
 }
 th, td {
   padding: 12px 14px;
-  text-align: left;
   border-bottom: 1px solid #e5e7eb;
+  vertical-align: middle;
 }
 thead tr {
   background-color: #f4f6f9;
@@ -248,9 +246,26 @@ thead tr {
 tbody tr:hover {
   background-color: #f9f9f9;
 }
+
+/* 공통 정렬 클래스 */
+.text-left {
+  text-align: left;
+}
+.text-center {
+  text-align: center;
+}
+.text-right {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* 상태 배지 스타일 */
 .status-badge {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   padding: 4px 12px;
+  height: 28px;
   border-radius: 9999px;
   font-size: 13px;
   font-weight: 500;
@@ -267,13 +282,14 @@ tbody tr:hover {
   background-color: #fee2e2;
   color: #b91c1c;
 }
-.amount {
-  text-align: right;
-}
+
 .detail-link {
   color: #3aaed8;
   text-decoration: none;
   font-weight: 500;
+  display: inline-block;
+  vertical-align: middle;
+  line-height: 1.5;
 }
 .detail-link:hover {
   text-decoration: underline;
