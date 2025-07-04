@@ -3,32 +3,32 @@ import ProductDummyView from "@/features/product/views/ProductDummyView.vue";
 export const productRoutes = [
     {
         path: '/category/list',
-        name: 'ProductDummyView',
+        name: 'ProductDummy1View',
         component: ProductDummyView
     },
     {
         path: '/category/register',
-        name: 'ProductDummyView',
+        name: 'ProductDummy2View',
         component: ProductDummyView
     },
     {
         path: '/product/list',
-        name: 'ProductDummyView',
+        name: 'ProductDummy3View',
         component: ProductDummyView
     },
     {
         path: '/product/register',
-        name: 'ProductDummyView',
+        name: 'ProductDummy4View',
         component: ProductDummyView
     },
     {
         path: '/contract/list',
-        name: 'ProductDummyView',
+        name: 'ProductDummy5View',
         component: ProductDummyView
     },
     {
         path: '/contract/register',
-        name: 'ProductDummyView',
+        name: 'ProductDummy6View',
         component: ProductDummyView
     },
 ];

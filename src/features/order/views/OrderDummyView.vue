@@ -3,7 +3,7 @@
 </script>
 
 <template>
-
+  OrderDummyView
 </template>
 
 <style scoped>

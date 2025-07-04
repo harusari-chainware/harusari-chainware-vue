@@ -3,7 +3,7 @@
 </script>
 
 <template>
-
+  PurchaseDummyView
 </template>
 
 <style scoped>
