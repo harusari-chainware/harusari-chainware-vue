@@ -58,17 +58,17 @@ const isActive = (itemRoute) => {
   margin-bottom: 0.1rem;
   text-decoration: none;
   font-size: 0.9rem;
-  color: #4a5662;
+  color: var(--color-gray-700);
   border-radius: 6px;
   transition: background-color 0.2s;
 }
 
 .menu-link:not(.active-link):hover {
-  background-color: #f1f4f6;
+  background-color: var(--color-hover-light);
 }
 
 .active-link {
-  background-color: #e9f5fa;
-  color: #3aaed8;
+  background-color: var(--color-primary-light);
+  color:var(--color-primary);
 }
 </style>

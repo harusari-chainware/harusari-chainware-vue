@@ -4,13 +4,13 @@
     width: 270px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
     border-radius: 8px;
-    border: 1px solid #e5e7eb;
+    border: 1px solid var(--color-gray-200);
 }
 
 /* 헤더 스타일 */
 .flatpickr-months {
     background-color: #f9fafb;
-    border-bottom: 1px solid #e5e7eb;
+    border-bottom: 1px solid var(--color-gray-200);
     padding: 5px 10px;
     border-radius: 8px 8px 0 0;
 }

@@ -22,8 +22,8 @@ const props = defineProps({
   align-items: center;
   justify-content: center;
   padding: 40px 20px;
-  color: #6b7280;
-  border: 1px dashed #d1d5db;
+  color: var(--color-gray-600);
+  border: 1px dashed var(--color-border);
   border-radius: 12px;
   background-color: #f9fafb;
   text-align: center;

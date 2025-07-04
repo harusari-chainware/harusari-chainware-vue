@@ -25,15 +25,15 @@ defineEmits(['open'])
 @import '@/assets/css/filter-common.css';
 .search-modal-trigger {
   padding: 8px 12px;
-  border: 1px solid #d1d5db;
+  border: 1px solid var(--color-border);
   border-radius: 6px;
-  background-color: #f9f9f9;
+  background-color: var(--color-gray-50);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: space-between;
 }
 .search-modal-trigger:hover {
-  background-color: #f0f0f0;
+  background-color: var(--color-hover);
 }
 </style>

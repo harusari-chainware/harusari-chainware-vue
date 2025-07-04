@@ -53,16 +53,16 @@ table {
 th, td {
   padding: 12px 15px;
   text-align: left;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid var(--color-gray-200);
 }
 thead tr {
-  background-color: #f4f6f9;
+  background-color: var(--color-gray-100);
 }
 tbody tr:hover {
-  background-color: #f9f9f9;
+  background-color: var(--color-gray-50);
 }
 .detail-link {
-  color: #3aaed8;
+  color: var(--color-primary);
   text-decoration: none;
   font-weight: 500;
 }

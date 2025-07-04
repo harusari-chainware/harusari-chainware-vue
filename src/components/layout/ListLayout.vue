@@ -54,13 +54,13 @@ main {
 /* page-header */
 .page-title {
   font-size: 1.5rem;
-  color: #1f2d3d;
+  color: var(--color-gray-900);
   margin-bottom: 10px;
-  border-left: 4px solid #3aaed8;
+  border-left: 4px solid var(--color-primary);
   padding-left: 10px;
 }
 .page-description {
-  color: #6b7280;
+  color: var(--color-gray-600);
   font-size: 1rem;
 }
 </style>

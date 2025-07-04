@@ -121,7 +121,7 @@ const statusClass = computed(() => `status-${statusMap[props.status]?.class || '
 }
 
 .status-default {
-  background-color: #e5e7eb;
-  color: #374151;
+  background-color: var(--color-gray-200);
+  color: var(--color-gray-800);
 }
 </style>

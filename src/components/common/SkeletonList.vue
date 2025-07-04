@@ -40,19 +40,19 @@ defineProps({
 .skeleton-table th,
 .skeleton-table td {
   padding: 12px;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid var(--color-gray-200);
 }
 
 .skeleton-header {
   height: 14px;
   width: 60%;
-  background-color: #e5e7eb;
+  background-color: var(--color-gray-200);
   border-radius: 4px;
 }
 
 .skeleton-cell {
   height: 18px;
-  background-color: #e5e7eb;
+  background-color: var(--color-gray-200);
   border-radius: 4px;
 }
 

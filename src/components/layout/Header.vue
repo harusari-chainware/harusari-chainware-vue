@@ -128,7 +128,7 @@ onBeforeUnmount(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 1px solid #e3e7ec;
+  border-bottom: 1px solid var(--color-border-light);
 }
 
 .logo-box {
@@ -151,7 +151,7 @@ onBeforeUnmount(() => {
 
 .top-menu a {
   text-decoration: none;
-  color: #4a5662;
+  color: var(--color-gray-700);
   font-size: 0.95rem;
   font-weight: 500;
   padding: 0.3rem 0.6rem;
@@ -159,18 +159,18 @@ onBeforeUnmount(() => {
 }
 
 .top-menu a.active {
-  background-color: #3aaed8;
+  background-color: var(--color-primary);
   color: #fff;
 }
 
 .top-menu a:not(.active):hover {
-  background-color: #e9f5fa;
-  color: #3aaed8;
+  background-color: var(--color-primary-light);
+  color: 	var(--color-primary);
 }
 
 .top-menu a.active,
 .mypage-menu.active {
-  background-color: #3aaed8;
+  background-color: var(--color-primary);
   color: #fff;
 }
 
@@ -202,12 +202,12 @@ onBeforeUnmount(() => {
 }
 
 .dropdown a:hover {
-  background-color: #f1f1f1;
+  background-color: var(--color-hover-dark);
 }
 
 .mypage-menu {
   text-decoration: none;
-  color: #4a5662;
+  color: var(--color-gray-700);
   font-size: 0.95rem;
   font-weight: 500;
   padding: 0.3rem 0.6rem;
@@ -216,6 +216,6 @@ onBeforeUnmount(() => {
 
 .mypage-menu.mypage-active {
   background-color: #c3e9f5;
-  color: #00647a;
+  color: var(--color-primary-dark);
 }
 </style>

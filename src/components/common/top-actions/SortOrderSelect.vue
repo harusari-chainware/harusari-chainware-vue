@@ -27,7 +27,7 @@ defineEmits(['update:modelValue'])
 .styled-select {
   width: 100%;
   padding: 8px 30px 8px 12px;
-  border: 1px solid #d1d5db;
+  border: 1px solid var(--color-border);
   border-radius: 8px;
   font-size: 14px;
   background-color: white;
@@ -43,6 +43,6 @@ defineEmits(['update:modelValue'])
   pointer-events: none;
   transform: translateY(-50%);
   font-size: 12px;
-  color: #6b7280;
+  color: var(--color-gray-600);
 }
 </style>

@@ -72,7 +72,7 @@ const handleSelectMenu = (menu) => {
   display: flex;
   height: 100vh;
   width: 100%;
-  background-color: #f9f9f9;
+  background-color: var(--color-gray-50);
   flex-direction: column;
   overflow: hidden;
 }
@@ -101,7 +101,7 @@ const handleSelectMenu = (menu) => {
   box-sizing: border-box;
   width: 240px;
   background-color: #fff;
-  border-right: 1px solid #e3e7ec;
+  border-right: 1px solid var(--color-border-light);
   padding: 1rem 1.5rem;
 }
 
@@ -110,6 +110,6 @@ const handleSelectMenu = (menu) => {
   flex: 1;
   padding: 1.5rem 2rem;
   overflow-y: auto;
-  background-color: #f4f6f9;
+  background-color: var(--color-gray-100);
 }
 </style>

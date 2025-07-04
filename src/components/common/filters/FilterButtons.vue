@@ -27,7 +27,7 @@
 }
 
 .btn-primary {
-  background-color: #3aaed8;
+  background-color:	var(--color-primary);
   color: white;
 }
 
@@ -36,11 +36,11 @@
 }
 
 .btn-secondary {
-  background-color: #e5e7eb;
-  color: #1f2d3d;
+  background-color: var(--color-gray-200);
+  color: var(--color-gray-900);
 }
 
 .btn-secondary:hover {
-  background-color: #d1d5db;
+  background-color: var(--color-gray-400);
 }
 </style>

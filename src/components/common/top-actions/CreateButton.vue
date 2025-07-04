@@ -16,7 +16,7 @@ defineEmits(['click'])
   border-radius: 6px;
   cursor: pointer;
   border: none;
-  background-color: #3aaed8;
+  background-color: var(--color-primary);
   color: white;
   transition: background-color 0.2s;
 }

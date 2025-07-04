@@ -31,7 +31,7 @@ const emitToggle = () => {
 <style scoped>
 .menu-title {
   font-weight: 600;
-  color: #3aaed8;
+  color: var(--color-primary);
   margin-bottom: 0.5rem;
   display: flex;
   align-items: center;
