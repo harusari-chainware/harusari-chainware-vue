@@ -20,7 +20,7 @@
 <script setup>
 import GenericTable from '@/components/common/GenericTable.vue'
 import StatusBadge from '@/components/common/StatusBadge.vue'
-import { formatCurrency, statusText, statusClass } from '@/utils/tableUtils'
+import { formatCurrency} from '@/utils/tableUtils'
 
 defineProps({
   orders: {
