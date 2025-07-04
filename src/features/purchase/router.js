@@ -8,7 +8,7 @@ export const purchaseRoutes = [
     },
     {
         path: '/stockin/list',
-        name: 'PurchaseDummyView',
+        name: 'PurchaseDummy1View',
         component: PurchaseDummyView
     },
 ];

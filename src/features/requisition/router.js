@@ -8,7 +8,7 @@ export const requisitionRoutes = [
     },
     {
         path: '/requisition/register',
-        name: 'RequisitionDummy1View',
+        name: 'Requisition1Dummy1View',
         component: RequisitionDummyView,
         meta: { requiresAuth: true }
     },
