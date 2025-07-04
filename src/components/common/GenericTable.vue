@@ -3,13 +3,17 @@
     <table>
       <thead>
       <tr>
-        <th v-for="col in columns" :key="col.key" :style="{ textAlign: col.align || 'left' }">
+        <th
+            v-for="col in columns"
+            :key="col.key"
+            :style="{ textAlign: col.align || 'left' }"
+        >
           {{ col.label }}
         </th>
       </tr>
       </thead>
       <tbody>
-      <tr v-for="(item, index) in items" :key="item.id">
+      <tr v-for="(item, index) in items" :key="item.id || index">
         <td
             v-for="col in columns"
             :key="col.key"
