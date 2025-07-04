@@ -20,30 +20,42 @@
 
     <!-- table -->
     <template #table>
-      <OrderTable :orders="pagedOrders" />
-      <Pagination
-          v-model="currentPage"
-          :total-items="totalCount"
-          :items-per-page="itemsPerPage"
+      <SkeletonList v-if="isLoading" :rows="8" :columns="6" :cellWidth="120" />
+      <EmptyResult
+          v-else-if="!isLoading && orders.length === 0"
+          message="등록된 주문이 없습니다."
       />
+      <template v-else>
+        <OrderTable :orders="pagedOrders" />
+        <Pagination
+            v-model="currentPage"
+            :total-items="totalCount"
+            :items-per-page="itemsPerPage"
+        />
+      </template>
     </template>
   </ListLayout>
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { dummyOrders } from '@/constants/dummy/order'
 
 import ListLayout from '@/components/layout/ListLayout.vue'
-import OrderFilters from '../components/OrderFilters.vue'
-import OrderTable from '../components/OrderTable.vue'
+import EmptyResult from "@/components/common/EmptyResult.vue";
 import Pagination from '@/components/common/Pagination.vue'
+import SkeletonList from "@/components/common/SkeletonList.vue";
 
 import CreateButton from '@/components/common/top-actions/CreateButton.vue'
 import SortDropdown from '@/components/common/top-actions/SortDropdown.vue'
 import SortOrderSelect from '@/components/common/top-actions/SortOrderSelect.vue'
 
+import OrderFilters from '../components/OrderFilters.vue'
+import OrderTable from '../components/OrderTable.vue'
+
 const router = useRouter()
+const isLoading = ref(true)
 
 // 페이지네이션
 const currentPage = ref(1)
@@ -60,32 +72,16 @@ const sortOptions = [
 ]
 
 // 더미 주문 데이터
-const orders = ref([
-  {
-    id: 1,
-    orderCode: 'ORD-001',
-    franchiseName: '강남1호점',
-    totalProducts: 3,
-    totalAmount: 48000,
-    deliveryCode: 'D-1001',
-    createdAt: '2025-07-01',
-    dueDate: '2025-07-05',
-    deliveredAt: '',
-    status: 'PENDING'
-  },
-  {
-    id: 2,
-    orderCode: 'ORD-002',
-    franchiseName: '신촌2호점',
-    totalProducts: 5,
-    totalAmount: 72000,
-    deliveryCode: 'D-1002',
-    createdAt: '2025-07-02',
-    dueDate: '2025-07-07',
-    deliveredAt: '2025-07-06',
-    status: 'DELIVERED'
-  }
-])
+const orders = ref(dummyOrders)
+
+// 마운트 시 로딩 시뮬레이션
+onMounted(() => {
+  isLoading.value = true
+  setTimeout(() => {
+    orders.value = dummyOrders
+    isLoading.value = false
+  }, 1000) // 1초 후 데이터 주입
+})
 
 // 정렬 기준 바뀔 때 쿼리 반영
 watch([sortKey, sortOrder], ([key, order]) => {
