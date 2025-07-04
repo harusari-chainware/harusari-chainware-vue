@@ -1,30 +1,61 @@
 <template>
   <nav class="pagination-container" aria-label="페이지 네비게이션">
     <ul class="pagination">
+      <!-- 처음 그룹으로 이동 -->
+      <li
+          class="page-item"
+          :class="{ disabled: currentPageGroup === 1 }"
+          @click="goToFirstGroup"
+          aria-label="처음 페이지 그룹으로 이동"
+          role="button"
+      >
+        <i class="fa-solid fa-angles-left page-icon" aria-hidden="true" />
+      </li>
+
+      <!-- 이전 그룹으로 이동 -->
       <li
           class="page-item"
           :class="{ disabled: currentPageGroup === 1 }"
           @click="goToPrevGroup"
+          aria-label="이전 페이지 그룹으로 이동"
+          role="button"
       >
-        <i class="fa-solid fa-caret-left page-icon" />
+        <i class="fa-solid fa-caret-left page-icon" aria-hidden="true" />
       </li>
 
+      <!-- 페이지 목록 -->
       <li
           v-for="page in pageNumbers"
           :key="page"
           class="page-item"
-          :class="{ active: page === props.modelValue }"
+          :class="{ active: page === modelValue }"
           @click="$emit('update:modelValue', page)"
+          :aria-current="page === modelValue ? 'page' : null"
+          role="button"
       >
         <span class="page-link">{{ page }}</span>
       </li>
 
+      <!-- 다음 그룹으로 이동 -->
       <li
           class="page-item"
           :class="{ disabled: currentPageGroup === totalGroups }"
           @click="goToNextGroup"
+          aria-label="다음 페이지 그룹으로 이동"
+          role="button"
       >
-        <i class="fa-solid fa-caret-right page-icon" />
+        <i class="fa-solid fa-caret-right page-icon" aria-hidden="true" />
+      </li>
+
+      <!-- 마지막 그룹으로 이동 -->
+      <li
+          class="page-item"
+          :class="{ disabled: currentPageGroup === totalGroups }"
+          @click="goToLastGroup"
+          aria-label="마지막 페이지 그룹으로 이동"
+          role="button"
+      >
+        <i class="fa-solid fa-angles-right page-icon" aria-hidden="true" />
       </li>
     </ul>
   </nav>
@@ -75,6 +106,13 @@ const pageNumbers = computed(() => {
   return Array.from({ length: end - start + 1 }, (_, i) => start + i)
 })
 
+// 첫 그룹 이동
+const goToFirstGroup = () => {
+  if (currentPageGroup.value > 1) {
+    emit('update:modelValue', 1)
+  }
+}
+
 // 이전 그룹 이동
 const goToPrevGroup = () => {
   if (currentPageGroup.value > 1) {
@@ -86,6 +124,13 @@ const goToPrevGroup = () => {
 const goToNextGroup = () => {
   if (currentPageGroup.value < totalGroups.value) {
     emit('update:modelValue', currentPageGroup.value * props.pagesPerGroup + 1)
+  }
+}
+
+// 마지막 그룹 이동
+const goToLastGroup = () => {
+  if (currentPageGroup.value < totalGroups.value) {
+    emit('update:modelValue', totalPages.value)
   }
 }
 </script>
@@ -105,7 +150,11 @@ const goToNextGroup = () => {
 }
 
 .page-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
+  user-select: none;
 }
 
 .page-item.disabled {
@@ -119,18 +168,21 @@ const goToNextGroup = () => {
   padding: 8px 12px;
   border-radius: 6px;
   text-decoration: none;
-  color: #1f2d3d;
-  background-color: #fff;
-  transition: background-color 0.2s;
+  font-size: 14px;
+  color: var(--color-text);
+  background-color: var(--color-white);
+  border: 1px solid var(--color-border);
+  transition: background-color 0.2s, color 0.2s;
 }
 
 .page-link:hover,
 .page-icon:hover {
-  background-color: #f0f0f0;
+  background-color: var(--color-hover);
 }
 
 .page-item.active .page-link {
-  background-color: #3aaed8;
+  background-color: var(--color-primary);
   color: white;
+  font-weight: bold;
 }
 </style>

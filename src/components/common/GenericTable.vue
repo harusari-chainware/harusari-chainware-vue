@@ -21,7 +21,7 @@
               :value="item[col.key]"
               :index="index"
           >
-            {{ col.format ? col.format(item[col.key], item) : item[col.key] }}
+            {{ col.format ? col.format(item[col.key], item, index) : item[col.key] }}
           </slot>
         </td>
       </tr>
