@@ -11,4 +11,9 @@ export const orderRoutes = [
         name: 'OrderDummy2View',
         component: OrderDummyView
     },
+    {
+        path: '/order/detail',
+        name: 'OrderDummy3View',
+        component: OrderDummyView
+    },
 ];
