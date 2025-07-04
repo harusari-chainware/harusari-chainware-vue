@@ -33,7 +33,7 @@ defineProps({
   box-sizing: border-box;
   background-color: #fff;
   padding: 1.5rem;
-  border-right: 1px solid #e3e7ec;
+  border-right: 1px solid var(--color-border-light);
 }
 
 .sidebar-area{

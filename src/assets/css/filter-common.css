@@ -1,0 +1,51 @@
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex: 1;
+    min-width: 180px;
+}
+
+.filter-label {
+    font-weight: 600;
+    font-size: var(--font-filter-label);
+    color: var(--color-gray-800);
+}
+
+.filter-input,
+.filter-select,
+.filter-date,
+.search-modal-trigger {
+    padding: 10px 14px;
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    font-size: var(--font-filter-input);
+    background-color: var(--color-gray-50);
+    width: 100%;
+    box-sizing: border-box;
+    transition: border-color 0.2s ease-in-out;
+}
+
+.filter-input:focus,
+.filter-select:focus,
+.filter-date:focus,
+.search-modal-trigger:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    background-color: #fff;
+}
+
+.filter-select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg fill='black' height='12' viewBox='0 0 24 24' width='12' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 12px;
+}
+
+.search-modal-trigger {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+}

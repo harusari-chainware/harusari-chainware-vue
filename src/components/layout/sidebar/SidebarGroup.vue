@@ -30,8 +30,9 @@ const emitToggle = () => {
 
 <style scoped>
 .menu-title {
+  font-size: var(--font-sidebar-group);
   font-weight: 600;
-  color: #3aaed8;
+  color: var(--color-primary);
   margin-bottom: 0.5rem;
   display: flex;
   align-items: center;
@@ -48,7 +49,7 @@ const emitToggle = () => {
 }
 
 .arrow-icon {
-  font-size: 0.7rem;
+  font-size: var(--font-sidebar-group);
 }
 
 .icon-wrapper {
@@ -61,7 +62,7 @@ const emitToggle = () => {
 }
 
 .menu-icon {
-  font-size: 1rem;
+  font-size: var(--font-sidebar-group);
   width: 1rem;
   text-align: center;
 }
