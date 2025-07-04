@@ -16,6 +16,7 @@
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 // import { useUserStore } from '@/stores/user'
+import { routeAliasMap } from '@/constants/activeSidebarMap.js'
 
 const props = defineProps({
   items: Array
@@ -32,7 +33,16 @@ const route = useRoute()
 
 const isActive = (itemRoute) => {
   if (!itemRoute) return false
-  return route.path.startsWith(itemRoute)
+
+  const currentPath = route.path
+
+  // alias 매핑이 있다면 해당 기준으로 대체
+  const aliasTarget = Object.entries(routeAliasMap).find(([alias]) =>
+      currentPath.startsWith(alias)
+  )
+  const normalizedPath = aliasTarget ? aliasTarget[1] : currentPath
+
+  return normalizedPath.startsWith(itemRoute)
 }
 </script>
 
