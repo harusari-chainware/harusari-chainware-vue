@@ -4,11 +4,12 @@ export const requisitionRoutes = [
     {
         path: '/requisition/list',
         name: 'RequisitionDummyView',
-        component: RequisitionDummyView
+        component: () => import('@/features/requisition/views/RequisitionDummyView.vue')
     },
     {
         path: '/requisition/register',
         name: 'RequisitionDummyView',
-        component: RequisitionDummyView
+        component: RequisitionDummyView,
+        meta: { requiresAuth: true }
     },
 ];
