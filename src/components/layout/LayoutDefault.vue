@@ -110,6 +110,6 @@ const handleSelectMenu = (menu) => {
   flex: 1;
   padding: 1.5rem 2rem;
   overflow-y: auto;
-  background-color: #fff;
+  background-color: #f4f6f9;
 }
 </style>
