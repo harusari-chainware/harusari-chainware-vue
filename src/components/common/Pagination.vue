@@ -168,8 +168,8 @@ const goToLastGroup = () => {
   padding: 8px 12px;
   border-radius: 6px;
   text-decoration: none;
-  font-size: 14px;
-  color: var(--color-text);
+  font-size: var(--font-pagination);
+  color: var(--color-gray-700);
   background-color: var(--color-white);
   border: 1px solid var(--color-border);
   transition: background-color 0.2s, color 0.2s;

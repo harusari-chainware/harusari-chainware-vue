@@ -72,7 +72,7 @@ const statusClass = computed(() => `status-${statusMap[props.status]?.class || '
   display: inline-block;
   padding: 4px 12px;
   border-radius: 9999px;
-  font-size: 13px;
+  font-size: var(--font-status-badge);
   font-weight: 500;
   min-width: 70px;
   text-align: center;

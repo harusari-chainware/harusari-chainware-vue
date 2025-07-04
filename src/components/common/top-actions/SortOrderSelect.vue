@@ -21,7 +21,7 @@ defineEmits(['update:modelValue'])
 .select-wrapper {
   position: relative;
   display: inline-block;
-  width: 120px;
+  width: 100px;
 }
 
 .styled-select {
@@ -29,7 +29,7 @@ defineEmits(['update:modelValue'])
   padding: 8px 30px 8px 12px;
   border: 1px solid var(--color-border);
   border-radius: 8px;
-  font-size: 14px;
+  font-size: var(--font-dropdown);
   background-color: white;
   appearance: none;
   -webkit-appearance: none;
@@ -42,7 +42,7 @@ defineEmits(['update:modelValue'])
   top: 50%;
   pointer-events: none;
   transform: translateY(-50%);
-  font-size: 12px;
+  font-size: var(--font-dropdown);
   color: var(--color-gray-600);
 }
 </style>

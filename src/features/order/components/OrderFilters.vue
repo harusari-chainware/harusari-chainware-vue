@@ -111,6 +111,5 @@ const openFranchiseSearchModal = () => {
   display: flex;
   flex-wrap: wrap;
   gap: 15px;
-  margin-bottom: 15px;
 }
 </style>

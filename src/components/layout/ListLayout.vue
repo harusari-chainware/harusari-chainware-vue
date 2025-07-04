@@ -53,7 +53,7 @@ main {
 
 /* page-header */
 .page-title {
-  font-size: 1.5rem;
+  font-size: var(--font-page-title-large);
   color: var(--color-gray-900);
   margin-bottom: 10px;
   border-left: 4px solid var(--color-primary);
@@ -61,6 +61,6 @@ main {
 }
 .page-description {
   color: var(--color-gray-600);
-  font-size: 1rem;
+  font-size: var(--font-page-description);
 }
 </style>

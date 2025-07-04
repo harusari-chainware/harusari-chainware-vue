@@ -57,7 +57,7 @@ const isActive = (itemRoute) => {
   padding: 0.4rem 0.6rem;
   margin-bottom: 0.1rem;
   text-decoration: none;
-  font-size: 0.9rem;
+  font-size: var(--font-sidebar-item);
   color: var(--color-gray-700);
   border-radius: 6px;
   transition: background-color 0.2s;

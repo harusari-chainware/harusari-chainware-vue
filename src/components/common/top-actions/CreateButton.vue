@@ -11,7 +11,7 @@ defineEmits(['click'])
 <style scoped>
 .btn-create {
   padding: 8px 16px;
-  font-size: 14px;
+  font-size: var(--font-button);
   font-weight: 500;
   border-radius: 6px;
   cursor: pointer;

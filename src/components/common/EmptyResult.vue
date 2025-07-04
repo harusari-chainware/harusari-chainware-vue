@@ -30,13 +30,13 @@ const props = defineProps({
 }
 
 .empty-icon {
-  font-size: 36px;
+  font-size: var(--font-empty-title);
   margin-bottom: 12px;
   color: #9ca3af;
 }
 
 .empty-text {
-  font-size: 16px;
+  font-size: var(--font-empty-text);
   font-weight: 500;
   margin-bottom: 8px;
 }

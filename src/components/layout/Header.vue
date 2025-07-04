@@ -152,7 +152,7 @@ onBeforeUnmount(() => {
 .top-menu a {
   text-decoration: none;
   color: var(--color-gray-700);
-  font-size: 0.95rem;
+  font-size: var(--font-header);
   font-weight: 500;
   padding: 0.3rem 0.6rem;
   border-radius: 4px;
@@ -198,7 +198,7 @@ onBeforeUnmount(() => {
   padding: 0.6rem 1rem;
   text-decoration: none;
   color: #333;
-  font-size: 0.9rem;
+  font-size: var(--font-header-dropdown);
 }
 
 .dropdown a:hover {
@@ -208,7 +208,7 @@ onBeforeUnmount(() => {
 .mypage-menu {
   text-decoration: none;
   color: var(--color-gray-700);
-  font-size: 0.95rem;
+  font-size: var(--font-header);
   font-weight: 500;
   padding: 0.3rem 0.6rem;
   border-radius: 4px;
