@@ -1,35 +1,35 @@
-import DashboardDummyView from "@/features/statistics/views/DashboardDummyView.vue";
+import DashboardDummyView from '../statistics/views/DashboardDummyView.vue'
 
 /* 사용자가 보는 routes와 view를 연결 */
 export const dashboardRoutes = [
     {
         path: '/dashboard/prediction',
-        name: 'DashboardDummyView',
+        name: 'DashboardDummy1View',
         component: DashboardDummyView
     },
     {
         path: '/dashboard/accuracy',
-        name: 'DashboardDummyView',
+        name: 'DashboardDummy2View',
         component: DashboardDummyView
     },
     {
         path: '/dashboard/sales',
-        name: 'DashboardDummyView',
+        name: 'DashboardDummy3View',
         component: DashboardDummyView
     },
     {
         path: '/dashboard/inventory-turn',
-        name: 'DashboardDummyView',
+        name: 'DashboardDummy4View',
         component: DashboardDummyView
     },
     {
         path: '/dashboard/purchase-stats',
-        name: 'DashboardDummyView',
+        name: 'DashboardDummy5View',
         component: DashboardDummyView
     },
     {
         path: '/dashboard/dispose-stats',
-        name: 'DashboardDummyView',
+        name: 'DashboardDummy6View',
         component: DashboardDummyView
     },
 ];

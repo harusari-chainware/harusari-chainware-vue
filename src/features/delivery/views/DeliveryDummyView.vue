@@ -3,7 +3,7 @@
 </script>
 
 <template>
-
+  DeliveryDummyView
 </template>
 
 <style scoped>

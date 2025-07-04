@@ -3,12 +3,12 @@ import OrderDummyView from "@/features/order/views/OrderDummyView.vue";
 export const orderRoutes = [
     {
         path: '/order/list',
-        name: 'OrderDummyView',
+        name: 'OrderDummy1View',
         component: OrderDummyView
     },
     {
         path: '/order/register',
-        name: 'OrderDummyView',
+        name: 'OrderDummy2View',
         component: OrderDummyView
     },
 ];

@@ -4,7 +4,7 @@ import FranchiseDummyView from "@/features/franchise/views/FranchiseDummyView.vu
 export const franchiseRoutes = [
     {
         path: '/franchise/list',
-        name: 'FranchiseDummyView',
+        name: 'FranchiseDummy1View',
         component: FranchiseDummyView
     },
 ];

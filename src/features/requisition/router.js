@@ -3,12 +3,12 @@ import RequisitionDummyView from "@/features/requisition/views/RequisitionDummyV
 export const requisitionRoutes = [
     {
         path: '/requisition/list',
-        name: 'RequisitionDummyView',
+        name: 'RequisitionDummy1View',
         component: RequisitionDummyView
     },
     {
         path: '/requisition/register',
-        name: 'RequisitionDummyView',
+        name: 'RequisitionDummy2View',
         component: RequisitionDummyView
     },
 ];

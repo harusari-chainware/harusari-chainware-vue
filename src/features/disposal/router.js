@@ -4,22 +4,22 @@ import DisposalDummyView from "@/features/disposal/views/DisposalDummyView.vue";
 export const disposalRoutes = [
     {
         path: '/disposal/franchise/list',
-        name: 'DisposalDummyView',
+        name: 'DisposalDummy1View',
         component: DisposalDummyView
     },
     {
         path: '/disposal/franchise/register',
-        name: 'DisposalDummyView',
+        name: 'DisposalDummy2View',
         component: DisposalDummyView
     },
     {
         path: '/disposal/warehouse/list',
-        name: 'DisposalDummyView',
+        name: 'DisposalDummy3View',
         component: DisposalDummyView
     },
     {
         path: '/disposal/warehouse/register',
-        name: 'DisposalDummyView',
+        name: 'DisposalDummy4View',
         component: DisposalDummyView
     },
 ];
