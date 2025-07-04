@@ -4,7 +4,7 @@ import DeliveryDummyView from "@/features/delivery/views/DeliveryDummyView.vue";
 export const deliveryRoutes = [
     {
         path: '/delivery/list',
-        name: 'DeliveryDummyView',
+        name: 'DeliveryDummy1View',
         component: DeliveryDummyView
     },
 ];

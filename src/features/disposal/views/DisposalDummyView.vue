@@ -3,7 +3,7 @@
 </script>
 
 <template>
-
+  DisposalDummyView
 </template>
 
 <style scoped>

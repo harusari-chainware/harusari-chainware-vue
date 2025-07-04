@@ -56,7 +56,7 @@ export const sidebarMap = {
             icon: 'fas fa-warehouse',
             items: [
                 { name: "창고 조회", route: "/warehouse/list", roles: ["GENERAL_MANAGER", "SENIOR_MANAGER", "WAREHOUSE_MANAGER"] },
-                { name: "보유 재고 조회", route: "/warehouse/inventory", roles: ["GENERAL_MANAGER", "SENIOR_MANAGER", "WAREHOUSE_MANAGER"] },
+                { name: "보유 재고 조회", route: "/warehouse/inventory/list", roles: ["GENERAL_MANAGER", "SENIOR_MANAGER", "WAREHOUSE_MANAGER"] },
                 { name: "보유 재고 등록", route: "/warehouse/inventory/register", roles: ["WAREHOUSE_MANAGER"] }
             ]
         }

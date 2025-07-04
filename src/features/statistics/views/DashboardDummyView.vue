@@ -3,7 +3,7 @@
 </script>
 
 <template>
-
+  DashboardDummyView
 </template>
 
 <style scoped>

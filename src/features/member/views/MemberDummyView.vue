@@ -3,7 +3,7 @@
 </script>
 
 <template>
-
+  MemberDummyView
 </template>
 
 <style scoped>

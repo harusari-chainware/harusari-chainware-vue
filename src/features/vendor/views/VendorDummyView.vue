@@ -3,7 +3,7 @@
 </script>
 
 <template>
-  FranchiseDummyView
+  VendorDummyView
 </template>
 
 <style scoped>

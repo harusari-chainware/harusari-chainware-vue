@@ -4,27 +4,27 @@ import MemberDummyView from "@/features/member/views/MemberDummyView.vue";
 export const memberRoutes = [
     {
         path: '/members/list',
-        name: 'MemberDummyView',
+        name: 'MemberDummy1View',
         component: MemberDummyView
     },
     {
         path: '/members/logs',
-        name: 'MemberDummyView',
+        name: 'MemberDummy2View',
         component: MemberDummyView
     },
     {
         path: '/members/register',
-        name: 'MemberDummyView',
+        name: 'MemberDummy3View',
         component: MemberDummyView
     },
     {
         path: '/mypage/password',
-        name: 'MemberDummyView',
+        name: 'MemberDummy4View',
         component: MemberDummyView
     },
     {
         path: '/mypage/info',
-        name: 'MemberDummyView',
+        name: 'MemberDummy5View',
         component: MemberDummyView
     },
 ];
