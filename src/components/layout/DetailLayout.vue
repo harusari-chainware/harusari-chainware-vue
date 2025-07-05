@@ -74,7 +74,8 @@ defineProps({
 /* scoped style */
 .basic-info {
   display: grid;
-  gap: 1.5rem;
+  gap: 1rem;
+  margin-bottom: 2rem;
 }
 
 @media (min-width: 768px) {
