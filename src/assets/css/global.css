@@ -22,3 +22,16 @@ a {
     text-decoration: none;
     color: inherit;
 }
+
+/* 정렬 구조  */
+.grid {
+    display: grid;
+}
+
+.grid-2 {
+    grid-template-columns: repeat(2, 1fr);
+}
+
+.gap-6 {
+    gap: 1.5rem;
+}
