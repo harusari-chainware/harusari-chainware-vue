@@ -41,10 +41,12 @@
     --font-header-dropdown: 0.9rem;
     --font-sidebar-group: 1rem;
     --font-sidebar-item: 0.9rem;
+    --font-info-label: 0.8rem;
+    --font-info-value: 0.8rem;
     --font-empty-title: 3rem;
     --font-empty-text: 1rem;
     --font-table-th: 0.8rem;
-    --font-table-td: 0.7rem;
+    --font-table-td: 0.75rem;
     --font-status-badge: 0.7rem;
     --font-filter-label: 0.8rem;
     --font-filter-input: 0.8rem;

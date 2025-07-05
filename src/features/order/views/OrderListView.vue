@@ -99,7 +99,7 @@ const pagedOrders = computed(() => {
 
 // 작성 페이지로 이동 (예시용으로 현재 페이지 유지)
 const goToCreate = () => {
-  router.push({name: 'OrderDummy2View'})
+  router.push({name: 'OrderRegisterView'})
 }
 </script>
 
