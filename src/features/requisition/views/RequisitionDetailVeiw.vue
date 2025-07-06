@@ -1,5 +1,8 @@
 <script setup>
 import { ref } from 'vue'
+import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
+import RejectReasonDialog from '@/components/common/RejectReasonDialog.vue'
+
 
 // 더미 데이터 (향후 API 연동시 대체 예정)
 const requisition = ref({
@@ -55,6 +58,41 @@ const reject = () => {
   // TODO: API 연동 예정
   console.log('반려')
 }
+
+const showConfirm = ref(false)
+
+const handleApproveClick = () => {
+  showConfirm.value = true
+}
+
+const handleConfirm = () => {
+  showConfirm.value = false
+  // 승인 처리 로직 실행
+}
+
+const handleCancel = () => {
+  showConfirm.value = false
+}
+
+const showRejectModal = ref(false)
+
+
+// 반려 요청 처리 함수
+const handleRejectSubmit = (reason) => {
+  console.log('반려 사유:', reason)
+
+  // TODO: API 호출 로직 (예: axios.post('/api/requisitions/{id}/reject', { reason }))
+  // 예외 처리, 로딩 처리 등도 여기서 가능
+
+  showRejectModal.value = false
+}
+// 반려 버튼 클릭
+const rejectRequisition = () => {
+  showRejectModal.value = true
+}
+
+
+
 </script>
 
 <template>
@@ -62,8 +100,8 @@ const reject = () => {
     <div class="page-header">
       <h1 class="page-title">품의서 상세</h1>
       <div class="button-group">
-        <button class="btn btn-primary" @click="approve">승인</button>
-        <button class="btn btn-outline" @click="reject">반려</button>
+        <button class="btn btn-primary" @click="handleApproveClick">승인</button>
+        <button class="btn btn-outline" @click="rejectRequisition">반려</button>
       </div>
     </div>
 
@@ -151,6 +189,17 @@ const reject = () => {
           <dd class="info-value">{{ requisition.vendor.contact }}</dd>
         </dl>
       </article>
+
+      <article class="section">
+        <h2 class="section-title">창고 정보</h2>
+        <dl class="info-grid">
+          <dt class="info-label">창고명 </dt>
+          <dd class="info-value">{{ requisition.submittedAt }}</dd>
+
+          <dt class="info-label">담당자</dt>
+          <dd class="info-value">{{ requisition.approvedAt }}</dd>
+        </dl>
+      </article>
     </section>
 
     <section class="section">
@@ -189,6 +238,21 @@ const reject = () => {
       </div>
     </section>
   </div>
+
+  <ConfirmDialog
+      :visible="showConfirm"
+      title="승인 확인"
+      message="해당 품의를 승인하시겠습니까?"
+      confirmText="승인"
+      cancelText="취소"
+      @confirm="handleConfirm"
+      @cancel="handleCancel"
+  />
+  <RejectReasonDialog
+      :visible="showRejectModal"
+      @submit="handleRejectSubmit"
+      @cancel="() => (showRejectModal = false)"
+  />
 </template>
 
 <style scoped>
