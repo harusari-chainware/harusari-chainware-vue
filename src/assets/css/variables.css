@@ -1,0 +1,60 @@
+:root {
+    /* Primary Theme Colors */
+    --color-primary: #3aaed8;
+    --color-primary-light: #e9f5fa;
+    --color-primary-dark: #00647a;
+
+    /* Grayscale Colors */
+    --color-white: #ffffff;
+    --color-gray-50:#f9f9f9;
+    --color-gray-100: #f4f6f9;
+    --color-gray-200: #e5e7eb;
+    --color-gray-300: #e3e7ec;
+    --color-gray-400: #d1d5db;
+    --color-gray-500: #b0b8c1;
+    --color-gray-600: #6b7280;
+    --color-gray-700: #4a5662;
+    --color-gray-800: #374151;
+    --color-gray-900: #1f2d3d;
+
+    /* Hover / Active */
+    --color-hover: #f0f0f0;
+    --color-hover-light: #f1f4f6;
+    --color-hover-dark: #f1f1f1;
+
+    /* Border Colors */
+    --color-border: #d1d5db;
+    --color-border-light: #e3e7ec;
+
+    /* Status Colors */
+    --color-status-pending-bg: #fef3c7;
+    --color-status-pending-text: #92400e;
+    --color-status-approved-bg: #d1fae5;
+    --color-status-approved-text: #065f46;
+    --color-status-rejected-bg: #fee2e2;
+    --color-status-rejected-text: #b91c1c;
+
+    /* Font sizes */
+    --font-page-title-large: 1.5rem;
+    --font-page-description: 1rem;
+    --font-header: 0.95rem;
+    --font-header-dropdown: 0.9rem;
+    --font-sidebar-group: 1rem;
+    --font-sidebar-item: 0.9rem;
+    --font-info-label: 0.8rem;
+    --font-info-value: 0.8rem;
+    --font-empty-title: 3rem;
+    --font-empty-text: 1rem;
+    --font-table-th: 0.8rem;
+    --font-table-td: 0.75rem;
+    --font-status-badge: 0.7rem;
+    --font-filter-label: 0.8rem;
+    --font-filter-input: 0.8rem;
+    --font-button: 0.8rem;
+    --font-dropdown: 0.8rem;
+    --font-pagination: 0.8rem;
+    --font-flatpickr-calendar: 0.9rem;
+    --font-flatpickr-months: 0.9rem;
+    --font-flatpickr-weekdays: 0.75rem;
+    --font-flatpickr-day: 0.8rem;
+}
