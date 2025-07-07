@@ -2,6 +2,8 @@ import { createRouter, createWebHistory } from 'vue-router'
 
 import LayoutDefault from '/src/components/layout/LayoutDefault.vue'
 
+import { categoryRoutes } from "@/features/category/router.js";
+import { contractRoutes } from "@/features/contract/router.js";
 import { deliveryRoutes } from "@/features/delivery/router.js";
 import { disposalRoutes } from "@/features/disposal/router.js";
 import { franchiseRoutes } from "@/features/franchise/router.js";
@@ -26,6 +28,8 @@ const router = createRouter({
               path: '',
               redirect: '/dashboard/prediction' // 기본 페이지
           },
+          ...categoryRoutes,
+          ...contractRoutes,
           ...deliveryRoutes,
           ...disposalRoutes,
           ...franchiseRoutes,

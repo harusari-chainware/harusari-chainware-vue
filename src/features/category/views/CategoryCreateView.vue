@@ -41,7 +41,7 @@ import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import ListLayout from '@/components/layout/ListLayout.vue'
 import CategoryForm from '../components/CategoryForm.vue'
-import { fetchAllTopCategories } from '@/api/categoryApi'
+import {fetchAllListTopCategories, fetchAllTopCategories} from '@/api/categoryApi'
 
 const router = useRouter()
 const formType = ref('top') // 기본값: 상위 카테고리
@@ -57,9 +57,9 @@ const handleSuccess = () => {
 }
 
 const loadTopCategories = async () => {
-  const res = await fetchAllTopCategories()
+  const res = await fetchAllListTopCategories()
   console.log('topCategories 응답:', res.data?.data)
-  topCategories.value = res.data?.data?.topCategories ?? []
+  topCategories.value = res.data?.data ?? [];
 }
 
 onMounted(() => {

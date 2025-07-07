@@ -11,12 +11,19 @@
           class="modal-input"
       >
         <option disabled value="">상위 카테고리를 선택하세요</option>
+<!--        <option-->
+<!--            v-for="top in topCategories"-->
+<!--            :key="top.topCategoryId"-->
+<!--            :value="String(top.topCategoryId)"-->
+<!--        >-->
+<!--          {{ top.topCategoryName }}-->
+<!--        </option>-->
         <option
             v-for="top in topCategories"
-            :key="top.topCategoryId"
-            :value="String(top.topCategoryId)"
+            :key="top.value"
+            :value="top.value"
         >
-          {{ top.topCategoryName }}
+          {{ top.label }}
         </option>
       </select>
 
@@ -75,9 +82,13 @@ watch(code, (val) => {
 const selectedTopCategoryId = ref('')
 
 // 상위 카테고리명 찾아주는 computed
+// const selectedTopCategoryName = computed(() => {
+//   const top = props.topCategories.find(tc => tc.topCategoryId === selectedTopCategoryId.value)
+//   return top ? top.topCategoryName : ''
+// })
 const selectedTopCategoryName = computed(() => {
-  const top = props.topCategories.find(tc => tc.topCategoryId === selectedTopCategoryId.value)
-  return top ? top.topCategoryName : ''
+  const top = props.topCategories.find(tc => tc.value === selectedTopCategoryId.value)
+  return top ? top.label : ''
 })
 
 // 초기값 세팅
@@ -86,13 +97,24 @@ watch(
     ([top, cat, topId]) => {
       name.value = top?.topCategoryName || cat?.categoryName || ''
       code.value = cat?.categoryCode || ''
-      // 반드시 문자열!
       selectedTopCategoryId.value = cat?.topCategoryId !== undefined
           ? String(cat.topCategoryId)
           : (topId !== undefined ? String(topId) : '')
     },
     { immediate: true }
 )
+// watch(
+//     [() => props.topEditData, () => props.categoryEditData, () => props.topCategoryId],
+//     ([top, cat, topId]) => {
+//       name.value = top?.topCategoryName || cat?.categoryName || ''
+//       code.value = cat?.categoryCode || ''
+//       // 반드시 문자열!
+//       selectedTopCategoryId.value = cat?.topCategoryId !== undefined
+//           ? String(cat.topCategoryId)
+//           : (topId !== undefined ? String(topId) : '')
+//     },
+//     { immediate: true }
+// )
 
 const handleSubmit = async () => {
   if (!name.value.trim()) {
@@ -101,12 +123,13 @@ const handleSubmit = async () => {
   }
 
   if (!props.isTop) {
-    if (!selectedTopCategoryId.value) {
+    if (selectedTopCategoryId.value) {
+      if (!/^[A-Z]{2}$/.test(code.value)) {
+        alert('카테고리 코드는 대문자 2자리여야 합니다. 예: AB')
+        return
+      }
+    } else {
       alert('상위 카테고리를 선택해주세요.')
-      return
-    }
-    if (!/^[A-Z]{2}$/.test(code.value)) {
-      alert('카테고리 코드는 대문자 2자리여야 합니다. 예: AB')
       return
     }
   }
