@@ -1,6 +1,7 @@
-import { createRouter, createWebHistory } from 'vue-router'
+import {createRouter, createWebHistory} from 'vue-router'
 
 import LayoutDefault from '/src/components/layout/LayoutDefault.vue'
+import AuthLayout from "@/components/layout/login/AuthLayout.vue";
 
 import { categoryRoutes } from "@/features/category/router.js";
 import { contractRoutes } from "@/features/contract/router.js";
@@ -16,6 +17,7 @@ import { dashboardRoutes } from "@/features/statistics/router.js";
 import { takebackRoutes } from "@/features/takeback/router.js";
 import { vendorRoutes } from "@/features/vendor/router.js";
 import { warehouseRoutes } from "@/features/warehouse/router.js";
+import {AuthRoutes} from "@/features/auth/router.js";
 
 const router = createRouter({
   history: createWebHistory(),
@@ -43,7 +45,12 @@ const router = createRouter({
           ...vendorRoutes,
           ...warehouseRoutes
       ]
-    }
+    },
+      {
+          path: '/login',
+          component: AuthLayout,
+          children: AuthRoutes
+      },
   ],
 })
 

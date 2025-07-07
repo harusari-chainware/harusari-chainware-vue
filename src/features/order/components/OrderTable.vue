@@ -8,7 +8,7 @@
     <!-- 상세보기 버튼 커스터마이징 -->
     <template #cell-actions="{ item }">
       <RouterLink
-          :to="{ name: 'OrderDummy2View' }"
+          :to="{ name: 'OrderDetailView' }"
           class="detail-link"
       >
         상세보기
