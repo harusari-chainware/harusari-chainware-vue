@@ -1,7 +1,9 @@
 <template>
   <header class="header">
     <div class="logo-box">
-      <img :src="logo" alt="Chainware 로고" class="logo-img" />
+      <a href="/" @click.prevent="reloadPage">
+        <img :src="logo" alt="Chainware 로고" class="logo-img" />
+      </a>
     </div>
 
     <nav class="top-menu">
@@ -47,6 +49,10 @@ const emits = defineEmits(['selectMenu'])
 const props = defineProps({
   selected: String
 })
+
+const reloadPage = () => {
+  window.location.href = '/'
+}
 
 const menuList = [
   '대시보드',
