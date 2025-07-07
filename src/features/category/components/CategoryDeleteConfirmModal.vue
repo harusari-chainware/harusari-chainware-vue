@@ -14,6 +14,7 @@
 
 <script setup>
 import { defineProps, defineEmits } from 'vue'
+import { deleteCategory, deleteTopCategory } from '@/api/categoryApi'
 
 const props = defineProps({
   targetId: Number,
@@ -23,10 +24,19 @@ const props = defineProps({
 const emit = defineEmits(['close', 'deleted'])
 
 const handleDelete = async () => {
-  // 실제 API 호출은 여기서 진행해야 함
-  console.log('삭제 요청 ID:', props.targetId)
-  emit('deleted')
-  emit('close')
+  try {
+    if (props.isTop) {
+      await deleteTopCategory(props.targetId)
+    } else {
+      await deleteCategory(props.targetId)
+    }
+    emit('deleted')
+    emit('close')
+    alert('삭제 완료!')
+  } catch (e) {
+    alert('삭제 실패: ' + (e?.response?.data?.message ?? '서버 오류'))
+    emit('close')
+  }
 }
 </script>
 

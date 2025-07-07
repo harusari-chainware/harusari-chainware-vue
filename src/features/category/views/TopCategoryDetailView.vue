@@ -12,7 +12,7 @@
     <template #basic>
       <div class="info-group">
         <div class="info-row">
-          <label>대분류</label>
+          <label>상위 카테고리</label>
           <input type="text" v-model="detail.topCategoryName" :readonly="!isEditing" />
         </div>
         <div class="info-row">
