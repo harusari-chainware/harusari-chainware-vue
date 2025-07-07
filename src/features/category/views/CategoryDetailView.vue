@@ -45,6 +45,7 @@
               {{ cat.categoryName }}
             </option>
           </select>
+
           <input
               v-else
               type="text"
@@ -174,6 +175,12 @@ const pagedProducts = computed(() => {
   return products.value.slice(start, start + itemsPerPage)
 })
 
+function extractCategoryCode(productCode) {
+  if (!productCode) return '';
+  const parts = productCode.split('-');
+  return parts.length >= 3 ? parts[1] : '';
+}
+
 const loadCategory = async () => {
   const res = await fetchCategoryDetail(categoryId, page.value, itemsPerPage)
   const data = res.data.data
@@ -181,14 +188,16 @@ const loadCategory = async () => {
   category.value = {
     categoryId: data.categoryMeta.categoryId,
     categoryName: data.categoryMeta.categoryName,
-    categoryCode: data.categoryMeta.categoryCode,
+    categoryCode:
+        data.categoryMeta.categoryCode // 우선 categoryMeta에 있으면 그거!
+        ?? (data.products?.length > 0 ? extractCategoryCode(data.products[0].productCode) : ''),
     topCategoryName: data.topCategory.topCategoryName,
     topCategoryId: data.topCategory.topCategoryId,
     productCount: data.categoryMeta.productCount,
     createdAt: data.categoryMeta.createdAt,
     modifiedAt: data.categoryMeta.modifiedAt
   }
-
+  console.log('🔍 category.value:', category.value)
   products.value = data.products
   pagination.value = data.pagination
 }
@@ -252,6 +261,20 @@ const handleDelete = () => {
   }
 }
 
+watch(
+    () => category.value.categoryId,
+    (newId) => {
+      const selected = allCategories.value.find(cat => cat.categoryId === newId)
+      if (selected) {
+        category.value.categoryName = selected.categoryName
+        category.value.categoryCode = selected.categoryCode
+        category.value.topCategoryId = selected.topCategoryId
+      }
+    }
+)
+
+
+
 watch(isEditing, async (newVal) => {
   if (newVal) {
     const res = await fetchTopCategoriesWithChildren();
@@ -267,8 +290,16 @@ watch(isEditing, async (newVal) => {
         }))
     );
 
-    console.log('✅ selectedTopCategoryId:', selectedTopCategoryId.value);
-    console.log('✅ allCategories:', allCategories.value);
+    console.log(
+        '✅ allCategories categoryCode 체크:',
+        allCategories.value.map(c => ({
+          id: c.categoryId,
+          name: c.categoryName,
+          code: c.categoryCode
+        }))
+    );
+
+    console.log('✅ allCategories 전체:', allCategories.value);
   }
 });
 

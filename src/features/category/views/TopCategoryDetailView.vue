@@ -108,6 +108,7 @@ import StatusButton from '@/components/common/StatusButton.vue'
 import Pagination from '@/components/common/Pagination.vue'
 import {
   fetchTopCategoryWithProducts,
+  fetchAllListTopCategories,
   fetchAllTopCategories,
   updateTopCategory,
   updateCategory,
@@ -144,29 +145,103 @@ const editedCategory = ref({
 const topCategories = ref([])
 
 const loadTopCategory = async () => {
+  // 1. 상세 데이터(카테고리 목록 포함)
   const res = await fetchTopCategoryWithProducts(topCategoryId)
   const topCategoryData = res.data.data
 
-  const allCategoryRes = await fetchAllTopCategories()
-  // 응답에 따라 아래처럼 바꾸세요
-  const allTopCategories = allCategoryRes.data.data.topCategories
+  // 2. 드롭다운용 상위카테고리 리스트
+  const allListRes = await fetchAllListTopCategories()
+  const listTopCategories = Array.isArray(allListRes.data.data) ? allListRes.data.data : []
 
-  topCategoryData.categories = topCategoryData.categories.map(cat => {
-    // topCategories 내 하위 카테고리 배열에서 매칭
+  topCategories.value = listTopCategories.map(top => ({
+    label: top.topCategoryName,
+    value: String(top.topCategoryId)
+  }))
+
+  // 3. 병합용 전체(상위+하위 포함) 상위카테고리
+  const allTopRes = await fetchAllTopCategories()
+  // 구조: { data: { topCategories: [...] } }
+  const allTopCategories = Array.isArray(allTopRes.data.data.topCategories)
+      ? allTopRes.data.data.topCategories
+      : []
+
+  // 4. 하위카테고리 병합 (카테고리 코드/상위명/ID 등)
+  topCategoryData.categories = (topCategoryData.categories ?? []).map(cat => {
     let matchedTop = allTopCategories.find(top =>
         (top.categories ?? []).some(c => c.categoryId === cat.categoryId)
     )
-    let matchedCategory = matchedTop?.categories.find(c => c.categoryId === cat.categoryId)
+    let matchedCategory = matchedTop?.categories?.find(c => c.categoryId === cat.categoryId)
 
     return {
       ...cat,
       categoryCode: matchedCategory?.categoryCode ?? '',
-      topCategoryId: matchedTop?.topCategoryId ?? '',
+      topCategoryId: String(matchedTop?.topCategoryId ?? ''),
       topCategoryName: matchedTop?.topCategoryName ?? ''
     }
   })
   detail.value = topCategoryData
 }
+
+
+// const loadTopCategory = async () => {
+//   const res = await fetchTopCategoryWithProducts(topCategoryId)
+//   const topCategoryData = res.data.data
+//
+//   const allCategoryRes = await fetchAllListTopCategories()
+//   const allTopCategories = Array.isArray(allCategoryRes.data.data)
+//       ? allCategoryRes.data.data
+//       : []
+//
+//   // 1. 상위 카테고리 옵션을 label/value 구조로 세팅!
+//   topCategories.value = (allTopCategories ?? []).map(top => ({
+//     label: top.topCategoryName,
+//     value: String(top.topCategoryId)
+//   }))
+//
+//   // 2. 하위 카테고리 병합(이 부분은 그대로 OK)
+//   topCategoryData.categories = (topCategoryData.categories ?? []).map(cat => {
+//     let matchedTop = allTopCategories.find(top =>
+//         (top.categories ?? []).some(c => c.categoryId === cat.categoryId)
+//     )
+//     let matchedCategory = matchedTop?.categories.find(c => c.categoryId === cat.categoryId)
+//
+//     return {
+//       ...cat,
+//       categoryCode: matchedCategory?.categoryCode ?? '',
+//       topCategoryId: String(matchedTop?.topCategoryId ?? ''),  // ← string 처리!
+//       topCategoryName: matchedTop?.topCategoryName ?? ''
+//     }
+//   })
+//   detail.value = topCategoryData
+// }
+
+
+// const topCategories = ref([])
+//
+// const loadTopCategory = async () => {
+//   const res = await fetchTopCategoryWithProducts(topCategoryId)
+//   const topCategoryData = res.data.data
+//
+//   const allCategoryRes = await fetchAllTopCategories()
+//   // 응답에 따라 아래처럼 바꾸세요
+//   const allTopCategories = allCategoryRes.data.data.topCategories
+//
+//   topCategoryData.categories = topCategoryData.categories.map(cat => {
+//     // topCategories 내 하위 카테고리 배열에서 매칭
+//     let matchedTop = allTopCategories.find(top =>
+//         (top.categories ?? []).some(c => c.categoryId === cat.categoryId)
+//     )
+//     let matchedCategory = matchedTop?.categories.find(c => c.categoryId === cat.categoryId)
+//
+//     return {
+//       ...cat,
+//       categoryCode: matchedCategory?.categoryCode ?? '',
+//       topCategoryId: matchedTop?.topCategoryId ?? '',
+//       topCategoryName: matchedTop?.topCategoryName ?? ''
+//     }
+//   })
+//   detail.value = topCategoryData
+// }
 
 const saveEdit = async () => {
   try {
@@ -190,7 +265,9 @@ const openCategoryEditModal = (category) => {
   // 병합된 데이터에서 정확한 categoryId 찾아서 넘김
   const fullCategory = detail.value.categories.find(c => c.categoryId === category.categoryId)
   console.log('🎯 모달에 넘길 카테고리:', fullCategory)
-  selectedCategory.value = { ...fullCategory }  // ✅ categoryCode 포함된 최신 데이터
+  selectedCategory.value = { ...fullCategory,
+    topCategoryId: String(fullCategory.topCategoryId)
+  }
   showCategoryModal.value = true
 }
 
