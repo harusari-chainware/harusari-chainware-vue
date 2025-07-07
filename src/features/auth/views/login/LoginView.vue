@@ -27,7 +27,15 @@
                 <input type="checkbox" id="saveId" v-model="saveId" @change="handleSaveIdChange"/>
                 <label for="saveId">아이디 저장</label>
             </div>
-            <button type="submit">로그인</button>
+            <!-- StatusButton 사용 -->
+            <StatusButton
+                    type="primary"
+                    :disabled="isSubmitting"
+                    @click="handleLogin"
+                    id="error-btn"
+            >
+            로그인
+            </StatusButton>
         </form>
     </div>
 </template>
@@ -38,6 +46,7 @@ import { useRouter } from 'vue-router'
 import logo from '@/assets/images/chainware-logo.png'
 import { useAuthStore } from '@/features/auth/useAuthStore'
 import { login } from '@/features/auth/api'
+import StatusButton from "@/components/common/StatusButton.vue"; // StatusButton 컴포넌트 임포트
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -47,6 +56,7 @@ const password = ref('')
 const showPassword = ref(false)
 const saveId = ref(authStore.saveId)
 const errorMessage = ref('')
+const isSubmitting = ref(false) // 로그인 요청 중인 상태를 관리
 
 // 페이지 로드 시 이메일 복원
 onMounted(() => {
@@ -94,13 +104,14 @@ function togglePassword() {
 
 // 로그인
 async function handleLogin() {
+    isSubmitting.value = true // 로그인 중 상태로 설정
     try {
         errorMessage.value = '' // 이전 에러 메시지 초기화
         const res = await login(email.value, password.value)
 
         if (res.success && res.data) {
-            const { accessToken, refreshToken } = res.data
-            authStore.setTokens({ accessToken, refreshToken })
+            const {accessToken, refreshToken} = res.data
+            authStore.setTokens({accessToken, refreshToken})
 
             if (saveId.value) {
                 authStore.setEmail(email.value)
@@ -115,6 +126,8 @@ async function handleLogin() {
     } catch (error) {
         console.error('로그인 실패:', error)
         errorMessage.value = error.response?.data?.message || '서버와 연결할 수 없습니다.'
+    } finally {
+        isSubmitting.value = false // 로그인 완료 후 상태 변경
     }
 }
 </script>
@@ -263,7 +276,8 @@ input[type="password"]:focus {
     transform: translate(-50%, -50%);
 }
 
-button {
+/* ID 적용한 스타일 */
+#error-btn {
     width: 100%;
     padding: 16px;
     background: linear-gradient(135deg, #3aaed8, #48b6df);
