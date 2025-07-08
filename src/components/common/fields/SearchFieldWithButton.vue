@@ -10,13 +10,14 @@
           class="field-input"
           readonly
       />
-      <button class="btn-search" @click="$emit('search')">검색</button>
+      <StatusButton type="primary" @click="$emit('search')">검색</StatusButton>
     </div>
   </div>
 </template>
 
 <script setup>
 import { computed } from 'vue'
+import StatusButton from "@/components/common/StatusButton.vue";
 const props = defineProps({
   label: String,
   modelValue: String,
@@ -57,21 +58,5 @@ const modelValue = computed({
   border-radius: 6px;
   background: var(--color-gray-50);
   color: var(--color-gray-900);
-}
-
-.btn-search {
-  background-color: var(--color-primary);
-  color: white;
-  border: none;
-  padding: 0.45rem 1rem;
-  border-radius: 6px;
-  font-size: 0.85rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-}
-
-.btn-search:hover {
-  background-color: var(--color-primary-dark);
 }
 </style>

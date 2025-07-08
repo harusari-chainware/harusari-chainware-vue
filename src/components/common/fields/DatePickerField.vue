@@ -2,26 +2,50 @@
   <div class="date-picker-field">
     <label class="field-label" :for="id">{{ label }}</label>
     <input
-        type="date"
+        ref="input"
+        type="text"
         :id="id"
-        v-model="modelValue"
         class="field-input"
+        :placeholder="placeholder"
     />
   </div>
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { ref, onMounted, watch } from 'vue'
+import flatpickr from 'flatpickr'
+import 'flatpickr/dist/flatpickr.min.css'
+import '@/assets/css/flatpickr-custom.css'
+
 const props = defineProps({
   label: String,
   modelValue: String,
-  id: String
+  id: String,
+  placeholder: {
+    type: String,
+    default: '날짜 선택'
+  }
 })
 
 const emit = defineEmits(['update:modelValue'])
-const modelValue = computed({
-  get: () => props.modelValue,
-  set: value => emit('update:modelValue', value)
+
+const input = ref(null)
+let fpInstance = null
+
+onMounted(() => {
+  fpInstance = flatpickr(input.value, {
+    dateFormat: 'Y-m-d',
+    defaultDate: props.modelValue || null,
+    onChange: ([selectedDate]) => {
+      emit('update:modelValue', selectedDate ? selectedDate.toISOString().split('T')[0] : '')
+    }
+  })
+})
+
+watch(() => props.modelValue, (newVal) => {
+  if (fpInstance && newVal !== fpInstance.input.value) {
+    fpInstance.setDate(newVal, false)
+  }
 })
 </script>
 
@@ -45,5 +69,6 @@ const modelValue = computed({
   border-radius: 6px;
   background: var(--color-gray-50);
   color: var(--color-gray-900);
+  min-height: 2.2rem;
 }
 </style>

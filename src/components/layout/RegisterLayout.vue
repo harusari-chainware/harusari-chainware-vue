@@ -13,8 +13,10 @@
 
     <!-- 좌우 정보 입력 -->
     <section class="info-section" :class="{ 'full-width': !slots.right }">
-      <slot name="left" />
-      <section>
+      <section class="left-area">
+        <slot name="left" />
+      </section>
+      <section class="right-area" v-if="slots.right">
         <slot name="right" />
       </section>
     </section>
@@ -50,8 +52,8 @@ const hasDetailSlot = computed(() => !!slots.detail)
 .register-layout {
   display: flex;
   flex-direction: column;
-  gap: 2rem;
-  padding: 2rem 3rem;
+  gap: 1rem;
+  padding: 1rem;
   background-color: var(--color-gray-100);
 }
 
@@ -59,15 +61,15 @@ const hasDetailSlot = computed(() => !!slots.detail)
 .page-header {
   display: flex;
   justify-content: space-between;
-  align-items: flex-end;
-  margin-bottom: 1rem;
+  align-items: center;
 }
 
 .page-title {
   font-size: var(--font-page-title-large);
-  font-weight: bold;
-  margin-bottom: 0.25rem;
   color: var(--color-gray-900);
+  margin-bottom: 10px;
+  border-left: 4px solid var(--color-primary);
+  padding-left: 10px;
 }
 
 .page-description {
@@ -98,9 +100,14 @@ const hasDetailSlot = computed(() => !!slots.detail)
 
 .left-area {
   flex: 1;
+  min-width: 0;
 }
+
 .right-area {
   flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
 }
 
 /* 상세 테이블 */
