@@ -1,34 +1,21 @@
-import ProductDummyView from "@/features/product/views/ProductDummyView.vue";
+import ProductListView from "@/features/product/views/ProductListView.vue";
+import ProductCreateView from "@/features/product/views/ProductCreateView.vue";
+import ProductDetailView from "@/features/product/views/ProductDetailView.vue";
 
 export const productRoutes = [
     {
-        path: '/category/list',
-        name: 'ProductDummy1View',
-        component: ProductDummyView
-    },
-    {
-        path: '/category/register',
-        name: 'ProductDummy2View',
-        component: ProductDummyView
-    },
-    {
         path: '/product/list',
-        name: 'ProductDummy3View',
-        component: ProductDummyView
+        name: 'ProductListView',
+        component: ProductListView
     },
     {
         path: '/product/register',
-        name: 'ProductDummy4View',
-        component: ProductDummyView
+        name: 'ProductCreateView',
+        component: ProductCreateView
     },
     {
-        path: '/contract/list',
-        name: 'ProductDummy5View',
-        component: ProductDummyView
-    },
-    {
-        path: '/contract/register',
-        name: 'ProductDummy6View',
-        component: ProductDummyView
+        path: '/product/:productId',
+        name: 'ProductDetailView',
+        component: ProductDetailView
     },
 ];

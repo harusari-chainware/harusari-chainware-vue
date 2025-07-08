@@ -13,7 +13,7 @@
     </template>
 
     <!-- top-actions -->
-    <template #top-actions-left>
+    <template #top-actions-right>
       <CreateButton @click="openCreateModal">카테고리 추가</CreateButton>
     </template>
 
