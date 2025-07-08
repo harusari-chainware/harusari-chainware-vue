@@ -1,20 +1,27 @@
 <template>
-  <h2 class="section-title" v-if="title">{{ title }}</h2>
-  <section class="section">
-    <GenericTable :columns="columns" :items="items">
-      <template
-          v-for="col in columns"
-          :key="col.key"
-          v-slot:[`cell-${col.key}`]="slotProps"
-      >
-        <slot :name="`cell-${col.key}`" v-bind="slotProps" />
-      </template>
-    </GenericTable>
-
-    <div v-if="$slots.footer" class="table-footer">
-      <slot name="footer" />
+  <div class="detial-table-wrapper">
+    <div class="section-header">
+      <h2 class="section-title" v-if="title">{{ title }}</h2>
+      <div class="actions" v-if="$slots.actions">
+        <slot name="actions" />
+      </div>
     </div>
-  </section>
+    <section class="section">
+      <GenericTable :columns="columns" :items="items">
+        <template
+            v-for="col in columns"
+            :key="col.key"
+            v-slot:[`cell-${col.key}`]="slotProps"
+        >
+          <slot :name="`cell-${col.key}`" v-bind="slotProps" />
+        </template>
+      </GenericTable>
+
+      <div v-if="$slots.footer" class="table-footer">
+        <slot name="footer" />
+      </div>
+    </section>
+  </div>
 </template>
 
 <script setup>
@@ -34,6 +41,23 @@ defineProps({
 </script>
 
 <style scoped>
+.detail-table-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
 .section-title {
   font-size: var(--font-page-title-midium);
   font-weight: bold;

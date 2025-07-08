@@ -13,6 +13,7 @@ import RegisterRightPanel from '@/components/layout/registerview/RegisterRightPa
 import OrderSearchVendor from './registerview/OrderSearchVendor.vue'
 import OrderSearchApprover from './registerview/OrderSearchApprover.vue'
 import OrderSearchWarehouse from './registerview/OrderSearchWarehouse.vue'
+import OrderSearchProduct from "@/features/order/components/registerview/OrderSearchProduct.vue";
 import { computed } from "vue";
 
 const props = defineProps({
@@ -26,6 +27,7 @@ const searchComponent = computed(() => {
     case 'vendor': return OrderSearchVendor
     case 'approver': return OrderSearchApprover
     case 'warehouse': return OrderSearchWarehouse
+    case 'product': return OrderSearchProduct
     default: return null
   }
 })
@@ -35,6 +37,7 @@ const panelTitle = computed(() => {
     case 'vendor': return '거래처 검색'
     case 'approver': return '결재자 검색'
     case 'warehouse': return '창고 검색'
+    case 'product': return '제품 검색'
     default: return ''
   }
 })

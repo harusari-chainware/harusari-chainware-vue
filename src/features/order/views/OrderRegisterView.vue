@@ -1,9 +1,5 @@
-<!-- OrderRegisterView.vue -->
 <template>
-  <RegisterLayout
-      title="주문 등록"
-      description="납기일을 지정하고 각 제품에 대해 주문하세요."
-  >
+  <RegisterLayout title="주문 등록" description="납기일을 지정하고 각 제품에 대해 주문하세요.">
     <template #actions>
       <StatusButton type="primary" @click="submit">등록</StatusButton>
       <StatusButton type="reset" @click="cancel">취소</StatusButton>
@@ -27,27 +23,24 @@
       />
     </template>
 
-    <!-- 우측 확장 검색창 -->
     <template #right v-if="showRightPanel">
       <OrderRegisterRightPanel
           :type="searchType"
-          :multi="searchType === 'vendor'"
+          :multi="searchType === 'vendor' || searchType === 'product'"
           @select="handleSelect"
           @close="showRightPanel = false"
       />
     </template>
 
-
-    <!-- 제품 상세 테이블 -->
     <template #detail>
       <OrderRegisterDetail
           :items="form.items"
           @remove="handleRemove"
+          @update-item="handleUpdateItem"
           @add-product="handleAddProduct"
       />
     </template>
 
-    <!-- 총합 요약 -->
     <template #summary>
       <RegisterSummaryBox
           :total-items="totalItems"
@@ -56,7 +49,6 @@
       />
     </template>
 
-    <!-- 하단 버튼 -->
     <template #footer>
       <OrderRegisterFooter />
     </template>
@@ -66,25 +58,21 @@
 <script setup>
 import RegisterLayout from '@/components/layout/RegisterLayout.vue'
 import RegisterSummaryBox from '@/components/layout/registerview/RegisterSummaryBox.vue'
-
 import OrderRegisterLeft from '../components/OrderRegisterLeft.vue'
 import OrderRegisterRightPanel from '../components/OrderRegisterRightPanel.vue'
 import OrderRegisterDetail from '../components/OrderRegisterDetail.vue'
 import OrderRegisterFooter from '../components/registerview/OrderRegisterFooter.vue'
-
 import { dummyOrderRegister } from '@/constants/dummy/orderRegister'
 import { computed, reactive, ref } from 'vue'
-import OrderRegisterVendorSearch from "@/features/order/components/registerview/OrderRegisterVendorSearch.vue";
-import StatusButton from "@/components/common/StatusButton.vue";
+import StatusButton from "@/components/common/StatusButton.vue"
 
 const form = reactive({
   ...dummyOrderRegister,
-  vendorList: [] // 다중선택
+  items: []
 })
 
-
 const showRightPanel = ref(false)
-const searchType = ref(null) // 'vendor' | 'approver' | 'warehouse'
+const searchType = ref(null)
 
 function openSearch(type) {
   searchType.value = type
@@ -93,11 +81,15 @@ function openSearch(type) {
 
 function handleSelect(payload) {
   if (Array.isArray(payload)) {
-    // 다중 선택
-    form.vendorList = payload  // 예시: form 안에 vendorList로 담음
-    console.log('다중 선택된 벤더:', payload)
+    if (searchType.value === 'product') {
+      // 중복 제거 + 기존 항목 유지
+      const existingIds = new Set(form.items.map(i => i.id))
+      const newItems = payload.filter(p => !existingIds.has(p.id))
+      const enriched = newItems.map(p => ({ ...p, quantity: 1 }))
+      form.items.push(...enriched)
+      showRightPanel.value = false
+    }
   } else {
-    // 단일 선택
     switch (searchType.value) {
       case 'vendor':
         Object.assign(form.vendor, payload)
@@ -109,23 +101,21 @@ function handleSelect(payload) {
         Object.assign(form.warehouse, payload)
         break
     }
-    showRightPanel.value = false // ✅ 단일일 때만 닫기
+    showRightPanel.value = false
   }
 }
 
-
-const showVendorSearch = ref(false)
-
-// 거래처 선택에 대한 모달 검색 창
-function openVendorSearch() {
-  console.log('[View] 거래처 검색창 열림 시도')
-  showVendorSearch.value = true
+function handleRemove(itemToRemove) {
+  const idx = form.items.findIndex(item => item.id === itemToRemove.id)
+  if (idx !== -1) form.items.splice(idx, 1)
 }
 
+function handleUpdateItem(index, field, value) {
+  form.items[index][field] = value
+}
 
-function handleSelectVendor(selectedVendor) {
-  form.vendor = selectedVendor
-  showVendorSearch.value = false
+function handleAddProduct() {
+  openSearch('product')
 }
 
 const totalItems = computed(() => form.items.length)
@@ -136,12 +126,11 @@ const totalAmount = computed(() =>
     form.items.reduce((sum, item) => sum + item.unitPrice * item.quantity, 0)
 )
 
-function handleRemove(index) {
-  form.items.splice(index, 1)
+function submit() {
+  alert('제출됨: ' + JSON.stringify(form))
 }
 
-function handleAddProduct() {
-  // 제품 추가 모달 또는 로직
-  alert('제품 추가 기능 미구현')
+function cancel() {
+  alert('취소됨')
 }
 </script>

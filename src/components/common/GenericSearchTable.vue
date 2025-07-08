@@ -26,7 +26,7 @@
 </template>
 
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import GenericTable from '@/components/common/GenericTable.vue'
 import StatusBadge from '@/components/common/StatusBadge.vue'
 import StatusButton from "@/components/common/StatusButton.vue";
@@ -37,13 +37,21 @@ const props = defineProps({
   multi: {
     type: Boolean,
     default: false
+  },
+  selected: {
+    type: Array,
+    default: () => []
   }
 })
 
-const emit = defineEmits(['select'])
+const emit = defineEmits(['update:selected', 'select'])
 
 const tableConfig = computed(() => searchTableConfigs[props.type] || {})
-const selectedItems = ref([])
+const selectedItems = ref([...props.selected])
+
+watch(() => props.selected, val => {
+  selectedItems.value = [...val]
+})
 
 function isSelected(item) {
   return selectedItems.value.some(i => i.id === item.id)
@@ -61,7 +69,7 @@ function handleClick(item) {
     } else {
       selectedItems.value.push(item)
     }
-    emit('select', [...selectedItems.value])
+    emit('update:selected', [...selectedItems.value])
   } else {
     emit('select', item)
   }

@@ -53,5 +53,21 @@ export const searchTableConfigs = {
             { id: 7, name: '광주센터', status: 'INACTIVE', address: '광주 북구 용봉로 151' }
         ],
         customSlots: ['status']
+    },
+    product: {
+        columns: [
+            { key: 'productCode', label: '제품 코드' },
+            { key: 'productName', label: '제품명' },
+            { key: 'unit', label: '단위' },
+            { key: 'storeType', label: '보관 방식' },
+            { key: 'unitPrice', label: '단가' },
+            { key: 'actions', label: '' }
+        ],
+        data: [
+            { id: 1, productCode: 'P001', productName: '고구마말랭이', unit: '봉지', storeType: '실온', unitPrice: 1200 },
+            { id: 2, productCode: 'P002', productName: '냉동떡볶이', unit: '팩', storeType: '냉동', unitPrice: 3500 },
+            { id: 3, productCode: 'P003', productName: '두유세트', unit: '박스', storeType: '상온', unitPrice: 7500 }
+        ],
+        customSlots: []
     }
 }
