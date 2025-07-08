@@ -32,9 +32,9 @@ const handleDelete = async () => {
     }
     emit('deleted')
     emit('close')
-    alert('삭제 완료!')
+    alert('삭제 완료되었습니다.')
   } catch (e) {
-    alert('삭제 실패: ' + (e?.response?.data?.message ?? '서버 오류'))
+    alert('삭제 실패했습니다.: ' + (e?.response?.data?.message ?? '서버 오류'))
     emit('close')
   }
 }

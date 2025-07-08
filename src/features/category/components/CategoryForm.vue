@@ -258,3 +258,10 @@ select.modal-input {
 }
 
 </style>
+
+<style>
+.filters-section {
+  display: none !important;
+}
+
+</style>

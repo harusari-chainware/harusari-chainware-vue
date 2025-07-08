@@ -84,8 +84,10 @@ onMounted(() => {
 }
 
 .tab-buttons button.active {
-  background: #3b82f6;
+  background: #3aaed8;
   color: white;
-  border-color: #3b82f6;
+  border-color: #3aaed8;
 }
+
+
 </style>

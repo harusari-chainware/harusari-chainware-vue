@@ -248,11 +248,11 @@ const saveEdit = async () => {
     await updateTopCategory(topCategoryId, {
       topCategoryName: detail.value.topCategoryName
     })
-    alert('수정 완료')
+    alert('수정 완료되었습니다.')
     isEditing.value = false
     await loadTopCategory()
   } catch (e) {
-    alert('수정 실패')
+    alert('수정 실패했습니다.')
   }
 }
 

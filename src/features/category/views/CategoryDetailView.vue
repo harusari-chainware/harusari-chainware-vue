@@ -16,7 +16,8 @@
 
     <!-- 기본 정보 -->
     <template #basic>
-      <div class="info-group">
+      <div v-if="!isLoading" class="info-group">
+<!--      <div class="info-group">-->
         <!-- 상위 카테고리명 -->
         <div class="info-row">
           <label>상위 카테고리명</label>
@@ -33,19 +34,17 @@
           <input v-else type="text" :value="category.topCategoryName" readonly />
         </div>
 
+
         <!-- 카테고리명 -->
         <div class="info-row">
           <label>카테고리명</label>
-          <select v-if="isEditing" v-model="category.categoryId" class="modal-input">
-            <option disabled value="">카테고리명을 선택하세요</option>
-            <option
-                v-for="cat in filteredCategories"
-                :key="cat.categoryId"
-                :value="cat.categoryId"
-            >
-              {{ cat.categoryName }}
-            </option>
-          </select>
+          <input
+              v-if="isEditing"
+              v-model="category.categoryName"
+              class="modal-input"
+              placeholder="카테고리명을 입력하세요"
+              maxlength="20"
+          />
           <input
               v-else
               type="text"
@@ -60,9 +59,10 @@
           <input
               v-if="isEditing"
               v-model="category.categoryCode"
-              @input="category.categoryCode = category.categoryCode.toUpperCase()"
+              @input="category.categoryCode = category.categoryCode.toUpperCase().slice(0,2)"
               class="modal-input"
               placeholder="예: CF"
+              maxlength="2"
           />
           <input
               v-else
@@ -71,6 +71,45 @@
               readonly
           />
         </div>
+
+        <!--        &lt;!&ndash; 카테고리명 &ndash;&gt;-->
+<!--        <div class="info-row">-->
+<!--          <label>카테고리명</label>-->
+<!--          <select v-if="isEditing" v-model="category.categoryId" class="modal-input">-->
+<!--            <option disabled value="">카테고리명을 선택하세요</option>-->
+<!--            <option-->
+<!--                v-for="cat in filteredCategories"-->
+<!--                :key="cat.categoryId"-->
+<!--                :value="cat.categoryId"-->
+<!--            >-->
+<!--              {{ cat.categoryName }}-->
+<!--            </option>-->
+<!--          </select>-->
+<!--          <input-->
+<!--              v-else-->
+<!--              type="text"-->
+<!--              :value="category.categoryName"-->
+<!--              readonly-->
+<!--          />-->
+<!--        </div>-->
+
+<!--        &lt;!&ndash; 카테고리 코드 &ndash;&gt;-->
+<!--        <div class="info-row">-->
+<!--          <label>카테고리 코드</label>-->
+<!--          <input-->
+<!--              v-if="isEditing"-->
+<!--              v-model="category.categoryCode"-->
+<!--              @input="category.categoryCode = category.categoryCode.toUpperCase()"-->
+<!--              class="modal-input"-->
+<!--              placeholder="예: CF"-->
+<!--          />-->
+<!--          <input-->
+<!--              v-else-->
+<!--              type="text"-->
+<!--              :value="category.categoryCode"-->
+<!--              readonly-->
+<!--          />-->
+<!--        </div>-->
 
         <!-- 제품 수, 등록일시, 수정일시 -->
         <div class="info-row">
@@ -86,6 +125,8 @@
           <input type="text" :value="category.modifiedAt" disabled />
         </div>
       </div>
+
+      <div v-else style="padding:2rem;text-align:center;">로딩중...</div>
     </template>
 
     <!-- 제품 테이블 -->
@@ -106,7 +147,8 @@
           <tbody>
           <tr v-for="product in pagedProducts" :key="product.productId">
             <td>{{ product.productId }}</td>
-            <td>{{ product.productCode }}</td>
+<!--            <td>{{ product.productCode }}</td>-->
+            <td>{{ getDisplayProductCode(product, category.categoryCode) }}</td>
             <td>{{ product.productName }}</td>
             <td>{{ product.basePrice }}</td>
             <td>{{ product.productStatus ? '활성' : '비활성' }}</td>
@@ -138,6 +180,16 @@ import {
   updateCategory,
   deleteCategory
 } from '@/api/categoryApi'
+
+function getDisplayProductCode(product, categoryCode) {
+  // product.sequence 또는 product.productId 중 원하는 값 사용!
+  // 예: sequence가 1, categoryCode가 'ED'면 -> 'PD-ED-001'
+  // product.sequence 필드가 없다면 product.productId를 써도 됨!
+  const seq = product.sequence ?? product.productId;
+  return `PD-${categoryCode}-${String(seq).padStart(3, '0')}`;
+}
+
+const isLoading = ref(true)
 
 const route = useRoute()
 const categoryId = route.params.categoryId
@@ -177,13 +229,21 @@ const page = ref(1)
 const itemsPerPage = 5
 
 const startEdit = () => {
+  if (isLoading.value) return
+  originalCategory.value = JSON.parse(JSON.stringify(category.value))
+  selectedTopCategoryId.value = category.value.topCategoryId
   isEditing.value = true
+  console.log("startEdit 직전", category.value)
 }
 
+// const startEdit = () => {
+//   isEditing.value = true
+// }
+
 // 하위카테고리 리스트 필터링 (선택된 상위카테고리에 속하는 하위카테고리만)
-const filteredCategories = computed(() =>
-    allCategories.value.filter(cat => cat.topCategoryId === Number(selectedTopCategoryId.value))
-)
+// const filteredCategories = computed(() =>
+//     allCategories.value.filter(cat => cat.topCategoryId === Number(selectedTopCategoryId.value))
+// )
 
 // 페이지네이션에 맞게 제품 리스트 자름
 const pagedProducts = computed(() => {
@@ -219,49 +279,83 @@ const loadFullCategoryTree = async () => {
 }
 
 // 카테고리 상세 및 제품 리스트 조회
+// const loadCategory = async () => {
+//   isLoading.value = true
+//   try {
+//     const res = await fetchCategoryDetail(categoryId, page.value, itemsPerPage)
+//     const data = res.data.data
+//
+//     category.value = {
+//       categoryId: data.categoryMeta.categoryId,
+//       categoryName: data.categoryMeta.categoryName,
+//       categoryCode: data.categoryMeta.categoryCode,
+//       topCategoryName: data.topCategory.topCategoryName,
+//       topCategoryId: data.topCategory.topCategoryId,
+//       productCount: data.categoryMeta.productCount,
+//       createdAt: data.categoryMeta.createdAt,
+//       modifiedAt: data.categoryMeta.modifiedAt
+//     }
+//     products.value = data.products
+//     pagination.value = data.pagination
+//
+//     // 수정 모드 대비 드롭다운 값 세팅
+//     selectedTopCategoryId.value = category.value.topCategoryId
+//   } catch (e) {
+//     console.error('카테고리 상세 불러오기 실패', e)
+//   }finally {
+//     isLoading.value = false
+//   }
+//   }
+
 const loadCategory = async () => {
+  isLoading.value = true
   try {
     const res = await fetchCategoryDetail(categoryId, page.value, itemsPerPage)
     const data = res.data.data
 
+    // 1. 상세 정보로 세팅
     category.value = {
       categoryId: data.categoryMeta.categoryId,
       categoryName: data.categoryMeta.categoryName,
-      categoryCode: data.categoryMeta.categoryCode,
+      categoryCode: '', // 일단 비워두고,
       topCategoryName: data.topCategory.topCategoryName,
       topCategoryId: data.topCategory.topCategoryId,
       productCount: data.categoryMeta.productCount,
       createdAt: data.categoryMeta.createdAt,
       modifiedAt: data.categoryMeta.modifiedAt
     }
+
+    // 2. allCategories에서 코드 찾아서 세팅
+    const match = allCategories.value.find(cat => cat.categoryId === category.value.categoryId)
+    if (match) {
+      category.value.categoryCode = match.categoryCode || ''
+    }
+
     products.value = data.products
     pagination.value = data.pagination
 
-    // 수정 모드 대비 드롭다운 값 세팅
     selectedTopCategoryId.value = category.value.topCategoryId
   } catch (e) {
     console.error('카테고리 상세 불러오기 실패', e)
+  } finally {
+    isLoading.value = false
   }
 }
 
 let lock = false
-let callCount = 0
 // 수정 / 저장 토글
 const handleEditOrSave = async () => {
-  callCount++
-  console.log(`handleEditOrSave 호출 횟수: ${callCount}, isEditing:`, isEditing.value)
 
   if(lock) return
   lock = true
 
-  console.log('handleEditOrSave called, isEditing:', isEditing.value)
   try {
     if (isEditing.value) {
       // 저장 처리
-      if (!category.value.categoryId) {
-        alert('소분류 카테고리를 선택하세요.')
-        return
-      }
+      // if (!category.value.categoryId) {
+      //   alert('소분류 카테고리를 선택하세요.')
+      //   return
+      // }
       if (!/^[A-Z]{2}$/.test(category.value.categoryCode)) {
         alert('카테고리 코드는 대문자 2자리로 입력해주세요. (예: CF)')
         return
@@ -303,25 +397,25 @@ const cancelEdit = () => {
   isEditing.value = false
 }
 
-// 소분류 선택 변경 시 category명, 코드 자동 세팅 + 상위카테고리도 동기화
-watch(() => category.value.categoryId, (newId) => {
-  const selected = allCategories.value.find(cat => cat.categoryId === newId)
-  if (selected) {
-    category.value.categoryName = selected.categoryName
-    category.value.categoryCode = selected.categoryCode
-    category.value.topCategoryId = selected.topCategoryId
-    selectedTopCategoryId.value = selected.topCategoryId
-  }
-})
+//소분류 선택 변경 시 category명, 코드 자동 세팅 + 상위카테고리도 동기화
+// watch(() => category.value.categoryId, (newId) => {
+//   const selected = allCategories.value.find(cat => cat.categoryId === newId)
+//   if (selected) {
+//     category.value.categoryName = selected.categoryName
+//     category.value.categoryCode = selected.categoryCode
+//     category.value.topCategoryId = selected.topCategoryId
+//     selectedTopCategoryId.value = selected.topCategoryId
+//   }
+// })
 
-// 상위카테고리 선택 변경 시 소분류 초기화 혹은 첫 번째 소분류로 변경
-watch(selectedTopCategoryId, (newTopId) => {
-  if (!isEditing.value) return
-  const filtered = allCategories.value.filter(cat => cat.topCategoryId === Number(newTopId))
-  if (!filtered.some(cat => cat.categoryId === category.value.categoryId)) {
-    category.value.categoryId = filtered.length > 0 ? filtered[0].categoryId : null
-  }
-})
+//상위카테고리 선택 변경 시 소분류 초기화 혹은 첫 번째 소분류로 변경
+// watch(selectedTopCategoryId, (newTopId) => {
+//   if (!isEditing.value) return
+//   const filtered = allCategories.value.filter(cat => cat.topCategoryId === Number(newTopId))
+//   if (!filtered.some(cat => cat.categoryId === category.value.categoryId)) {
+//     category.value.categoryId = filtered.length > 0 ? filtered[0].categoryId : null
+//   }
+// })
 
 // 페이지 바뀌면 제품 리스트 재조회
 watch(page, () => {

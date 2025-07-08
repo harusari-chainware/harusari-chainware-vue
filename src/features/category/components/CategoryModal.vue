@@ -145,9 +145,9 @@ const handleSubmit = async () => {
           topCategoryId: selectedTopCategoryId.value,
           categoryName: name.value,
           categoryCode: code.value
-
         })
       }
+      alert('수정이 완료되었습니다.')
     } else {
       if (props.isTop) {
         await createTopCategory({ topCategoryName: name.value })
@@ -158,8 +158,8 @@ const handleSubmit = async () => {
           categoryCode: code.value
         })
       }
+      alert('등록이 완료되었습니다.')
     }
-
     emit('refresh')
     emit('close')
   } catch (err) {

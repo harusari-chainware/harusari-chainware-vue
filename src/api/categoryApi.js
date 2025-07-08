@@ -1,4 +1,3 @@
-// src/api/categoryApi.js
 import api from "@/api/axios.js";
 
 /* ───────────── 카테고리 커맨드 API ───────────── */

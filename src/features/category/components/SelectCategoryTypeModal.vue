@@ -53,12 +53,12 @@ button {
 }
 
 button:nth-child(1) {
-  background-color: #3b82f6;
+  background-color: #3aaed8;
   color: white;
 }
 
 button:nth-child(2) {
-  background-color: #10b981;
+  background-color: #3aaed8;
   color: white;
 }
 
