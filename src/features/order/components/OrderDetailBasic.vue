@@ -14,12 +14,12 @@
 </template>
 
 <script setup>
-import OrderDetailBasicInfo from './OrderDetailBasicInfo.vue'
-import OrderDetailDate from './OrderDetailDate.vue'
-import OrderDetailFranchise from './OrderDetailFranchise.vue'
-import OrderDetailDeliveryHistory from './OrderDetailDeliveryHistory.vue'
-import OrderDetailSummary from './OrderDetailSummary.vue'
-import OrderDetailRejectReason from './OrderDetailRejectReason.vue'
+import OrderDetailBasicInfo from './detailview/OrderDetailBasicInfo.vue'
+import OrderDetailDate from './detailview/OrderDetailDate.vue'
+import OrderDetailFranchise from './detailview/OrderDetailFranchise.vue'
+import OrderDetailDeliveryHistory from './detailview/OrderDetailDeliveryHistory.vue'
+import OrderDetailSummary from './detailview/OrderDetailSummary.vue'
+import OrderDetailRejectReason from './detailview/OrderDetailRejectReason.vue'
 
 defineProps({
   order: {
