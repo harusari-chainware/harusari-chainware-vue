@@ -7,14 +7,19 @@ export const dummyOrderRegister = {
         ownerPhone: '010-1234-5678'
     },
     approver: {
+        id: null,
         name: '홍승인',
         role: '본부장'
     },
     vendor: {
-        name: '농심식자재'
+        id: null,
+        name: '농심식자재',
+        phone: ''
     },
     warehouse: {
-        name: '서울물류센터'
+        id: null,
+        name: '서울물류센터',
+        location: ''
     },
     deliveryDate: '2025-08-01',
     orderCategory: '공급업체',

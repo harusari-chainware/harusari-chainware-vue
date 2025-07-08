@@ -1,6 +1,5 @@
 <template>
-  <div class="info-card">
-    <div class="info-header">주문 관련 정보</div>
+  <RegisterInfoGroup title="주문 관련 정보">
     <div class="grid grid-2 gap-6">
       <SearchFieldWithButton
           label="거래처명"
@@ -47,7 +46,7 @@
           @update:model-value="val => emit('update:attachments', val)"
       />
     </div>
-  </div>
+  </RegisterInfoGroup>
 </template>
 
 <script setup>
@@ -58,6 +57,7 @@ import InputField from '@/components/common/fields/InputField.vue'
 import AddressSearchField from '@/components/common/fields/AddressSearchField.vue'
 import FileUploadField from '@/components/common/fields/FileUploadField.vue'
 import { computed } from "vue";
+import RegisterInfoGroup from "@/components/layout/registerview/RegisterInfoGroup.vue";
 
 const props = defineProps({
   vendor: Object,

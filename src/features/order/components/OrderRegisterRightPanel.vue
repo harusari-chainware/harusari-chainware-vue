@@ -1,0 +1,47 @@
+<template>
+  <RegisterRightPanel :title="panelTitle">
+    <component
+        :is="searchComponent"
+        :multi="multi"
+        @select="onSelect"
+    />
+  </RegisterRightPanel>
+</template>
+
+<script setup>
+import RegisterRightPanel from '@/components/layout/registerview/RegisterRightPanel.vue'
+import OrderSearchVendor from './OrderSearchVendor.vue'
+import OrderSearchApprover from './OrderSearchApprover.vue'
+import OrderSearchWarehouse from './OrderSearchWarehouse.vue'
+import { computed } from "vue";
+
+const props = defineProps({
+  type: String, // 'vendor' | 'approver' | 'warehouse'
+  multi: Boolean
+})
+const emit = defineEmits(['select', 'close'])
+
+const searchComponent = computed(() => {
+  switch (props.type) {
+    case 'vendor': return OrderSearchVendor
+    case 'approver': return OrderSearchApprover
+    case 'warehouse': return OrderSearchWarehouse
+    default: return null
+  }
+})
+
+const panelTitle = computed(() => {
+  switch (props.type) {
+    case 'vendor': return '거래처 검색'
+    case 'approver': return '결재자 검색'
+    case 'warehouse': return '창고 검색'
+    default: return ''
+  }
+})
+
+function onSelect(payload) {
+  emit('select', payload)
+  // 다중 선택이 아닌 경우만 닫기
+  if (!props.multi) emit('close')
+}
+</script>

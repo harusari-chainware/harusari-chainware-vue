@@ -5,8 +5,8 @@
       description="납기일을 지정하고 각 제품에 대해 주문하세요."
   >
     <template #actions>
-      <button @click="submit">등록</button>
-      <button @click="cancel">취소</button>
+      <StatusButton type="primary" @click="submit">등록</StatusButton>
+      <StatusButton type="reset" @click="cancel">취소</StatusButton>
     </template>
 
     <template #left>
@@ -21,18 +21,19 @@
           v-model:attachments="form.attachments"
           :store="form.store"
           :orderType="form.orderType"
-          @searchVendor="openVendorSearch"
+          @searchVendor="() => openSearch('vendor')"
+          @searchApprover="() => openSearch('approver')"
+          @searchWarehouse="() => openSearch('warehouse')"
       />
     </template>
 
     <!-- 우측 확장 검색창 -->
-    <template #right>
-      <OrderRegisterVendorSearch
-          v-if="showVendorSearch"
-          @select="(val) => {
-            console.log('[View] 검색창 보임 - 선택된 거래처:', val)
-            handleSelectVendor(val)
-          }"
+    <template #right v-if="showRightPanel">
+      <OrderRegisterRightPanel
+          :type="searchType"
+          :multi="searchType === 'vendor'"
+          @select="handleSelect"
+          @close="showRightPanel = false"
       />
     </template>
 
@@ -67,15 +68,52 @@ import RegisterLayout from '@/components/layout/RegisterLayout.vue'
 import RegisterSummaryBox from '@/components/layout/registerview/RegisterSummaryBox.vue'
 
 import OrderRegisterLeft from '../components/OrderRegisterLeft.vue'
-import OrderRegisterRight from '../components/OrderRegisterRight.vue'
+import OrderRegisterRightPanel from '../components/OrderRegisterRightPanel.vue'
 import OrderRegisterDetail from '../components/OrderRegisterDetail.vue'
 import OrderRegisterFooter from '../components/OrderRegisterFooter.vue'
 
 import { dummyOrderRegister } from '@/constants/dummy/orderRegister'
 import { computed, reactive, ref } from 'vue'
 import OrderRegisterVendorSearch from "@/features/order/components/OrderRegisterVendorSearch.vue";
+import StatusButton from "@/components/common/StatusButton.vue";
 
-const form = reactive(dummyOrderRegister)
+const form = reactive({
+  ...dummyOrderRegister,
+  vendorList: [] // 다중선택
+})
+
+
+const showRightPanel = ref(false)
+const searchType = ref(null) // 'vendor' | 'approver' | 'warehouse'
+
+function openSearch(type) {
+  searchType.value = type
+  showRightPanel.value = true
+}
+
+function handleSelect(payload) {
+  if (Array.isArray(payload)) {
+    // 다중 선택
+    form.vendorList = payload  // 예시: form 안에 vendorList로 담음
+    console.log('다중 선택된 벤더:', payload)
+  } else {
+    // 단일 선택
+    switch (searchType.value) {
+      case 'vendor':
+        Object.assign(form.vendor, payload)
+        break
+      case 'approver':
+        Object.assign(form.approver, payload)
+        break
+      case 'warehouse':
+        Object.assign(form.warehouse, payload)
+        break
+    }
+    showRightPanel.value = false // ✅ 단일일 때만 닫기
+  }
+}
+
+
 const showVendorSearch = ref(false)
 
 // 거래처 선택에 대한 모달 검색 창

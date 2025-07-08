@@ -1,6 +1,5 @@
 <template>
   <div class="left-section">
-    <OrderRegisterOrderType :order-type="orderType" />
     <OrderRegisterStoreInfo :store="store" />
     <OrderRegisterApproverInfo
         :approver="approver"
@@ -29,7 +28,6 @@
 </template>
 
 <script setup>
-import OrderRegisterOrderType from './OrderRegisterOrderType.vue'
 import OrderRegisterStoreInfo from './OrderRegisterStoreInfo.vue'
 import OrderRegisterApproverInfo from './OrderRegisterApproverInfo.vue'
 import OrderRegisterOrderInfo from './OrderRegisterOrderInfo.vue'
