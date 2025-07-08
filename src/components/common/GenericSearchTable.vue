@@ -8,13 +8,13 @@
 
       <!-- 선택 버튼 -->
       <template #cell-actions="{ item }">
-        <StatusButton
+        <GenericSearchButton
             type="selected"
             :class="{ selected: isSelected(item) }"
-            @click="handleClick(item)"
+            @click="(event) => handleClickWithEvent(event, item)"
         >
           {{ isSelected(item) ? '선택됨' : '선택' }}
-        </StatusButton>
+        </GenericSearchButton>
       </template>
     </GenericTable>
 
@@ -31,6 +31,7 @@ import GenericTable from '@/components/common/GenericTable.vue'
 import StatusBadge from '@/components/common/StatusBadge.vue'
 import StatusButton from "@/components/common/StatusButton.vue";
 import { searchTableConfigs } from '@/constants/dummy/orderSearchTableConfig.js'
+import GenericSearchButton from "@/components/common/GenericSearchButton.vue";
 
 const props = defineProps({
   type: String,
@@ -61,14 +62,21 @@ const submitSelected = () => {
   emit('select', [...selectedItems.value])
 }
 
-function handleClick(item) {
+function handleClickWithEvent(event, item) {
+  if (!item || typeof item !== 'object') {
+    return
+  }
+  event.stopPropagation()
+  event.preventDefault()
+
   if (props.multi) {
-    const index = selectedItems.value.findIndex(i => i.id === item.id)
-    if (index >= 0) {
-      selectedItems.value.splice(index, 1)
+    const exists = selectedItems.value.some(i => i.id === item.id)
+    if (exists) {
+      selectedItems.value = selectedItems.value.filter(i => i.id !== item.id)
     } else {
-      selectedItems.value.push(item)
+      selectedItems.value = [...selectedItems.value, item]
     }
+
     emit('update:selected', [...selectedItems.value])
   } else {
     emit('select', item)
@@ -77,11 +85,6 @@ function handleClick(item) {
 </script>
 
 <style scoped>
-.status-button.selected {
-  background-color: var(--color-primary-dark);
-  color: white;
-}
-
 .search-table-wrapper {
   display: flex;
   flex-direction: column;
