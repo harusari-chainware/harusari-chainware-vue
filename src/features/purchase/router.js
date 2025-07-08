@@ -7,8 +7,8 @@ export const purchaseRoutes = [
         component: () => import('@/features/purchase/views/PurchaseOrderListView.vue')
     },
     {
-        path: '/stockin/list',
-        name: 'PurchaseDummy1View',
-        component: PurchaseDummyView
+        path: '/purchase/detail',
+        name: 'PurchaseOrderDetailView',
+        component: () => import('@/features/purchase/views/PurchaseOrderDetailView.vue')
     },
 ];

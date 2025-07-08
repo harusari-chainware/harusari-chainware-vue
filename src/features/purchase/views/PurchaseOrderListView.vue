@@ -22,11 +22,11 @@
     <template #table>
       <SkeletonList v-if="isLoading" :rows="8" :columns="6" :cellWidth="120" />
       <EmptyResult
-          v-else-if="!isLoading && orders.length === 0"
-          message="등록된 주문이 없습니다."
+          v-else-if="!isLoading && purchase.length === 0"
+          message="등록된 발주가 없습니다."
       />
       <template v-else>
-        <OrderTable :orders="pagedOrders" />
+        <PurchaseTable :purchase="pagedPurchase" />
         <Pagination
             v-model="currentPage"
             :total-items="totalCount"
@@ -40,7 +40,7 @@
 <script setup>
 import { ref, computed, watch, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { dummyOrders } from '@/constants/dummy/order'
+import { dummyPurchases } from '@/constants/dummy/purchase'
 
 import ListLayout from '@/components/layout/ListLayout.vue'
 import EmptyResult from "@/components/common/EmptyResult.vue";
@@ -52,7 +52,7 @@ import SortDropdown from '@/components/common/top-actions/SortDropdown.vue'
 import SortOrderSelect from '@/components/common/top-actions/SortOrderSelect.vue'
 
 import OrderFilters from '../components/PurchaseFilters.vue'
-import OrderTable from '../components/PurchaseTable.vue'
+import PurchaseTable from "@/features/purchase/components/PurchaseTable.vue";
 
 const router = useRouter()
 const isLoading = ref(true)
@@ -66,19 +66,19 @@ const sortKey = ref('createdAt')
 const sortOrder = ref('asc')
 
 const sortOptions = [
-  { label: '주문 등록일', value: 'createdAt' },
+  { label: '발주 등록일', value: 'createdAt' },
   { label: '납기 요청일', value: 'dueDate' },
   { label: '총 금액', value: 'totalAmount' }
 ]
 
 // 더미 주문 데이터
-const orders = ref(dummyOrders)
+const purchase = ref(dummyPurchases)
 
 // 마운트 시 로딩 시뮬레이션
 onMounted(() => {
   isLoading.value = true
   setTimeout(() => {
-    orders.value = dummyOrders
+    purchase.value = dummyPurchases
     isLoading.value = false
   }, 1000) // 1초 후 데이터 주입
 })
@@ -89,12 +89,12 @@ watch([sortKey, sortOrder], ([key, order]) => {
 })
 
 // 정렬 + 페이징된 결과 반환
-const totalCount = computed(() => orders.value.length)
+const totalCount = computed(() => purchase.value.length)
 
-const pagedOrders = computed(() => {
+const pagedPurchase = computed(() => {
   const start = (currentPage.value - 1) * itemsPerPage
   const end = start + itemsPerPage
-  return orders.value.slice(start, end)
+  return purchase.value.slice(start, end)
 })
 
 // 작성 페이지로 이동 (예시용으로 현재 페이지 유지)
@@ -102,4 +102,3 @@ const goToCreate = () => {
   router.push({name: 'OrderRegisterView'})
 }
 </script>
-

@@ -1,5 +1,5 @@
 <template>
-  <GenericTable :items="orders" :columns="columns">
+  <GenericTable :items="purchase" :columns="columns">
     <!-- 상태 컬럼 커스터마이징 -->
     <template #cell-status="{ value }">
       <StatusBadge :status="value" />
@@ -8,7 +8,7 @@
     <!-- 상세보기 버튼 커스터마이징 -->
     <template #cell-actions="{ item }">
       <RouterLink
-          :to="{ name: 'OrderDetailView' }"
+          :to="{ name: 'PurchaseOrderDetailView' }"
           class="detail-link"
       >
         상세보기
@@ -23,7 +23,7 @@ import StatusBadge from '@/components/common/StatusBadge.vue'
 import { formatCurrency} from '@/utils/tableUtils.js'
 
 defineProps({
-  orders: {
+  purchase: {
     type: Array,
     required: true,
   },
@@ -32,15 +32,16 @@ defineProps({
 // 열 정의
 const columns = [
   { key: 'no', label: 'No', align: 'center', format: (_, __, index) => index + 1 },
-  { key: 'orderCode', label: '주문코드', align: 'center' },
-  { key: 'franchiseName', label: '가맹점명', align: 'left' },
-  { key: 'totalProducts', label: '총 제품 수', align: 'right' },
+  { key: 'purchaseCode', label: '발주 코드', align: 'center' },
+  { key: 'vendorName', label: '거래처명', align: 'left' },
+  { key: 'productsCount', label: '제품 수', align: 'right' },
+  { key: 'totalProducts', label: '총 수량', align: 'right' },
   { key: 'totalAmount', label: '총 금액', align: 'right', format: formatCurrency },
-  { key: 'deliveryCode', label: '관련 배송 코드', align: 'center' },
-  { key: 'createdAt', label: '주문 등록일', align: 'center' },
+  { key: 'requisitionCode', label: '관련 품의 코드', align: 'center' },
+  { key: 'createdAt', label: '발주 등록일', align: 'center' },
   { key: 'dueDate', label: '납기 요청일', align: 'center' },
-  { key: 'deliveredAt', label: '배송 완료일', align: 'center' },
-  { key: 'status', label: '주문 상태', align: 'center' },
+  { key: 'warehousedAt', label: '입고 완료일', align: 'center' },
+  { key: 'status', label: '발주 상태', align: 'center' },
   { key: 'actions', label: '상세', align: 'center' }
 ]
 </script>
