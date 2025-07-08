@@ -1,7 +1,7 @@
 <template>
   <RegisterRightPanel :title="panelTitle">
-    <component
-        :is="searchComponent"
+    <GenericSearchWrapper
+        :type="type"
         :multi="multi"
         @select="onSelect"
     />
@@ -9,28 +9,15 @@
 </template>
 
 <script setup>
+import { computed } from 'vue'
 import RegisterRightPanel from '@/components/layout/registerview/RegisterRightPanel.vue'
-import OrderSearchVendor from './registerview/OrderSearchVendor.vue'
-import OrderSearchApprover from './registerview/OrderSearchApprover.vue'
-import OrderSearchWarehouse from './registerview/OrderSearchWarehouse.vue'
-import OrderSearchProduct from "@/features/order/components/registerview/OrderSearchProduct.vue";
-import { computed } from "vue";
+import GenericSearchWrapper from '@/components/common/GenericSearchWrapper.vue'
 
 const props = defineProps({
-  type: String, // 'vendor' | 'approver' | 'warehouse'
+  type: String,
   multi: Boolean
 })
 const emit = defineEmits(['select', 'close'])
-
-const searchComponent = computed(() => {
-  switch (props.type) {
-    case 'vendor': return OrderSearchVendor
-    case 'approver': return OrderSearchApprover
-    case 'warehouse': return OrderSearchWarehouse
-    case 'product': return OrderSearchProduct
-    default: return null
-  }
-})
 
 const panelTitle = computed(() => {
   switch (props.type) {
@@ -44,7 +31,6 @@ const panelTitle = computed(() => {
 
 function onSelect(payload) {
   emit('select', payload)
-  // 다중 선택이 아닌 경우만 닫기
   if (!props.multi) emit('close')
 }
 </script>

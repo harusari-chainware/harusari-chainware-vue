@@ -45,12 +45,12 @@ export const searchTableConfigs = {
         ],
         data: [
             { id: 1, name: '서울물류센터', status: 'ACTIVE', address: '서울...' },
-            { id: 2, name: '부산창고', status: 'INACTIVE', address: '부산 사하구 낙동대로 345' },
+            { id: 2, name: '부산창고', status: 'EXPIRED', address: '부산 사하구 낙동대로 345' },
             { id: 3, name: '대전허브센터', status: 'ACTIVE', address: '대전 유성구 대덕대로 77' },
             { id: 4, name: '경기물류단지', status: 'ACTIVE', address: '경기 화성시 동탄대로 12' },
             { id: 5, name: '제주보관소', status: 'EXPIRED', address: '제주 제주시 애월읍 평화로 52' },
             { id: 6, name: '인천창고', status: 'ACTIVE', address: '인천 연수구 청학동 33-2' },
-            { id: 7, name: '광주센터', status: 'INACTIVE', address: '광주 북구 용봉로 151' }
+            { id: 7, name: '광주센터', status: 'EXPIRED', address: '광주 북구 용봉로 151' }
         ],
         customSlots: ['status']
     },

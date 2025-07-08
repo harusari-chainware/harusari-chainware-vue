@@ -27,7 +27,7 @@
     <template #right v-if="showRightPanel">
       <OrderRegisterRightPanel
           :type="searchType"
-          :multi="searchType === 'vendor' || searchType === 'product'"
+          :multi="searchType === 'product'"
           @select="handleSelect"
           @close="showRightPanel = false"
       />
