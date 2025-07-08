@@ -175,7 +175,6 @@ watch(() => filters.topCategoryId, (newTopId) => {
   }
   console.log('하위 카테고리 목록:', selectedTop.categories)
   categoryNameOptions.value = [
-    { label: '전체', value: '' },
     ...selectedTop.categories.map(cat => ({
       label: cat.categoryName,
       value: String(cat.categoryId)
