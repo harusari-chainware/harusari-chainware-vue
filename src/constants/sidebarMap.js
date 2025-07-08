@@ -2,11 +2,10 @@ export const sidebarMap = {
     "회원": [
         {
             title: "회원",
-            icon: 'fas fa-user-plus',
+            icon: 'fas fa-user',
             items: [
-                { name: "회원 조회", route: "/members/list", roles: ["MASTER"] },
-                { name: "로그인 내역 조회", route: "/members/logs", roles: ["MASTER"] },
-                { name: "신규 회원 가입", route: "/members/register", roles: ["MASTER"] }
+                { name: "회원 조회", route: "/member/list", roles: ["MASTER"] },
+                { name: "회원 등록", route: "/member/register", roles: ["MASTER"] }
             ]
         }
     ],
