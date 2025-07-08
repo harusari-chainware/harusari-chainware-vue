@@ -1,5 +1,3 @@
-import PurchaseDummyView from "@/features/purchase/views/PurchaseDummyView.vue";
-
 export const purchaseRoutes = [
     {
         path: '/purchase/list',

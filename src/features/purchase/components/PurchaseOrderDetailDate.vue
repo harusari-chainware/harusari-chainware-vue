@@ -6,9 +6,13 @@
       <template #value>{{ purchaseDetail.createdAt }}</template>
     </InfoItem>
     <InfoItem>
-      <template #label>{{ statusLabel }}</template>
+      <template #label>승인 / 반려 일시</template>
       <template #value>{{ purchaseDetail.updatedAt }}</template>
     </InfoItem>
+<!--    <InfoItem>
+      <template #label>{{ statusLabel }}</template>
+      <template #value>{{ purchaseDetail.updatedAt }}</template>
+    </InfoItem>-->
     <InfoItem>
       <template #label>납기일</template>
       <template #value>{{ purchaseDetail.dueDate }}</template>
@@ -27,11 +31,11 @@ defineProps({
     required: true
   }
 })
-const statusLabel = computed(() => {
+/*const statusLabel = computed(() => {
   const status = props.purchaseDetail.status
   if (status === 'APPROVED') return '승인 일시'
   if (status === 'REJECTED') return '반려 일시'
   return '처리 일시'
-})
+})*/
 
 </script>

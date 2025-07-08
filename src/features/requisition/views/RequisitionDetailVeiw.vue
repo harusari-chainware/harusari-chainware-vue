@@ -1,3 +1,4 @@
+<!--
 <script setup>
 import { ref } from 'vue'
 import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
@@ -390,3 +391,61 @@ tfoot tr {
   background-color: #fef2f2;
 }
 </style>
+-->
+<template>
+  <DetailLayout
+      title="품의서 상세"
+      description="품의 요청에 대한 기본 정보와 품목 내역을 확인할 수 있습니다."
+  >
+    <!-- 상단 버튼 -->
+    <template #actions>
+      <StatusButton type="primary" @click="handleEdit">수정</StatusButton>
+      <StatusButton type="approve" @click="handleApprove">승인</StatusButton>
+      <StatusButton type="reject" @click="openRejectDialog">반려</StatusButton>
+    </template>
+
+    <!-- 기본 정보 -->
+    <template #basic>
+      <RequisitionDetailBasic :requisition="requisition" />
+    </template>
+
+    <!-- 품목 리스트 -->
+    <template #detail>
+      <RequisitionDetailDetail :items="requisition.products" />
+    </template>
+
+    <!-- 반려 사유 입력 -->
+    <RejectReasonDialog v-model="showRejectDialog" @confirm="handleReject" />
+  </DetailLayout>
+</template>
+
+<script setup>
+import { ref } from 'vue'
+
+import DetailLayout from '@/components/layout/DetailLayout.vue'
+import StatusButton from '@/components/common/StatusButton.vue'
+import RejectReasonDialog from '@/components/common/RejectReasonDialog.vue'
+
+// 핵심 컴포넌트 (Basic 내부에 하위 컴포넌트 모두 포함)
+import RequisitionDetailBasic from '../components/RequisitionDetailBasic.vue'
+import RequisitionDetailDetail from '../components/RequisitionDetailDetail.vue'
+
+// 데이터 바인딩 (실제 연동 시 API로 주입 예정)
+const requisition = ref({})
+
+const showRejectDialog = ref(false)
+
+const handleEdit = () => {
+  // TODO: 수정 페이지 이동
+}
+const handleApprove = () => {
+  // TODO: 승인 API 호출
+}
+const openRejectDialog = () => {
+  showRejectDialog.value = true
+}
+const handleReject = (reason) => {
+  // TODO: 반려 API 호출
+  showRejectDialog.value = false
+}
+</script>

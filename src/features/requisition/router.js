@@ -1,5 +1,3 @@
-import RequisitionListView from "@/features/requisition/views/RequisitionListView.vue";
-
 export const requisitionRoutes = [
     {
         path: '/requisition/list',
