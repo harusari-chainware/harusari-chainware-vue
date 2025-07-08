@@ -1,10 +1,22 @@
 import axios from 'axios'
+import { useAuthStore } from '@/features/auth/useAuthStore' // Pinia store import
 
-// 기본 axios 인스턴스 생성
 const api = axios.create({
-    baseURL: 'http://localhost:8080', // 더미용 -> 추후 env로 관리
-    headers : { 'Content-Type' : 'application/json' },
-    withCredentials : true
-})
+    baseURL: import.meta.env.VITE_API_BASE_URL,
+});
 
-export default api
+api.interceptors.request.use(
+        (config) => {
+            const authStore = useAuthStore(); // Pinia store 인스턴스 생성
+            const token = authStore.accessToken; // Pinia에서 직접 가져오기
+
+            if (token) {
+                config.headers.Authorization = `Bearer ${token}`;
+            }
+
+            return config;
+        },
+        (error) => Promise.reject(error)
+);
+
+export default api;

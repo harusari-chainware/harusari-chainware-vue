@@ -32,7 +32,7 @@ const selectedMenu = ref('')
 
 const routeToMenuMap = [
   { path: '/dashboard', menu: '대시보드' },
-  { path: '/members', menu: '회원' },
+  { path: '/member', menu: '회원' },
   { path: '/category', menu: '제품' },
   { path: '/product', menu: '제품' },
   { path: '/contract', menu: '제품' },

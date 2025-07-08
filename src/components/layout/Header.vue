@@ -78,7 +78,7 @@ const mypageRef = ref(null)
 
 const routeMap = {
   '대시보드': '/dashboard/prediction',
-  '회원': '/members/list',
+  '회원': '/member/list',
   '제품': '/product/list',
   '가맹점/거래처/창고': '/franchise/list',
   '주문/반품/배송': '/order/list',
