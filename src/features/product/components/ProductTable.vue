@@ -67,9 +67,15 @@ const getDetailLink = (item) => {
 const getCategoryName = (categoryId) => {
   for (const top of props.categories) {
     const found = (top.categories || []).find(cat => cat.categoryId === categoryId)
-    if (found) return found.categoryName
+    if (found) {
+      // 상위카테고리명 > 카테고리명
+      return `${top.topCategoryName || top.categoryName || '-'} / ${found.categoryName}`;
+    }
   }
-  return ''
+  // 상위만 있는 경우
+  const topOnly = props.categories.find(tc => tc.topCategoryId === categoryId);
+  if (topOnly) return topOnly.topCategoryName || topOnly.categoryName || '';
+  return '';
 }
 
 function formatDate(dateString) {
