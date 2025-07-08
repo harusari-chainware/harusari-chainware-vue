@@ -70,11 +70,11 @@ import RegisterSummaryBox from '@/components/layout/registerview/RegisterSummary
 import OrderRegisterLeft from '../components/OrderRegisterLeft.vue'
 import OrderRegisterRightPanel from '../components/OrderRegisterRightPanel.vue'
 import OrderRegisterDetail from '../components/OrderRegisterDetail.vue'
-import OrderRegisterFooter from '../components/OrderRegisterFooter.vue'
+import OrderRegisterFooter from '../components/registerview/OrderRegisterFooter.vue'
 
 import { dummyOrderRegister } from '@/constants/dummy/orderRegister'
 import { computed, reactive, ref } from 'vue'
-import OrderRegisterVendorSearch from "@/features/order/components/OrderRegisterVendorSearch.vue";
+import OrderRegisterVendorSearch from "@/features/order/components/registerview/OrderRegisterVendorSearch.vue";
 import StatusButton from "@/components/common/StatusButton.vue";
 
 const form = reactive({

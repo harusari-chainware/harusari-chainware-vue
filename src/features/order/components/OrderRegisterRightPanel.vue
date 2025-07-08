@@ -10,9 +10,9 @@
 
 <script setup>
 import RegisterRightPanel from '@/components/layout/registerview/RegisterRightPanel.vue'
-import OrderSearchVendor from './OrderSearchVendor.vue'
-import OrderSearchApprover from './OrderSearchApprover.vue'
-import OrderSearchWarehouse from './OrderSearchWarehouse.vue'
+import OrderSearchVendor from './registerview/OrderSearchVendor.vue'
+import OrderSearchApprover from './registerview/OrderSearchApprover.vue'
+import OrderSearchWarehouse from './registerview/OrderSearchWarehouse.vue'
 import { computed } from "vue";
 
 const props = defineProps({

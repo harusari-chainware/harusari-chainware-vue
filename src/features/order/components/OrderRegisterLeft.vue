@@ -28,9 +28,9 @@
 </template>
 
 <script setup>
-import OrderRegisterStoreInfo from './OrderRegisterStoreInfo.vue'
-import OrderRegisterApproverInfo from './OrderRegisterApproverInfo.vue'
-import OrderRegisterOrderInfo from './OrderRegisterOrderInfo.vue'
+import OrderRegisterStoreInfo from './registerview/OrderRegisterStoreInfo.vue'
+import OrderRegisterApproverInfo from './registerview/OrderRegisterApproverInfo.vue'
+import OrderRegisterOrderInfo from './registerview/OrderRegisterOrderInfo.vue'
 
 const props = defineProps({
   orderType: String,
