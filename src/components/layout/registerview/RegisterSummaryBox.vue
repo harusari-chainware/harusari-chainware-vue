@@ -1,15 +1,20 @@
+
 <template>
   <div class="summary-box">
-    <slot name="summary">
-      <div><strong>총 항목 수:</strong> 0</div>
-      <div><strong>총 수량:</strong> 0</div>
-      <div><strong>총 금액:</strong> 0원</div>
-    </slot>
+    <div><strong>총 항목 수:</strong> {{ totalItems }}</div>
+    <div><strong>총 수량:</strong> {{ totalQuantity }}</div>
+    <div><strong>총 금액:</strong> {{ formatCurrency(totalAmount) }}</div>
   </div>
 </template>
 
 <script setup>
-// 슬롯 기반 공통 요약 상자
+import { formatCurrency } from "@/utils/tableUtils.js";
+
+const props = defineProps({
+  totalItems: Number,
+  totalQuantity: Number,
+  totalAmount: Number
+})
 </script>
 
 <style scoped>

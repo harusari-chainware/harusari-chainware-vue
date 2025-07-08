@@ -1,8 +1,9 @@
 <template>
   <RegisterLayout title="주문 등록" description="납기일을 지정하고 각 제품에 대해 주문하세요.">
     <template #actions>
-      <StatusButton type="primary" @click="submit">등록</StatusButton>
-      <StatusButton type="reset" @click="cancel">취소</StatusButton>
+      <!-- 상단에 액션 버튼이 필요하다면 여기 정의-->
+<!--      <StatusButton type="primary" @click="submit">등록</StatusButton>-->
+<!--      <StatusButton type="reset" @click="cancel">취소</StatusButton>-->
     </template>
 
     <template #left>
