@@ -1,8 +1,16 @@
-import axios from 'axios'
+import api from "@/api/axios.js";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
+export async function loginApi(email, password) {
+    const response = await api.post("/auth/login", { email, password });
+    return response.data;
+}
 
-export const login = async (email, password) => {
-    const response = await axios.post(`${API_BASE_URL}/auth/login`, { email, password })
-    return response.data
+export async function logoutApi() {
+    const response = await api.post("/auth/logout");
+    return response.data;
+}
+
+export async function refreshApi() {
+    const response = await api.post("/auth/refresh");
+    return response.data;
 }
