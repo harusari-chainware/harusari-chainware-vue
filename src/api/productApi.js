@@ -4,17 +4,17 @@ import api from "@/api/axios.js";
 
 // 제품 등록
 export const createProduct = (productData) => {
-    return api.post('/api/v1/product', productData); // 단수
+    return api.post('/product', productData); // 단수
 };
 
 // 제품 수정
 export const updateProduct = (productId, productData) => {
-    return api.put(`/api/v1/product/${productId}`, productData); // 단수 + PK path param
+    return api.put(`/product/${productId}`, productData); // 단수 + PK path param
 };
 
 // 제품 삭제 (Soft Delete 또는 실제 삭제)
 export const deleteProduct = (productId) => {
-    return api.delete(`/api/v1/product/${productId}`); // 단수 + PK
+    return api.delete(`/product/${productId}`); // 단수 + PK
 };
 
 /* ───────────── 제품(상품) 조회 API ───────────── */
@@ -25,7 +25,7 @@ export const deleteProduct = (productId) => {
  * @returns {Promise}
  */
 export const fetchProducts = (params) => {
-    return api.get("/api/v1/products", { params });
+    return api.get("/products", { params });
 };
 
 /**
@@ -36,7 +36,7 @@ export const fetchProducts = (params) => {
  * @returns {Promise}
  */
 export const fetchProductDetail = (productId, page = 1, size = 10) => {
-    return api.get(`/api/v1/products/${productId}`, {
+    return api.get(`/products/${productId}`, {
         params: { page, size },
     });
 };
