@@ -94,10 +94,6 @@ const columns = [
   { key: 'detail', label: '상세', align: 'center' }
 ]
 
-// const getDetailLink = (item) => {
-//     return `/product/${item.categoryId}`
-// }
-
 // 숫자 패딩 함수
 function padProductCode(productCode) {
   if (!productCode) return "";
@@ -120,10 +116,7 @@ const getCategoryName = (categoryId) => {
       return `${top.topCategoryName || top.categoryName || '-'} / ${found.categoryName}`;
     }
   }
-  // 상위만 있는 경우
-  // const topOnly = props.categories.find(tc => tc.topCategoryId === categoryId);
-  // if (topOnly) return topOnly.topCategoryName || topOnly.categoryName || '';
-  // return '';
+
   const topOnly = props.categories.find(tc => String(tc.topCategoryId) === String(categoryId));
   if (topOnly) return topOnly.topCategoryName || topOnly.categoryName || '';
   return '-';

@@ -256,12 +256,4 @@ select.modal-input {
     margin-bottom: 16px;
   }
 }
-
 </style>
-
-<!--<style>-->
-<!--.filters-section {-->
-<!--  display: none !important;-->
-<!--}-->
-
-<!--</style>-->

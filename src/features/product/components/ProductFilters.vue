@@ -95,18 +95,6 @@ onMounted(async () => {
   topCategories.value = resFull.data.data.topCategories ?? []
 })
 
-// onMounted(() => {
-//   if (props.topCategories.length > 0) {
-//     topCategoryOptions.value = [
-//       { label: '전체', value: '' },
-//       ...props.topCategories.map(tc => ({
-//         label: tc.topCategoryName,
-//         value: String(tc.topCategoryId)
-//       }))
-//     ]
-//   }
-// })
-
 watch(() => filters.topCategoryName, newTopName  => {
   filters.categoryName  = ''
   const found = topCategories.value.find(tc => String(tc.topCategoryName ) === newTopName)

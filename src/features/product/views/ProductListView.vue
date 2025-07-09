@@ -124,27 +124,6 @@ const loadProducts = async () => {
   totalCount.value = res.data.data.pagination.totalItems
 }
 
-// --- 필터/검색/초기화 ---
-// const handleSearch = () => {
-//   page.value = 1
-//   loadProducts()
-// }
-
-
-
-// const handleReset = () => {
-//   Object.assign(filters, {
-//     topCategoryId: '',
-//     categoryId: '',
-//     storeType: '',
-//     productStatus: '',
-//     productName: '',
-//     createdAt: ''
-//   })
-//   page.value = 1
-//   loadProducts()
-// }
-
 const handleSearch = (newFilters) => {
   console.log('[handleSearch] 전달된 값:', newFilters)
   Object.assign(filters, newFilters) // 부모 filters reactive에 반영!
@@ -163,7 +142,6 @@ const handleReset = () => {
   page.value = 1
   loadProducts()
 }
-
 
 // --- 상세/추가 (라우터 연결 등) ---
 const goDetail = (item) => {

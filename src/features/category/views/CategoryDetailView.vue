@@ -72,45 +72,6 @@
           />
         </div>
 
-        <!--        &lt;!&ndash; 카테고리명 &ndash;&gt;-->
-<!--        <div class="info-row">-->
-<!--          <label>카테고리명</label>-->
-<!--          <select v-if="isEditing" v-model="category.categoryId" class="modal-input">-->
-<!--            <option disabled value="">카테고리명을 선택하세요</option>-->
-<!--            <option-->
-<!--                v-for="cat in filteredCategories"-->
-<!--                :key="cat.categoryId"-->
-<!--                :value="cat.categoryId"-->
-<!--            >-->
-<!--              {{ cat.categoryName }}-->
-<!--            </option>-->
-<!--          </select>-->
-<!--          <input-->
-<!--              v-else-->
-<!--              type="text"-->
-<!--              :value="category.categoryName"-->
-<!--              readonly-->
-<!--          />-->
-<!--        </div>-->
-
-<!--        &lt;!&ndash; 카테고리 코드 &ndash;&gt;-->
-<!--        <div class="info-row">-->
-<!--          <label>카테고리 코드</label>-->
-<!--          <input-->
-<!--              v-if="isEditing"-->
-<!--              v-model="category.categoryCode"-->
-<!--              @input="category.categoryCode = category.categoryCode.toUpperCase()"-->
-<!--              class="modal-input"-->
-<!--              placeholder="예: CF"-->
-<!--          />-->
-<!--          <input-->
-<!--              v-else-->
-<!--              type="text"-->
-<!--              :value="category.categoryCode"-->
-<!--              readonly-->
-<!--          />-->
-<!--        </div>-->
-
         <!-- 제품 수, 등록일시, 수정일시 -->
         <div class="info-row">
           <label>총 제품 개수</label>
@@ -147,7 +108,6 @@
           <tbody>
           <tr v-for="product in pagedProducts" :key="product.productId">
             <td>{{ product.productId }}</td>
-<!--            <td>{{ product.productCode }}</td>-->
             <td>{{ getDisplayProductCode(product, category.categoryCode) }}</td>
             <td>{{ product.productName }}</td>
             <td>{{ product.basePrice }}</td>
@@ -236,15 +196,6 @@ const startEdit = () => {
   console.log("startEdit 직전", category.value)
 }
 
-// const startEdit = () => {
-//   isEditing.value = true
-// }
-
-// 하위카테고리 리스트 필터링 (선택된 상위카테고리에 속하는 하위카테고리만)
-// const filteredCategories = computed(() =>
-//     allCategories.value.filter(cat => cat.topCategoryId === Number(selectedTopCategoryId.value))
-// )
-
 // 페이지네이션에 맞게 제품 리스트 자름
 const pagedProducts = computed(() => {
   const start = (page.value - 1) * itemsPerPage
@@ -277,35 +228,6 @@ const loadFullCategoryTree = async () => {
     console.error('전체 카테고리 트리 불러오기 실패', e)
   }
 }
-
-// 카테고리 상세 및 제품 리스트 조회
-// const loadCategory = async () => {
-//   isLoading.value = true
-//   try {
-//     const res = await fetchCategoryDetail(categoryId, page.value, itemsPerPage)
-//     const data = res.data.data
-//
-//     category.value = {
-//       categoryId: data.categoryMeta.categoryId,
-//       categoryName: data.categoryMeta.categoryName,
-//       categoryCode: data.categoryMeta.categoryCode,
-//       topCategoryName: data.topCategory.topCategoryName,
-//       topCategoryId: data.topCategory.topCategoryId,
-//       productCount: data.categoryMeta.productCount,
-//       createdAt: data.categoryMeta.createdAt,
-//       modifiedAt: data.categoryMeta.modifiedAt
-//     }
-//     products.value = data.products
-//     pagination.value = data.pagination
-//
-//     // 수정 모드 대비 드롭다운 값 세팅
-//     selectedTopCategoryId.value = category.value.topCategoryId
-//   } catch (e) {
-//     console.error('카테고리 상세 불러오기 실패', e)
-//   }finally {
-//     isLoading.value = false
-//   }
-//   }
 
 const loadCategory = async () => {
   isLoading.value = true
@@ -351,11 +273,7 @@ const handleEditOrSave = async () => {
 
   try {
     if (isEditing.value) {
-      // 저장 처리
-      // if (!category.value.categoryId) {
-      //   alert('소분류 카테고리를 선택하세요.')
-      //   return
-      // }
+
       if (!/^[A-Z]{2}$/.test(category.value.categoryCode)) {
         alert('카테고리 코드는 대문자 2자리로 입력해주세요. (예: CF)')
         return
@@ -396,26 +314,6 @@ const cancelEdit = () => {
   }
   isEditing.value = false
 }
-
-//소분류 선택 변경 시 category명, 코드 자동 세팅 + 상위카테고리도 동기화
-// watch(() => category.value.categoryId, (newId) => {
-//   const selected = allCategories.value.find(cat => cat.categoryId === newId)
-//   if (selected) {
-//     category.value.categoryName = selected.categoryName
-//     category.value.categoryCode = selected.categoryCode
-//     category.value.topCategoryId = selected.topCategoryId
-//     selectedTopCategoryId.value = selected.topCategoryId
-//   }
-// })
-
-//상위카테고리 선택 변경 시 소분류 초기화 혹은 첫 번째 소분류로 변경
-// watch(selectedTopCategoryId, (newTopId) => {
-//   if (!isEditing.value) return
-//   const filtered = allCategories.value.filter(cat => cat.topCategoryId === Number(newTopId))
-//   if (!filtered.some(cat => cat.categoryId === category.value.categoryId)) {
-//     category.value.categoryId = filtered.length > 0 ? filtered[0].categoryId : null
-//   }
-// })
 
 // 페이지 바뀌면 제품 리스트 재조회
 watch(page, () => {

@@ -86,13 +86,13 @@ import CategoryModal from '../components/CategoryModal.vue'
 import CategoryDeleteConfirmModal from '../components/CategoryDeleteConfirmModal.vue'
 import SelectCategoryTypeModal from '../components/SelectCategoryTypeModal.vue'
 
-// ✅ 1. 원본 상태(항상 그대로 보관!)
+// 1. 원본 상태(항상 그대로 보관!)
 const mergedCategories = ref([])     // [{topCategoryId, topCategoryName, createdAt, modifiedAt, categories:[...]}]
 const isLoading = ref(true)
 const page = ref(1)
 const PAGE_SIZE = 5
 
-// ✅ 2. 필터(검색) 조건만 별도 상태로 관리
+// 2. 필터(검색) 조건만 별도 상태로 관리
 const filterCondition = ref({})
 
 // 모달/액션 관련
@@ -102,7 +102,7 @@ const editType = ref('SUB')
 const editTarget = ref(null)
 const deleteTarget = ref(null)
 
-// ✅ 3. 데이터 머지 & 상태 세팅 함수
+// 3. 데이터 머지 & 상태 세팅 함수
 const loadAndMergeCategories = async () => {
   isLoading.value = true
   try {
@@ -125,7 +125,7 @@ const loadAndMergeCategories = async () => {
   }
 }
 
-// ✅ 4. 필터용 드롭다운 (항상 원본 기준)
+// 4. 필터용 드롭다운 (항상 원본 기준)
 const topCategoryOptions = computed(() =>
     mergedCategories.value.map(item => ({
       label: item.topCategoryName,
@@ -134,7 +134,7 @@ const topCategoryOptions = computed(() =>
     }))
 )
 
-// ✅ 5. 화면에 보여줄 데이터는 filterCondition, 페이징까지 모두 computed!
+// 5. 화면에 보여줄 데이터는 filterCondition, 페이징까지 모두 computed!
 const filteredCategories = computed(() => {
   let list = mergedCategories.value;
   const filters = filterCondition.value;
@@ -190,7 +190,7 @@ const pagedTableRows = computed(() =>
     })
 );
 
-// ✅ 6. 검색(필터)시, 조건만 변경! (데이터 불변)
+// 6. 검색(필터)시, 조건만 변경! (데이터 불변)
 const handleSearch = (filters) => {
   console.log('[검색] 필터 조건:', filters);
   const normalized = { ...filters };

@@ -182,67 +182,6 @@ const loadTopCategory = async () => {
   detail.value = topCategoryData
 }
 
-
-// const loadTopCategory = async () => {
-//   const res = await fetchTopCategoryWithProducts(topCategoryId)
-//   const topCategoryData = res.data.data
-//
-//   const allCategoryRes = await fetchAllListTopCategories()
-//   const allTopCategories = Array.isArray(allCategoryRes.data.data)
-//       ? allCategoryRes.data.data
-//       : []
-//
-//   // 1. 상위 카테고리 옵션을 label/value 구조로 세팅!
-//   topCategories.value = (allTopCategories ?? []).map(top => ({
-//     label: top.topCategoryName,
-//     value: String(top.topCategoryId)
-//   }))
-//
-//   // 2. 하위 카테고리 병합(이 부분은 그대로 OK)
-//   topCategoryData.categories = (topCategoryData.categories ?? []).map(cat => {
-//     let matchedTop = allTopCategories.find(top =>
-//         (top.categories ?? []).some(c => c.categoryId === cat.categoryId)
-//     )
-//     let matchedCategory = matchedTop?.categories.find(c => c.categoryId === cat.categoryId)
-//
-//     return {
-//       ...cat,
-//       categoryCode: matchedCategory?.categoryCode ?? '',
-//       topCategoryId: String(matchedTop?.topCategoryId ?? ''),  // ← string 처리!
-//       topCategoryName: matchedTop?.topCategoryName ?? ''
-//     }
-//   })
-//   detail.value = topCategoryData
-// }
-
-
-// const topCategories = ref([])
-//
-// const loadTopCategory = async () => {
-//   const res = await fetchTopCategoryWithProducts(topCategoryId)
-//   const topCategoryData = res.data.data
-//
-//   const allCategoryRes = await fetchAllTopCategories()
-//   // 응답에 따라 아래처럼 바꾸세요
-//   const allTopCategories = allCategoryRes.data.data.topCategories
-//
-//   topCategoryData.categories = topCategoryData.categories.map(cat => {
-//     // topCategories 내 하위 카테고리 배열에서 매칭
-//     let matchedTop = allTopCategories.find(top =>
-//         (top.categories ?? []).some(c => c.categoryId === cat.categoryId)
-//     )
-//     let matchedCategory = matchedTop?.categories.find(c => c.categoryId === cat.categoryId)
-//
-//     return {
-//       ...cat,
-//       categoryCode: matchedCategory?.categoryCode ?? '',
-//       topCategoryId: matchedTop?.topCategoryId ?? '',
-//       topCategoryName: matchedTop?.topCategoryName ?? ''
-//     }
-//   })
-//   detail.value = topCategoryData
-// }
-
 const saveEdit = async () => {
   try {
     await updateTopCategory(topCategoryId, {
@@ -322,7 +261,7 @@ const handleDelete = () => {
     return
   }
   if (confirm('정말 삭제하시겠습니까?')) {
-    alert('삭제 처리') // TODO: 삭제 API 호출
+    alert('삭제 처리')
   }
 }
 
@@ -330,15 +269,6 @@ onMounted(() => {
   loadTopCategory()
 })
 
-// onMounted(async () => {
-//   await loadTopCategories()
-//   await loadTopCategory()
-// })
-
-// onMounted(() => {
-//   loadTopCategories()
-//   loadTopCategory()
-// })
 </script>
 
 <style scoped>

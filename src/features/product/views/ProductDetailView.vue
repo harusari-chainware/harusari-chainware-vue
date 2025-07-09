@@ -34,28 +34,46 @@
         <!-- 상위 카테고리명 -->
         <div class="info-row">
           <label>상위 카테고리명</label>
-          <input v-if="isEditing" v-model="product.topCategoryName" class="modal-input" />
-          <input v-else type="text" :value="topCategoryName" readonly />
+          <input type="text" :value="topCategoryName" readonly />
         </div>
 
         <!-- 카테고리명 -->
         <div class="info-row">
           <label>카테고리명</label>
-          <input v-if="isEditing" v-model="product.categoryName" class="modal-input" />
-          <input v-else type="text" :value="categoryName" readonly />
+          <input type="text" :value="categoryName" readonly />
         </div>
 
+        <!-- 상위 카테고리명 -->
+        <!--        <div class="info-row">-->
+        <!--          <label>상위 카테고리명</label>-->
+        <!--          <input v-if="isEditing" v-model="product.topCategoryName" class="modal-input" />-->
+        <!--          <input v-else type="text" :value="topCategoryName" readonly />-->
+        <!--        </div>-->
+        <!-- 상위 카테고리 -->
 <!--        <div class="info-row">-->
 <!--          <label>상위 카테고리명</label>-->
-<!--          <input v-if="isEditing" v-model="product.topCategoryName" class="modal-input" />-->
-<!--          <input v-else type="text" :value="product.topCategoryName" readonly />-->
+<!--          <select v-if="isEditing" v-model="product.topCategoryId" class="modal-input">-->
+<!--            <option v-for="top in topCategories" :key="top.topCategoryId" :value="top.topCategoryId">-->
+<!--              {{ top.topCategoryName }}-->
+<!--            </option>-->
+<!--          </select>-->
+<!--          <input v-else type="text" :value="topCategoryName" readonly />-->
 <!--        </div>-->
 
-<!--        &lt;!&ndash; 카테고리명 &ndash;&gt;-->
+        <!-- 카테고리명 -->
+        <!--        <div class="info-row">-->
+        <!--          <label>카테고리명</label>-->
+        <!--          <input v-if="isEditing" v-model="product.categoryName" class="modal-input" />-->
+        <!--          <input v-else type="text" :value="categoryName" readonly />-->
+        <!--        </div>-->
 <!--        <div class="info-row">-->
 <!--          <label>카테고리명</label>-->
-<!--          <input v-if="isEditing" v-model="product.categoryName" class="modal-input" />-->
-<!--          <input v-else type="text" :value="product.categoryName" readonly />-->
+<!--          <select v-if="isEditing" v-model="product.categoryId" class="modal-input">-->
+<!--            <option v-for="cat in getCategoryList(product.topCategoryId)" :key="cat.categoryId" :value="cat.categoryId">-->
+<!--              {{ cat.categoryName }}-->
+<!--            </option>-->
+<!--          </select>-->
+<!--          <input v-else type="text" :value="categoryName" readonly />-->
 <!--        </div>-->
 
         <!-- 단가 -->
@@ -153,29 +171,24 @@
         />
       </div>
     </template>
-<!--  </DetailLayout>-->
-
-    <!-- 거래(계약) 테이블 -->
-<!--    <template #table>-->
-<!--      <ContractTable :contracts="contracts" />-->
-<!--    </template>-->
   </DetailLayout>
 </template>
 
 <script setup>
 import { ref, onMounted, computed } from "vue";
 import { useRoute } from "vue-router";
-import { fetchProductDetail } from "@/api/productApi";
+import { fetchProductDetail, updateProduct, deleteProduct  } from "@/api/productApi";
 import { fetchAllTopCategories } from "@/api/categoryApi";
 import DetailLayout from "@/components/layout/DetailLayout.vue";
 import StatusButton from "@/components/common/StatusButton.vue";
-import ContractTable from "@/features/contract/components/ContractTable.vue";
 import Pagination from "@/components/common/Pagination.vue";
 
 const route = useRoute();
 const productId = route.params.productId;
 
 const topCategories = ref([]);
+
+const isDeleting = ref(false);
 
 const pagination = ref({
   currentPage: 1,
@@ -197,22 +210,10 @@ const topCategoryName = computed(() =>
     getTopCategoryName(product.value.categoryId)
 );
 
-// const loadProductDetail = async () => {
-//   try {
-//     const res = await fetchProductDetail(productId);
-//     const data = res.data.data;
-//     product.value = {
-//       ...data.product,
-//       topCategoryName: data.product.topCategoryName || "",
-//       categoryName: data.product.categoryName || "",
-//       productCreatedAt: data.product.productCreatedAt || "",
-//       productModifiedAt: data.product.productModifiedAt || "",
-//     };
-//     contracts.value = data.contracts ?? [];
-//   } catch (e) {
-//     alert("제품 정보를 불러오지 못했습니다.");
-//   }
-// };
+const getCategoryList = (topCategoryId) => {
+  const top = topCategories.value.find(tc => tc.topCategoryId === topCategoryId);
+  return top ? top.categories : [];
+};
 
 const loadProductDetail = async () => {
   try {
@@ -223,6 +224,7 @@ const loadProductDetail = async () => {
     console.log('data:', data);
     product.value = {
       ...data.product,
+      topCategoryId: findTopCategoryIdByCategoryId(data.product.categoryId),
       topCategoryName: data.product.topCategoryName || (data.contracts?.[0]?.topCategoryName || ""),
       categoryName: data.product.categoryName || (data.contracts?.[0]?.categoryName || ""),
       productCreatedAt: data.product.productCreatedAt || "",
@@ -244,29 +246,68 @@ const loadProductDetail = async () => {
 const startEdit = () => {
   isEditing.value = true;
 };
-const handleSave = () => {
-  // TODO: 저장 API 호출 및 저장 후 isEditing.value = false
-  isEditing.value = false;
+
+const handleSave = async () => {
+  try {
+    // 저장할 값 준비 (product.value를 그대로 써도 됨)
+    const payload = {
+      ...product.value,
+      // 필요시, 추가/제외할 필드 조정!
+      productId: product.value.productId,
+      productName: product.value.productName,
+      productCode: product.value.productCode,
+      categoryId: product.value.categoryId,
+      topCategoryId: product.value.topCategoryId,
+      basePrice: product.value.basePrice,
+      safetyStock: product.value.safetyStock,
+      origin: product.value.origin,
+      unitQuantity: product.value.unitQuantity,
+      unitSpec: product.value.unitSpec,
+      storeType: product.value.storeType,
+      shelfLife: product.value.shelfLife,
+    };
+
+    // 1. 실제 저장(수정) API 호출
+    await updateProduct(product.value.productId, payload);
+
+    // 2. 저장 후 상세정보 재조회
+    await loadProductDetail();
+
+    isEditing.value = false;
+    alert("저장되었습니다.");
+  } catch (e) {
+    alert("저장 실패: " + (e?.response?.data?.message || e.message));
+  }
 };
+
+
+const handleDelete = async () => {
+  if (isDeleting.value) return; // 중복 방지
+
+  if (!confirm("정말로 이 제품을 삭제하시겠습니까?")) {
+    return;
+  }
+
+  isDeleting.value = true; // 실제 삭제 시작 전에 true
+
+  try {
+    await deleteProduct(product.value.productId);
+
+    alert("삭제되었습니다.");
+    window.history.back();
+  } catch (e) {
+    alert("삭제 실패: " + (e?.response?.data?.message || e.message));
+  } finally {
+    isDeleting.value = false; // 항상 복구!
+  }
+};
+
+
 const cancelEdit = () => {
   // TODO: 원복 로직 필요하면 추가
   isEditing.value = false;
 };
-const handleDelete = () => {
-  // TODO: 삭제 로직
-  alert("삭제 기능 연결 필요");
-};
 
-
-
-// categoryId → 카테고리명
-// const getCategoryName = (categoryId) => {
-//   for (const top of topCategories.value) {
-//     const found = (top.categories || []).find(cat => cat.categoryId === categoryId);
-//     if (found) return found.categoryName;
-//   }
-//   return "";
-// };
 
 const getCategoryName = (categoryId) => {
   for (const top of topCategories.value) {
@@ -278,16 +319,6 @@ const getCategoryName = (categoryId) => {
   return "";
 };
 
-// categoryId → 상위 카테고리명
-// const getTopCategoryName = (categoryId) => {
-//   for (const top of topCategories.value) {
-//     if ((top.categories || []).find(cat => cat.categoryId === categoryId)) {
-//       return top.topCategoryName;
-//     }
-//   }
-//   return "";
-// };
-
 const getTopCategoryName = (categoryId) => {
   for (const top of topCategories.value) {
     if ((top.categories || []).find(
@@ -298,6 +329,15 @@ const getTopCategoryName = (categoryId) => {
   }
   return "";
 };
+
+function findTopCategoryIdByCategoryId(categoryId) {
+  for (const top of topCategories.value) {
+    if ((top.categories || []).find(cat => String(cat.categoryId) === String(categoryId))) {
+      return top.topCategoryId;
+    }
+  }
+  return null;
+}
 
 onMounted(async () => {
   const res = await fetchAllTopCategories();
@@ -311,9 +351,6 @@ onMounted(async () => {
   console.log('topCategoryName:', topCategoryName.value);
 });
 
-// onMounted(() => {
-//   loadProductDetail();
-// });
 </script>
 
 <style scoped>
