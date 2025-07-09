@@ -12,7 +12,7 @@
     <template #basic>
       <div class="info-group">
         <div class="info-row">
-          <label>대분류</label>
+          <label>상위 카테고리</label>
           <input type="text" v-model="detail.topCategoryName" :readonly="!isEditing" />
         </div>
         <div class="info-row">
@@ -108,11 +108,12 @@ import StatusButton from '@/components/common/StatusButton.vue'
 import Pagination from '@/components/common/Pagination.vue'
 import {
   fetchTopCategoryWithProducts,
+  fetchAllListTopCategories,
   fetchAllTopCategories,
   updateTopCategory,
   updateCategory,
   deleteCategory
-} from '@/api/categoryApi'
+} from '@/features/category/api.js'
 import CategoryModal from '@/features/category/components/CategoryModal.vue'
 
 const showCategoryModal = ref(false)
@@ -144,24 +145,37 @@ const editedCategory = ref({
 const topCategories = ref([])
 
 const loadTopCategory = async () => {
+  // 1. 상세 데이터(카테고리 목록 포함)
   const res = await fetchTopCategoryWithProducts(topCategoryId)
   const topCategoryData = res.data.data
 
-  const allCategoryRes = await fetchAllTopCategories()
-  // 응답에 따라 아래처럼 바꾸세요
-  const allTopCategories = allCategoryRes.data.data.topCategories
+  // 2. 드롭다운용 상위카테고리 리스트
+  const allListRes = await fetchAllListTopCategories()
+  const listTopCategories = Array.isArray(allListRes.data.data) ? allListRes.data.data : []
 
-  topCategoryData.categories = topCategoryData.categories.map(cat => {
-    // topCategories 내 하위 카테고리 배열에서 매칭
+  topCategories.value = listTopCategories.map(top => ({
+    label: top.topCategoryName,
+    value: String(top.topCategoryId)
+  }))
+
+  // 3. 병합용 전체(상위+하위 포함) 상위카테고리
+  const allTopRes = await fetchAllTopCategories()
+  // 구조: { data: { topCategories: [...] } }
+  const allTopCategories = Array.isArray(allTopRes.data.data.topCategories)
+      ? allTopRes.data.data.topCategories
+      : []
+
+  // 4. 하위카테고리 병합 (카테고리 코드/상위명/ID 등)
+  topCategoryData.categories = (topCategoryData.categories ?? []).map(cat => {
     let matchedTop = allTopCategories.find(top =>
         (top.categories ?? []).some(c => c.categoryId === cat.categoryId)
     )
-    let matchedCategory = matchedTop?.categories.find(c => c.categoryId === cat.categoryId)
+    let matchedCategory = matchedTop?.categories?.find(c => c.categoryId === cat.categoryId)
 
     return {
       ...cat,
       categoryCode: matchedCategory?.categoryCode ?? '',
-      topCategoryId: matchedTop?.topCategoryId ?? '',
+      topCategoryId: String(matchedTop?.topCategoryId ?? ''),
       topCategoryName: matchedTop?.topCategoryName ?? ''
     }
   })
@@ -173,11 +187,11 @@ const saveEdit = async () => {
     await updateTopCategory(topCategoryId, {
       topCategoryName: detail.value.topCategoryName
     })
-    alert('수정 완료')
+    alert('수정 완료되었습니다.')
     isEditing.value = false
     await loadTopCategory()
   } catch (e) {
-    alert('수정 실패')
+    alert('수정 실패했습니다.')
   }
 }
 
@@ -190,7 +204,9 @@ const openCategoryEditModal = (category) => {
   // 병합된 데이터에서 정확한 categoryId 찾아서 넘김
   const fullCategory = detail.value.categories.find(c => c.categoryId === category.categoryId)
   console.log('🎯 모달에 넘길 카테고리:', fullCategory)
-  selectedCategory.value = { ...fullCategory }  // ✅ categoryCode 포함된 최신 데이터
+  selectedCategory.value = { ...fullCategory,
+    topCategoryId: String(fullCategory.topCategoryId)
+  }
   showCategoryModal.value = true
 }
 
@@ -245,7 +261,7 @@ const handleDelete = () => {
     return
   }
   if (confirm('정말 삭제하시겠습니까?')) {
-    alert('삭제 처리') // TODO: 삭제 API 호출
+    alert('삭제 처리')
   }
 }
 
@@ -253,15 +269,6 @@ onMounted(() => {
   loadTopCategory()
 })
 
-// onMounted(async () => {
-//   await loadTopCategories()
-//   await loadTopCategory()
-// })
-
-// onMounted(() => {
-//   loadTopCategories()
-//   loadTopCategory()
-// })
 </script>
 
 <style scoped>
