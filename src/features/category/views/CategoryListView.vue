@@ -84,7 +84,7 @@ import CategoryFilters from '../components/CategoryFilters.vue'
 import CategoryTable from '../components/CategoryTable.vue'
 import CategoryModal from '../components/CategoryModal.vue'
 import CategoryDeleteConfirmModal from '../components/CategoryDeleteConfirmModal.vue'
-// import SelectCategoryTypeModal from '../components/SelectCategoryTypeModal.vue'
+import SelectCategoryTypeModal from '../components/SelectCategoryTypeModal.vue'
 
 // 1. 원본 상태(항상 그대로 보관!)
 const mergedCategories = ref([])     // [{topCategoryId, topCategoryName, createdAt, modifiedAt, categories:[...]}]
