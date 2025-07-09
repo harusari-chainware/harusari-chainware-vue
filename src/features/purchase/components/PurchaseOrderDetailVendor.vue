@@ -3,19 +3,19 @@
   <InfoGroup title="거래처 정보">
     <InfoItem>
       <template #label>거래처명</template>
-      <template #value>{{ purchaseDetail.vendorName }}</template>
+      <template #value>{{ purchaseDetail.vendor.name }}</template>
     </InfoItem>
     <InfoItem>
       <template #label>유형</template>
-      <template #value>{{ purchaseDetail.vendorType }}</template>
+      <template #value>{{ purchaseDetail.vendor.type }}</template>
     </InfoItem>
     <InfoItem>
       <template #label>담당자</template>
-      <template #value>{{ purchaseDetail.vendorManagerName }}</template>
+      <template #value>{{ purchaseDetail.vendor.managerName }}</template>
     </InfoItem>
     <InfoItem>
-      <template #label>가맹점 연락처</template>
-      <template #value>{{ purchaseDetail.vendorContact }}</template>
+      <template #label>거래처 연락처</template>
+      <template #value>{{ purchaseDetail.vendor.vendorContact }}</template>
     </InfoItem>
   </InfoGroup>
 </template>

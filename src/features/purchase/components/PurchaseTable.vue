@@ -32,7 +32,7 @@ defineProps({
 // 열 정의
 const columns = [
   { key: 'no', label: 'No', align: 'center', format: (_, __, index) => index + 1 },
-  { key: 'purchaseCode', label: '발주 코드', align: 'center' },
+  { key: 'purchaseOrderCode', label: '발주 코드', align: 'center' },
   { key: 'vendorName', label: '거래처명', align: 'left' },
   { key: 'productsCount', label: '제품 수', align: 'right' },
   { key: 'totalProducts', label: '총 수량', align: 'right' },

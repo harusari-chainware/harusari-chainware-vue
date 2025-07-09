@@ -9,10 +9,6 @@
     </template>
 
     <!-- top-actions -->
-    <template #top-actions-left>
-      <CreateButton @click="goToCreate">새 주문 작성</CreateButton>
-    </template>
-
     <template #top-actions-right>
       <SortDropdown v-model="sortKey" :options="sortOptions" />
       <SortOrderSelect v-model="sortOrder" />
@@ -45,7 +41,6 @@ import ListLayout from '@/components/layout/ListLayout.vue'
 import EmptyResult from "@/components/common/EmptyResult.vue"
 import Pagination from "@/components/common/Pagination.vue"
 import SkeletonList from "@/components/common/SkeletonList.vue"
-import CreateButton from "@/components/common/top-actions/CreateButton.vue"
 import SortDropdown from "@/components/common/top-actions/SortDropdown.vue"
 import SortOrderSelect from "@/components/common/top-actions/SortOrderSelect.vue"
 import OrderFilters from '../components/PurchaseFilters.vue'
@@ -92,7 +87,4 @@ const pagedPurchase = computed(() => {
   return purchase.value.slice(start, end)
 })
 
-const goToCreate = () => {
-  router.push({ name: 'OrderRegisterView' })
-}
 </script>

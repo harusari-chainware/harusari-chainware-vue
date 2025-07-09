@@ -3,11 +3,15 @@
   <InfoGroup title="창고 정보">
     <InfoItem>
       <template #label>창고명</template>
-      <template #value>{{ purchaseDetail.warehouseName }}</template>
+      <template #value>{{ purchaseDetail.warehouse.name }}</template>
     </InfoItem>
     <InfoItem>
       <template #label>담당자</template>
-      <template #value>{{ purchaseDetail.warehouseManagerName }}</template>
+      <template #value>{{ purchaseDetail.warehouse.managerName }}</template>
+    </InfoItem>
+    <InfoItem>
+      <template #label>창고 연락처</template>
+      <template #value>{{ purchaseDetail.warehouse.warehouseContact }}</template>
     </InfoItem>
   </InfoGroup>
 </template>

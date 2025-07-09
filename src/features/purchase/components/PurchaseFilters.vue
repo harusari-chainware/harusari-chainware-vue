@@ -92,16 +92,16 @@ const purchaseStatusOptions = [
 const applyFilters = () => {
   const query = {}
 
+  if (filters.drafterName) query.drafterName = filters.drafterName
+  if (filters.vendorManagerName) query.vendorManagerName = filters.vendorManagerName
   if (filters.vendorName) query.vendorName = filters.vendorName
-  if (filters.orderStatus) query.orderStatus = filters.orderStatus
-  if (filters.createdDate) query.createdDate = filters.createdDate
+  if (filters.purchaseStatus) query.purchaseStatus = filters.purchaseStatus
   if (filters.dueDateRange.start) query.dueStart = filters.dueDateRange.start
   if (filters.dueDateRange.end) query.dueEnd = filters.dueDateRange.end
-  if (filters.selectedvendorName) query.selectedvendor = filters.selectedvendorName
+  if (filters.selectedVendorName) query.selectedVendorName = filters.selectedVendorName // UI 표시용
 
-  router.push({ name: 'OrderListView', query })
+  router.push({ name: 'PurchaseOrderListView', query })
 }
-
 // 초기화 버튼
 const resetFilters = () => {
   filters.vendorName = ''

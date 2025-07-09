@@ -5,9 +5,9 @@ export const requisitionRoutes = [
         component: () => import('@/features/requisition/views/RequisitionListView.vue')
     },
     {
-        path: '/requisition/register',
+        path: '/requisition/detail/:requisitionId',
         name: 'RequisitionDetailView',
-        component: () => import('@/features/requisition/views/RequisitionDetailVeiw.vue'),
-        // meta: { requiresAuth: true }
+        component: () => import('@/features/requisition/views/RequisitionDetailView.vue'),
+        props: true
     },
 ];

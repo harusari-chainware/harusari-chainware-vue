@@ -3,15 +3,15 @@
   <InfoGroup title="작성자 정보">
     <InfoItem>
       <template #label>이름</template>
-      <template #value>{{ purchaseDetail.drafterName }}</template>
+      <template #value>{{ purchaseDetail.drafter.name }}</template>
     </InfoItem>
     <InfoItem>
       <template #label>직책</template>
-      <template #value>{{ purchaseDetail.drafterPosition }}</template>
+      <template #value>{{ purchaseDetail.drafter.position }}</template>
     </InfoItem>
     <InfoItem>
       <template #label>이메일</template>
-      <template #value>{{ purchaseDetail.drafterEmail }}</template>
+      <template #value>{{ purchaseDetail.drafter.email}}</template>
     </InfoItem>
   </InfoGroup>
 </template>

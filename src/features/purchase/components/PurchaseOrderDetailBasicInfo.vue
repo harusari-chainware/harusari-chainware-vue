@@ -3,13 +3,12 @@
   <InfoGroup title="기본 정보">
     <InfoItem>
       <template #label>발주 코드</template>
-      <template #value>{{ purchaseDetail.purchaseCode }}</template>
+      <template #value>{{ purchaseDetail.purchaseOrderCode }}</template>
     </InfoItem>
     <InfoItem>
       <template #label>발주 상태</template>
       <template #value>
         <StatusBadge :status="purchaseDetail.status" />
-        <span>두 개 정렬</span>
       </template>
     </InfoItem>
     <InfoItem>

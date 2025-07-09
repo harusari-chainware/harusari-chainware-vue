@@ -16,8 +16,8 @@
       {{ formatCurrency(value) }}
     </template>
 
-    <template #cell-storeType="{ value }">
-      <StatusBadge :status="value"/>
+    <template #cell-moq="{ value }">
+      {{ value ?? '-' }}
     </template>
 
     <template #cell-actions="{ item }">
@@ -25,6 +25,7 @@
         삭제
       </StatusButton>
     </template>
+
 
     <!-- 더보기 버튼으로 넘어가는 게 필요하다면 -->
 <!--    <template #footer>-->
@@ -72,14 +73,14 @@ const props = defineProps({
 })
 
 const columns = [
-  {key: 'index', label: 'No', align: 'center'},
-  {key: 'productCode', label: '제품코드', align: 'center'},
-  {key: 'productName', label: '제품명'},
-  {key: 'contractPrice', label: '계약 단가', align: 'center'},
-  {key: 'minOrderQty', label: 'MOQ', align: 'right'},
-  {key: 'quantity', label: '주문 수량', align: 'center'},
-  {key: 'totalPrice', label: '총 금액', align: 'right'},
-  {key: 'actions', label: '', align: 'center'}
+  { key: 'index', label: 'No', align: 'center' },
+  { key: 'productCode', label: '제품코드', align: 'center' },
+  { key: 'productName', label: '제품명', align: 'center' },
+  { key: 'unitPrice', label: '계약 단가', align: 'center' },
+  { key: 'moq', label: 'MOQ', align: 'center' },
+  { key: 'quantity', label: '주문 수량', align: 'center' },
+  { key: 'totalPrice', label: '총 금액', align: 'center' },
+  { key: 'actions', label: '', align: 'center' }
 ]
 
 // pagination 있다면

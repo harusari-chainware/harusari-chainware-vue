@@ -97,7 +97,7 @@ export const sidebarMap = {
             title: "발주",
             icon: 'fas fa-cart-shopping',
             items: [
-                { name: "발주 조회", route: "/purchase/list", roles: ["GENERAL_MANAGER", "SENIOR_MANAGER", "VENDOR_MANAGER"] }
+                { name: "발주 조회", route: "/purchases/list", roles: ["GENERAL_MANAGER", "SENIOR_MANAGER", "VENDOR_MANAGER", "WAREHOUSE_MANAGER"] }
             ]
         },
         {
