@@ -11,7 +11,8 @@
             </div>
             <div class="input-group">
                 <i class="fas fa-lock input-icon"></i>
-                <i :class="showPassword ? 'fas fa-eye toggle-password' : 'fas fa-eye-slash toggle-password'" @click="togglePassword"></i>
+                <i :class="showPassword ? 'fas fa-eye toggle-password' : 'fas fa-eye-slash toggle-password'"
+                   @click="togglePassword"></i>
                 <input :type="showPassword ? 'text' : 'password'" v-model="password" placeholder="비밀번호" required/>
             </div>
             <div v-if="errorMessage" class="error-message">{{ errorMessage }}</div>
@@ -19,17 +20,18 @@
                 <input type="checkbox" id="saveId" v-model="saveId" @change="handleSaveIdChange"/>
                 <label for="saveId">아이디 저장</label>
             </div>
-            <StatusButton type="primary" :disabled="isSubmitting" @click="handleLogin" id="error-btn">로그인</StatusButton>
+            <StatusButton type="primary" :disabled="isSubmitting" id="error-btn">로그인</StatusButton>
         </form>
     </div>
 </template>
 
 <script setup>
-import { ref, watch, onMounted } from 'vue';
-import { useRouter } from 'vue-router';
+import {ref, onMounted} from 'vue';
+import {useRouter} from 'vue-router';
 import logo from '@/assets/images/chainware-logo.png';
-import { useAuthStore } from '@/features/auth/useAuthStore';
-import { loginApi } from '@/features/auth/api';
+import {useAuthStore} from '@/features/auth/useAuthStore';
+import {loginApi} from '@/features/auth/api';
+import {parseJwt} from '@/utils/jwt';
 import StatusButton from "@/components/common/StatusButton.vue";
 
 const router = useRouter();
@@ -59,7 +61,7 @@ function handleSaveIdChange() {
         if (trimmedEmail !== '' && isValidEmail(trimmedEmail)) {
             authStore.setEmail(trimmedEmail);
             authStore.setSaveId(true);
-            errorMessage.value = ''; // 에러 초기화
+            errorMessage.value = '';
         } else {
             errorMessage.value = '올바른 이메일을 입력해주세요.';
             saveId.value = false;
@@ -67,7 +69,7 @@ function handleSaveIdChange() {
     } else {
         authStore.setEmail('');
         authStore.setSaveId(false);
-        errorMessage.value = ''; // 에러 초기화
+        errorMessage.value = '';
     }
 }
 
@@ -82,8 +84,13 @@ async function handleLogin() {
         const res = await loginApi(email.value, password.value);
 
         if (res.success && res.data) {
-            const { accessToken } = res.data;
+            const {accessToken} = res.data;
             authStore.setAccessToken(accessToken);
+
+            // JWT 디코드 후 authority 추출
+            const decoded = parseJwt(accessToken);
+            // console.log('Decoded JWT:', decoded); // 필요 시 확인 후 제거
+            authStore.setAuthority(decoded.authority);
 
             if (saveId.value) {
                 authStore.setEmail(email.value);
@@ -250,7 +257,6 @@ input[type="password"]:focus {
     transform: translate(-50%, -50%);
 }
 
-/* ID 적용한 스타일 */
 #error-btn {
     width: 100%;
     padding: 16px;

@@ -49,7 +49,9 @@ api.interceptors.response.use(
                     return api(originalRequest);
                 } catch (refreshError) {
                     authStore.clearAuth();
-                    await router.push("/login");
+                    router.push('/login').then(() => {
+                        window.location.reload();
+                    });
                     return Promise.reject(refreshError);
                 }
             }
