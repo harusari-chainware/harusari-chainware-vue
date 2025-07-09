@@ -23,7 +23,7 @@
 <script setup>
 import InfoGroup from '@/components/layout/detailview/InfoGroup.vue'
 import InfoItem from '@/components/layout/detailview/InfoItem.vue'
-import { formatCurrency } from '@/utils/tableUtils'
+import { formatCurrency } from '@/utils/tableUtils.js'
 
 defineProps({
   order: {

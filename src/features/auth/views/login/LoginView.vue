@@ -11,110 +11,97 @@
             </div>
             <div class="input-group">
                 <i class="fas fa-lock input-icon"></i>
-                <i
-                        :class="showPassword ? 'fas fa-eye toggle-password' : 'fas fa-eye-slash toggle-password'"
-                        @click="togglePassword"
-                ></i>
-                <input
-                        :type="showPassword ? 'text' : 'password'"
-                        v-model="password"
-                        placeholder="비밀번호"
-                        required
-                />
+                <i :class="showPassword ? 'fas fa-eye toggle-password' : 'fas fa-eye-slash toggle-password'" @click="togglePassword"></i>
+                <input :type="showPassword ? 'text' : 'password'" v-model="password" placeholder="비밀번호" required/>
             </div>
             <div v-if="errorMessage" class="error-message">{{ errorMessage }}</div>
             <div class="options">
                 <input type="checkbox" id="saveId" v-model="saveId" @change="handleSaveIdChange"/>
                 <label for="saveId">아이디 저장</label>
             </div>
-            <button type="submit">로그인</button>
+            <StatusButton type="primary" :disabled="isSubmitting" @click="handleLogin" id="error-btn">로그인</StatusButton>
         </form>
     </div>
 </template>
 
 <script setup>
-import { ref, watch, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
-import logo from '@/assets/images/chainware-logo.png'
-import { useAuthStore } from '@/features/auth/useAuthStore'
-import { login } from '@/features/auth/api'
+import { ref, watch, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
+import logo from '@/assets/images/chainware-logo.png';
+import { useAuthStore } from '@/features/auth/useAuthStore';
+import { loginApi } from '@/features/auth/api';
+import StatusButton from "@/components/common/StatusButton.vue";
 
-const router = useRouter()
-const authStore = useAuthStore()
+const router = useRouter();
+const authStore = useAuthStore();
 
-const email = ref('')
-const password = ref('')
-const showPassword = ref(false)
-const saveId = ref(authStore.saveId)
-const errorMessage = ref('')
+const email = ref('');
+const password = ref('');
+const showPassword = ref(false);
+const saveId = ref(authStore.saveId);
+const errorMessage = ref('');
+const isSubmitting = ref(false);
 
-// 페이지 로드 시 이메일 복원
 onMounted(() => {
     if (authStore.saveId && authStore.email) {
-        email.value = authStore.email
-        saveId.value = true
+        email.value = authStore.email;
+        saveId.value = true;
     }
-})
+});
 
-watch(email, (newVal) => {
-    if (saveId.value) {
-        if (newVal.trim() !== '') {
-            authStore.setEmail(newVal)
-            console.log('아이디 변경 감지, 저장된 아이디 갱신:', newVal)
-        } else {
-            authStore.setEmail('')
-            console.log('아이디 삭제 감지, 저장된 아이디 삭제')
-        }
-    }
-})
+function isValidEmail(email) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
 
-// 체크박스 클릭 시 즉시 반영
 function handleSaveIdChange() {
+    const trimmedEmail = email.value.trim();
     if (saveId.value) {
-        if (email.value.trim() !== '') {
-            authStore.setEmail(email.value)
-            authStore.setSaveId(true)
-            console.log('아이디 저장 완료:', email.value)
+        if (trimmedEmail !== '' && isValidEmail(trimmedEmail)) {
+            authStore.setEmail(trimmedEmail);
+            authStore.setSaveId(true);
+            errorMessage.value = ''; // 에러 초기화
         } else {
-            saveId.value = false
-            authStore.setSaveId(false)
-            console.log('아이디가 비어 있어 저장 취소')
+            errorMessage.value = '올바른 이메일을 입력해주세요.';
+            saveId.value = false;
         }
     } else {
-        authStore.setEmail('')
-        authStore.setSaveId(false)
-        console.log('아이디 저장 해제')
+        authStore.setEmail('');
+        authStore.setSaveId(false);
+        errorMessage.value = ''; // 에러 초기화
     }
 }
 
-// 비밀번호 보기 토글
 function togglePassword() {
-    showPassword.value = !showPassword.value
+    showPassword.value = !showPassword.value;
 }
 
-// 로그인
 async function handleLogin() {
+    isSubmitting.value = true;
     try {
-        errorMessage.value = '' // 이전 에러 메시지 초기화
-        const res = await login(email.value, password.value)
+        errorMessage.value = '';
+        const res = await loginApi(email.value, password.value);
 
         if (res.success && res.data) {
-            const { accessToken, refreshToken } = res.data
-            authStore.setTokens({ accessToken, refreshToken })
+            const { accessToken } = res.data;
+            authStore.setAccessToken(accessToken);
 
             if (saveId.value) {
-                authStore.setEmail(email.value)
+                authStore.setEmail(email.value);
+                authStore.setSaveId(true);
             } else {
-                authStore.setEmail('')
+                authStore.setEmail('');
+                authStore.setSaveId(false);
             }
 
-            router.push('/dashboard/prediction')
+            await router.push('/dashboard/prediction');
         } else {
-            errorMessage.value = res.message || '로그인에 실패했습니다.'
+            errorMessage.value = res.message || '로그인에 실패했습니다.';
         }
     } catch (error) {
-        console.error('로그인 실패:', error)
-        errorMessage.value = error.response?.data?.message || '서버와 연결할 수 없습니다.'
+        console.error('로그인 실패:', error);
+        errorMessage.value = error.response?.data?.message || '서버와 연결할 수 없습니다.';
+    } finally {
+        isSubmitting.value = false;
     }
 }
 </script>
@@ -263,7 +250,8 @@ input[type="password"]:focus {
     transform: translate(-50%, -50%);
 }
 
-button {
+/* ID 적용한 스타일 */
+#error-btn {
     width: 100%;
     padding: 16px;
     background: linear-gradient(135deg, #3aaed8, #48b6df);

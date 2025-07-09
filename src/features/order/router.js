@@ -1,6 +1,6 @@
-import OrderDummyView from "@/features/order/views/OrderDummyView.vue";
 import OrderListView from "@/features/order/views/OrderListView.vue";
 import OrderDetailView from "@/features/order/views/OrderDetailView.vue";
+import OrderRegisterView from "@/features/order/views/OrderRegisterView.vue";
 
 export const orderRoutes = [
     {
@@ -11,7 +11,7 @@ export const orderRoutes = [
     {
         path: '/order/register',
         name: 'OrderRegisterView',
-        component: OrderDummyView
+        component: OrderRegisterView
     },
     {
         path: '/order/detail',

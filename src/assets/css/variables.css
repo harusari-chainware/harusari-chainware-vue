@@ -36,6 +36,8 @@
 
     /* Font sizes */
     --font-page-title-large: 1.5rem;
+    --font-page-title-midium: 1.3rem;
+    --font-page-title-small: 1.1rem;
     --font-page-description: 1rem;
     --font-header: 0.95rem;
     --font-header-dropdown: 0.9rem;
