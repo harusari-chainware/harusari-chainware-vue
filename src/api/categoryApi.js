@@ -73,8 +73,12 @@ export const fetchSubCategories = async (topCategoryName) => {
     );
 };
 
+// export const fetchAllTopCategories = () => {
+//     return api.get("/api/v1/categories");
+// };
+
 export const fetchAllTopCategories = () => {
-    return api.get("/api/v1/categories");
+    return api.get("/api/v1/categories", { params: { page: 1, size: 100 } }); // size 크게!
 };
 
 export const fetchAllListTopCategories = () => {

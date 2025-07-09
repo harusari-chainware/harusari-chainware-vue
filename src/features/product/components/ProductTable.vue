@@ -2,6 +2,11 @@ producttable
 
 <template>
   <GenericTable :items="products" :columns="columns">
+    <!-- 제품코드: 3자리 패딩 -->
+    <template #cell-productCode="{ value }">
+      <span>{{ padProductCode(value) }}</span>
+    </template>
+
     <!-- 카테고리명: 매핑 -->
     <template #cell-categoryName="{ value, item }">
       <span>{{ getCategoryName(item.categoryId) || '-' }}</span>
@@ -41,12 +46,41 @@ producttable
 </template>
 
 <script setup>
+import { watchEffect } from 'vue'
 import GenericTable from '@/components/common/GenericTable.vue'
 
 const props = defineProps({
   products: { type: Array, required: true },
   categories: { type: Array, required: true }
 })
+
+watchEffect(() => {
+  props.products.forEach(prod => {
+    const found = props.categories.some(top =>
+        (top.categories || []).some(cat => String(cat.categoryId) === String(prod.categoryId))
+    )
+    if (!found) {
+      console.warn('매칭되는 카테고리 없음! productId:', prod.productId, 'categoryId:', prod.categoryId)
+      console.log('현재 카테고리 목록:', props.categories.map(top => ({
+        topCategoryId: top.topCategoryId,
+        topCategoryName: top.topCategoryName,
+        categories: (top.categories || []).map(cat => cat.categoryId)
+      })))
+    }
+  })
+})
+
+props.products.forEach(prod => {
+  const found = props.categories.some(top =>
+      (top.categories || []).some(cat => String(cat.categoryId) === String(prod.categoryId))
+  )
+  if (!found) {
+    console.warn('매칭되는 카테고리 없음! productId:', prod.productId, 'categoryId:', prod.categoryId)
+  }
+})
+
+console.log('products:', JSON.parse(JSON.stringify(props.products)))
+console.log('topCategories:', JSON.parse(JSON.stringify(props.categories)))
 
 const columns = [
   { key: 'productId', label: '제품 ID', align: 'center' },
@@ -60,22 +94,39 @@ const columns = [
   { key: 'detail', label: '상세', align: 'center' }
 ]
 
+// const getDetailLink = (item) => {
+//     return `/product/${item.categoryId}`
+// }
+
+// 숫자 패딩 함수
+function padProductCode(productCode) {
+  if (!productCode) return "";
+  const parts = productCode.split('-');
+  if (parts.length !== 3) return productCode;
+  const num = parts[2].padStart(3, '0');
+  return `${parts[0]}-${parts[1]}-${num}`;
+}
+
 const getDetailLink = (item) => {
-    return `/product/${item.categoryId}`
+  return `/product/${item.productId}` // 상품 상세라면 productId로!
 }
 
 const getCategoryName = (categoryId) => {
   for (const top of props.categories) {
-    const found = (top.categories || []).find(cat => cat.categoryId === categoryId)
+    // const found = (top.categories || []).find(cat => cat.categoryId === categoryId)
+    const found = (top.categories || []).find(cat => String(cat.categoryId) === String(categoryId))
     if (found) {
       // 상위카테고리명 > 카테고리명
       return `${top.topCategoryName || top.categoryName || '-'} / ${found.categoryName}`;
     }
   }
   // 상위만 있는 경우
-  const topOnly = props.categories.find(tc => tc.topCategoryId === categoryId);
+  // const topOnly = props.categories.find(tc => tc.topCategoryId === categoryId);
+  // if (topOnly) return topOnly.topCategoryName || topOnly.categoryName || '';
+  // return '';
+  const topOnly = props.categories.find(tc => String(tc.topCategoryId) === String(categoryId));
   if (topOnly) return topOnly.topCategoryName || topOnly.categoryName || '';
-  return '';
+  return '-';
 }
 
 function formatDate(dateString) {

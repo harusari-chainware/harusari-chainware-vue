@@ -1,17 +1,15 @@
-productfilters
-
 <template>
   <div class="filters-container-vertical">
     <div class="filter-row">
       <FilterSelect
           label="상위 카테고리명"
-          v-model="filters.topCategoryId"
-          :options="topCategoryOptions"
+          v-model="filters.topCategoryName"
+          :options="topCategoryOptionsName"
       />
       <FilterSelect
           label="카테고리명"
-          v-model="filters.categoryId"
-          :options="categoryOptions"
+          v-model="filters.categoryName"
+          :options="categoryOptionsName"
       />
     </div>
     <div class="filter-row">
@@ -64,8 +62,8 @@ const emit = defineEmits(['apply', 'reset'])
 
 // 필터 상태
 const filters = reactive({
-  topCategoryId: '',
-  categoryId: '',
+  topCategoryName: '',
+  categoryName: '',
   storeType: '',
   productStatus: '',
   productName: '',
@@ -77,17 +75,19 @@ const filters = reactive({
 // const categoryOptions = ref([{ label: '전체', value: '' }])
 const topCategories = ref([]) // 전체(상위+하위) 카테고리(카테고리 드롭다운에 사용)
 const topCategoryListOnly = ref([]) // 상위만 (상위 카테고리 드롭다운 전용)
-const topCategoryOptions = ref([{ label: '전체', value: '' }])
-const categoryOptions = ref([{ label: '전체', value: '' }])
+// const topCategoryOptions = ref([{ label: '전체', value: '' }])
+// const categoryOptions = ref([{ label: '전체', value: '' }])
+const categoryOptionsName = ref([{ label: '전체', value: '' }])
+const topCategoryOptionsName = ref([{ label: '전체', value: '' }])
 
 onMounted(async () => {
   // 1. 상위 카테고리(이름/ID만)
   const resTop = await fetchAllListTopCategories()
   topCategoryListOnly.value = resTop.data.data ?? []
-  topCategoryOptions.value = [
+  topCategoryOptionsName.value = [
     ...topCategoryListOnly.value.map(tc => ({
       label: tc.topCategoryName,
-      value: String(tc.topCategoryId)
+      value: top.topCategoryName
     }))
   ]
   // 2. 전체 카테고리(하위까지)
@@ -95,18 +95,30 @@ onMounted(async () => {
   topCategories.value = resFull.data.data.topCategories ?? []
 })
 
-watch(() => filters.topCategoryId, newTopId => {
-  filters.categoryId = ''
-  const found = topCategories.value.find(tc => String(tc.topCategoryId) === String(newTopId))
+// onMounted(() => {
+//   if (props.topCategories.length > 0) {
+//     topCategoryOptions.value = [
+//       { label: '전체', value: '' },
+//       ...props.topCategories.map(tc => ({
+//         label: tc.topCategoryName,
+//         value: String(tc.topCategoryId)
+//       }))
+//     ]
+//   }
+// })
+
+watch(() => filters.topCategoryName, newTopName  => {
+  filters.categoryName  = ''
+  const found = topCategories.value.find(tc => String(tc.topCategoryName ) === newTopName)
   if (found && found.categories && found.categories.length > 0) {
-    categoryOptions.value = [
+    categoryOptionsName.value = [
       ...found.categories.map(cat => ({
         label: cat.categoryName,
-        value: String(cat.categoryId)
+        value: cat.categoryName
       }))
     ]
   } else {
-    categoryOptions.value = [{ label: '전체', value: '' }]
+    categoryOptionsName.value = [{ label: '전체', value: '' }]
   }
 }, { immediate: true })
 
@@ -131,6 +143,7 @@ const productStatusOptions = [
 
 // 필터 적용
 const applyFilters = () => {
+  console.log('[applyFilters] 필터 값:', filters)
   emit('apply', { ...filters })
 }
 
@@ -153,50 +166,51 @@ const resetFilters = () => {
 .filters-container-vertical {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  background: #fff;
-  border-radius: 14px;
-  box-shadow: 0 4px 16px 0 var(--color-box-shadow, #e6edf7);
+  gap: 16px;
   margin-bottom: 2.5rem;
-  padding: 2rem 2.5rem 1.5rem 2.5rem;
-  max-width: 920px;
+  padding: 0 3rem 0 3rem;
+  max-width: 800px;
   margin-left: auto;
-  margin-right: auto;
+  margin-right: auto;;
 }
 .filter-row {
-  display: flex;
-  flex-direction: row;
-  gap: 28px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr); /* 4개 항목 똑같이 */
+  gap: 40px;
   align-items: flex-end;
+  width: 100%;
 }
+
 .align-end {
   align-items: flex-end;
 }
 .filter-input-wrap {
   display: flex;
   flex-direction: column;
-  min-width: 180px;
-  max-width: 260px;
+  width: 100%;
 }
 .filter-label {
-  font-weight: 700;
+  font-weight: 500;
   color: var(--color-gray-900, #222);
-  margin-bottom: 7px;
-  font-size: 1.08rem;
+  margin-bottom: 6px;
+  font-size: 1.01rem;
+  letter-spacing: -0.01em;
 }
 .filter-input {
-  border: 1px solid var(--color-gray-200, #dbe4ea);
+  border: 1px solid #e4e7ee;
   border-radius: 8px;
-  background: var(--color-bg-light, #f8fafc);
+  background: #fafbfc;
   height: 38px;
   font-size: 1rem;
-  padding: 0 14px;
+  padding: 0 13px;
   color: var(--color-gray-900, #222);
 }
+
 .filter-buttons {
   margin-left: auto;
   display: flex;
-  gap: 8px;
+  gap: 12px;
   align-items: flex-end;
 }
+
 </style>

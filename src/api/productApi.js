@@ -1,5 +1,21 @@
-// src/api/productApi.js
 import api from "@/api/axios.js";
+
+/* ───────────── 제품(상품) 커맨드 API ───────────── */
+
+// 제품 등록
+export const createProduct = (productData) => {
+    return api.post('/api/v1/product', productData); // 단수
+};
+
+// 제품 수정
+export const updateProduct = (productId, productData) => {
+    return api.put(`/api/v1/product/${productId}`, productData); // 단수 + PK path param
+};
+
+// 제품 삭제 (Soft Delete 또는 실제 삭제)
+export const deleteProduct = (productId) => {
+    return api.delete(`/api/v1/product/${productId}`); // 단수 + PK
+};
 
 /* ───────────── 제품(상품) 조회 API ───────────── */
 

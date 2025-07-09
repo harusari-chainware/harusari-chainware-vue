@@ -1,5 +1,3 @@
-0708 14 55
-
 <template>
   <ListLayout
       title="제품 목록 조회"
@@ -15,7 +13,7 @@
 
     <template #top-actions-right>
       <CreateButton @click="openModal">파일 출력</CreateButton>
-      <CreateButton @click="openCreateModal">제품 추가</CreateButton>
+      <CreateButton @click="goToCreatePage">제품 추가</CreateButton>
     </template>
 
     <template #table>
@@ -44,6 +42,17 @@ import { fetchProducts } from '@/api/productApi'
 import CreateButton from "@/components/common/top-actions/CreateButton.vue";
 import ProductTable from '../components/ProductTable.vue'
 import ProductFilters from '../components/ProductFilters.vue'
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
+
+const goToCreatePage = () => {
+  router.push('/product/register')
+}
+
+const openModal = () => {
+  alert('파일 출력 기능 준비 중!');
+}
 
 // --- 필터/상태 ---
 const filters = reactive({
@@ -64,7 +73,7 @@ const categoryOptions = ref([{ label: '전체', value: '' }])
 onMounted(async () => {
   // 1. 상위 카테고리(이름/ID만)
   const resTop = await fetchAllListTopCategories()
-  topCategoryListOnly.value = resTop.data.data ?? []
+  topCategoryListOnly.value = resTop.data.data.topCategories ?? []
   topCategoryOptions.value = [
     ...topCategoryListOnly.value.map(tc => ({
       label: tc.topCategoryName,
@@ -100,11 +109,16 @@ const PAGE_SIZE = 10
 const pagedProducts = computed(() => products.value)
 
 const loadProducts = async () => {
+  console.log('[loadProducts] filters:', filters)
   const params = {
     ...filters,
     page: page.value,
     size: PAGE_SIZE
   }
+  console.log('[loadProducts] params:', params)
+  Object.keys(params).forEach(k => {
+    if (params[k] === '' || params[k] == null) delete params[k]
+  })
   const res = await fetchProducts(params)
   products.value = res.data.data.products
   totalCount.value = res.data.data.pagination.totalItems
@@ -116,11 +130,7 @@ const loadProducts = async () => {
 //   loadProducts()
 // }
 
-const handleSearch = (newFilters) => {
-  Object.assign(filters, newFilters) // 부모 filters reactive에 반영!
-  page.value = 1
-  loadProducts()
-}
+
 
 // const handleReset = () => {
 //   Object.assign(filters, {
@@ -135,6 +145,12 @@ const handleSearch = (newFilters) => {
 //   loadProducts()
 // }
 
+const handleSearch = (newFilters) => {
+  console.log('[handleSearch] 전달된 값:', newFilters)
+  Object.assign(filters, newFilters) // 부모 filters reactive에 반영!
+  page.value = 1
+  loadProducts()
+}
 const handleReset = () => {
   Object.assign(filters, {
     topCategoryId: '',
@@ -150,7 +166,10 @@ const handleReset = () => {
 
 
 // --- 상세/추가 (라우터 연결 등) ---
-const goDetail = (item) => { /* 상세 페이지로 이동 */ }
+const goDetail = (item) => {
+  router.push(`/product/${item.productId}`)
+}
+
 const goAddProduct = () => { /* 추가 페이지로 이동 */ }
 
 // 최초 로딩
