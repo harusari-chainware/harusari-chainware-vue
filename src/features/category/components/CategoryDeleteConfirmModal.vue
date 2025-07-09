@@ -14,7 +14,7 @@
 
 <script setup>
 import { defineProps, defineEmits } from 'vue'
-import { deleteCategory, deleteTopCategory } from '@/api/categoryApi'
+import { deleteCategory, deleteTopCategory } from '@/features/category/api.js'
 
 const props = defineProps({
   targetId: Number,

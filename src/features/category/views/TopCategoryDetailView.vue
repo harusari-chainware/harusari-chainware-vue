@@ -113,7 +113,7 @@ import {
   updateTopCategory,
   updateCategory,
   deleteCategory
-} from '@/api/categoryApi'
+} from '@/features/category/api.js'
 import CategoryModal from '@/features/category/components/CategoryModal.vue'
 
 const showCategoryModal = ref(false)

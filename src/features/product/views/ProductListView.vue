@@ -37,8 +37,8 @@
 import { ref, reactive, computed, watch, onMounted } from 'vue'
 import ListLayout from '@/components/layout/ListLayout.vue'
 import Pagination from '@/components/common/Pagination.vue'
-import { fetchAllListTopCategories, fetchAllTopCategories  } from '@/api/categoryApi'
-import { fetchProducts } from '@/api/productApi'
+import { fetchAllListTopCategories, fetchAllTopCategories  } from '@/features/category/api.js'
+import { fetchProducts } from '@/features/product/api.js'
 import CreateButton from "@/components/common/top-actions/CreateButton.vue";
 import ProductTable from '../components/ProductTable.vue'
 import ProductFilters from '../components/ProductFilters.vue'

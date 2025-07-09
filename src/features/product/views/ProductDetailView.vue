@@ -177,8 +177,8 @@
 <script setup>
 import { ref, onMounted, computed } from "vue";
 import { useRoute } from "vue-router";
-import { fetchProductDetail, updateProduct, deleteProduct  } from "@/api/productApi";
-import { fetchAllTopCategories } from "@/api/categoryApi";
+import { fetchProductDetail, updateProduct, deleteProduct  } from '@/features/product/api.js'
+import { fetchAllTopCategories } from '@/features/category/api.js'
 import DetailLayout from "@/components/layout/DetailLayout.vue";
 import StatusButton from "@/components/common/StatusButton.vue";
 import Pagination from "@/components/common/Pagination.vue";

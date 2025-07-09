@@ -73,8 +73,8 @@ import { ref, onMounted, computed, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import DetailLayout from '@/components/layout/DetailLayout.vue'
 import StatusButton from '@/components/common/StatusButton.vue'
-import {fetchAllListTopCategories, fetchAllTopCategories} from '@/api/categoryApi'
-import { createProduct } from '@/api/productApi'
+import {fetchAllListTopCategories, fetchAllTopCategories} from '@/features/category/api.js'
+import { createProduct } from '@/features/product/api.js'
 
 // 폼 상태
 const form = ref({

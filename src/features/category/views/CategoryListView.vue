@@ -73,7 +73,7 @@ import { ref, computed, onMounted } from 'vue'
 import {
   fetchAllListTopCategories,
   fetchCategories
-} from '@/api/categoryApi'
+} from '@/features/category/api.js'
 
 import ListLayout from '@/components/layout/ListLayout.vue'
 import EmptyResult from "@/components/common/EmptyResult.vue";

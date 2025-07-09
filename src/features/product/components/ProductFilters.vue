@@ -53,7 +53,7 @@
 import {onMounted, reactive, ref, watch} from 'vue'
 import FilterSelect from '@/components/common/filters/FilterSelect.vue'
 import FilterButtons from '@/components/common/filters/FilterButtons.vue'
-import {fetchAllListTopCategories, fetchAllTopCategories} from "@/api/categoryApi.js";
+import {fetchAllListTopCategories, fetchAllTopCategories} from '@/features/category/api.js'
 
 const props = defineProps({
   topCategories: { type: Array, required: true }  // fetchAllTopCategories() 결과!

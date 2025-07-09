@@ -41,7 +41,7 @@ import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import ListLayout from '@/components/layout/ListLayout.vue'
 import CategoryForm from '../components/CategoryForm.vue'
-import {fetchAllListTopCategories, fetchAllTopCategories} from '@/api/categoryApi'
+import {fetchAllListTopCategories, fetchAllTopCategories} from '@/features/category/api.js'
 
 const router = useRouter()
 const formType = ref('top') // 기본값: 상위 카테고리

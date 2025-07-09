@@ -139,7 +139,7 @@ import {
   fetchCategoryDetail,
   updateCategory,
   deleteCategory
-} from '@/api/categoryApi'
+} from '@/features/category/api.js'
 
 function getDisplayProductCode(product, categoryCode) {
   // product.sequence 또는 product.productId 중 원하는 값 사용!

@@ -52,7 +52,7 @@ import {
   updateCategory,
   createTopCategory,
   updateTopCategory,
-} from '@/api/categoryApi'
+} from '@/features/category/api.js'
 
 const props = defineProps({
   isTop: { type: Boolean, default: false },
