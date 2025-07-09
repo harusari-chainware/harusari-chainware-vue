@@ -110,7 +110,7 @@ const withdrawalOptions = [
 
 // 컬럼 정의
 const columns = [
-    {key: 'memberId', label: '아이디'},
+    {key: 'memberId', label: '회원 ID'},
     {key: 'email', label: '이메일'},
     {key: 'name', label: '이름'},
     {key: 'authorityLabelKr', label: '권한'},

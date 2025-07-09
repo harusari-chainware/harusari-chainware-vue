@@ -5,9 +5,14 @@
                 <div class="indicator"></div>
                 <h2 class="title">회원 정보</h2>
             </div>
-            <RouterLink :to="`/member/${props.member.memberId}/edit`" class="action-button">
-                수정
-            </RouterLink>
+            <div v-if="!isEditMode" class="button-group">
+                <button class="action-button" @click="enterEditMode">수정</button>
+                <button class="delete-button" @click="handleDelete">탈퇴</button>
+            </div>
+            <div v-else class="edit-buttons">
+                <button class="action-button" @click="handleSave">저장</button>
+                <button class="cancel-button" @click="cancelEdit">취소</button>
+            </div>
         </div>
         <p class="description">회원 상세 내용을 확인할 수 있습니다.</p>
 
@@ -15,7 +20,21 @@
             <div v-for="item in rows" :key="item.label" class="info-item">
                 <div class="label">{{ item.label }}</div>
                 <div class="value">
-                    <template v-if="item.type === 'badge'">
+                    <template v-if="item.editable && isEditMode">
+                        <InputField
+                                v-if="item.type !== 'select'"
+                                v-model="form[item.key]"
+                                :placeholder="item.label + '을(를) 입력하세요'"
+                        />
+                        <SelectField
+                                v-else
+                                v-model="form[item.key]"
+                                :options="authorityOptions"
+                                placeholder="권한을 선택하세요"
+                                required
+                        />
+                    </template>
+                    <template v-else-if="item.type === 'badge'">
                         <span :class="['badge', item.badgeClass]">{{ item.value }}</span>
                     </template>
                     <template v-else>
@@ -28,9 +47,48 @@
 </template>
 
 <script setup>
+import {ref} from 'vue'
+import {useRouter} from 'vue-router'
+import InputField from '@/components/common/fields/InputField.vue'
+import SelectField from '@/components/common/fields/SelectField.vue'
+import {updateMember, deleteMember} from '@/features/member/api.js'
+
 const props = defineProps({
     member: {type: Object, required: true}
 })
+
+const emit = defineEmits(['refresh'])
+const router = useRouter()
+const isEditMode = ref(false)
+
+const form = ref({
+    name: '',
+    authorityName: '',
+    phoneNumber: '',
+    position: ''
+})
+
+// 권한 옵션 (시스템 포함)
+const authorityOptions = [
+    {label: '마스터', value: 'MASTER'},
+    {label: '일반 관리자', value: 'GENERAL_MANAGER'},
+    {label: '책임 관리자', value: 'SENIOR_MANAGER'},
+    {label: '창고 관리자', value: 'WAREHOUSE_MANAGER'},
+    {label: '가맹점 담당자', value: 'FRANCHISE_MANAGER'},
+    {label: '거래처 담당자', value: 'VENDOR_MANAGER'},
+    {label: '시스템', value: 'SYSTEM'}
+]
+
+// Label → Enum 매핑
+const labelToValueMap = {
+    '마스터': 'MASTER',
+    '일반 관리자': 'GENERAL_MANAGER',
+    '책임 관리자': 'SENIOR_MANAGER',
+    '창고 관리자': 'WAREHOUSE_MANAGER',
+    '가맹점 담당자': 'FRANCHISE_MANAGER',
+    '거래처 담당자': 'VENDOR_MANAGER',
+    '시스템': 'SYSTEM'
+}
 
 function formatDateTime(dateTime) {
     if (!dateTime) return '-'
@@ -64,6 +122,8 @@ function authorityBadgeClass(label) {
             return 'badge-franchise'
         case '거래처 담당자':
             return 'badge-vendor'
+        case '시스템':
+            return 'badge-system'
         default:
             return 'badge-default'
     }
@@ -72,16 +132,18 @@ function authorityBadgeClass(label) {
 const rows = [
     {label: '회원 ID', value: props.member.memberId},
     {label: '이메일', value: props.member.email},
-    {label: '이름', value: props.member.name},
+    {label: '이름', value: props.member.name, editable: true, key: 'name'},
     {
         label: '권한',
         value: props.member.authorityLabelKr,
-        type: 'badge',
+        editable: true,
+        type: 'select',
+        key: 'authorityName',
         badgeClass: authorityBadgeClass(props.member.authorityLabelKr)
     },
-    {label: '전화번호', value: formatPhoneNumber(props.member.phoneNumber)},
+    {label: '전화번호', value: formatPhoneNumber(props.member.phoneNumber), editable: true, key: 'phoneNumber'},
     {label: '생년월일', value: props.member.birthDate},
-    {label: '직책', value: props.member.position},
+    {label: '직책', value: props.member.position, editable: true, key: 'position'},
     {label: '가입일', value: formatDateTime(props.member.joinAt)},
     {label: '수정일', value: formatDateTime(props.member.modifiedAt)},
     {
@@ -89,11 +151,103 @@ const rows = [
         value: props.member.isDeleted ? '탈퇴' : '활동 중',
         type: 'badge',
         badgeClass: props.member.isDeleted ? 'badge-inactive' : 'badge-active'
-    },
+    }
 ]
+
+const enterEditMode = () => {
+    isEditMode.value = true
+    form.value = {
+        name: props.member.name ?? '',
+        authorityName: labelToValueMap[props.member.authorityLabelKr] ?? 'MASTER',
+        phoneNumber: props.member.phoneNumber ?? '',
+        position: props.member.position ?? ''
+    }
+}
+
+const cancelEdit = () => {
+    isEditMode.value = false
+}
+
+const handleSave = async () => {
+    if (!form.value.authorityName) {
+        alert('권한을 선택해주세요.')
+        return
+    }
+    if (!confirm('회원 정보를 수정하시겠습니까?')) {
+        return
+    }
+    try {
+        await updateMember(props.member.memberId, form.value)
+        emit('refresh')
+        isEditMode.value = false
+    } catch (error) {
+        console.error('회원 정보 수정 실패:', error)
+        alert('회원 정보 수정에 실패했습니다.')
+    }
+}
+
+const handleDelete = async () => {
+    if (!confirm('정말로 이 회원을 탈퇴 처리하시겠습니까?')) {
+        return
+    }
+    try {
+        await deleteMember(props.member.memberId)
+        alert('회원이 탈퇴 처리되었습니다.')
+        router.push('/member/list')
+    } catch (error) {
+        console.error('회원 탈퇴 실패:', error)
+        alert('회원 탈퇴 처리에 실패했습니다.')
+    }
+}
 </script>
 
 <style scoped>
+.button-group,
+.edit-buttons {
+    display: flex;
+    gap: 7px;
+}
+
+.action-button {
+    padding: 6px 14px;
+    background-color: var(--color-primary, #2F80ED);
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-weight: 500;
+    font-size: 0.9rem;
+    transition: background-color 0.2s ease;
+    cursor: pointer;
+}
+
+.delete-button {
+    padding: 6px 14px;
+    background-color: #f94144;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-weight: 500;
+    font-size: 0.9rem;
+    transition: background-color 0.2s ease;
+    cursor: pointer;
+}
+
+.delete-button:hover {
+    background-color: #e63b3b;
+}
+
+.cancel-button {
+    padding: 6px 14px;
+    background-color: #e0e0e0;
+    color: #333;
+    border: none;
+    border-radius: 6px;
+    font-weight: 500;
+    font-size: 0.9rem;
+    transition: background-color 0.2s ease;
+    cursor: pointer;
+}
+
 .card {
     background: #fff;
     border-radius: 12px;
@@ -130,21 +284,6 @@ const rows = [
     font-size: 0.95rem;
     color: #6c757d;
     margin-bottom: 16px;
-}
-
-.action-button {
-    padding: 6px 14px;
-    background-color: var(--color-primary, #2F80ED);
-    color: #fff;
-    border-radius: 6px;
-    text-decoration: none;
-    font-weight: 500;
-    font-size: 0.9rem;
-    transition: background-color 0.2s ease;
-}
-
-.action-button:hover {
-    background-color: var(--color-primary-dark, #1c60b3);
 }
 
 .info-grid {
@@ -188,7 +327,6 @@ const rows = [
     text-align: center;
 }
 
-/* 탈퇴 여부 배지 */
 .badge-active {
     background-color: #17c3b2;
 }
@@ -197,7 +335,6 @@ const rows = [
     background-color: #fe6d73;
 }
 
-/* 권한 배지 색상 */
 .badge-master {
     background-color: #ef476f;
 }
@@ -220,6 +357,10 @@ const rows = [
 
 .badge-vendor {
     background-color: #7678ed;
+}
+
+.badge-system {
+    background-color: #6c5ce7;
 }
 
 .badge-default {
