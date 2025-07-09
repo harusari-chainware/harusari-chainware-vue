@@ -6,6 +6,7 @@ import DetailLayout from '@/components/layout/DetailLayout.vue'
 import StatusButton from "@/components/common/StatusButton.vue"
 import PurchaseOrderDetailBasic from '../components/PurchaseOrderDetailBasic.vue'
 import PurchaseOrderDetailDetail from '../components/PurchaseOrderDetailDetail.vue'
+import {useAuthStore} from "@/features/auth/useAuthStore.js";
 
 const props = defineProps({
   purchaseOrderId: {
@@ -18,6 +19,23 @@ const props = defineProps({
 
 const purchaseDetail = ref(null)
 const isLoading = ref(true)
+
+
+const authStore = useAuthStore()
+const authority = authStore.authority
+
+const status = computed(() => purchaseDetail.value?.status || '')
+
+const isRequested = computed(() => status.value === 'REQUESTED')
+const isApproved = computed(() => status.value === 'APPROVED')
+const isShipped = computed(() => status.value === 'SHIPPED')
+
+const isGeneralManager = computed(() => authority === 'GENERAL_MANAGER')
+const isSeniorManager = computed(() => authority === 'SENIOR_MANAGER')
+const isVendor = computed(() => authority === 'VENDOR_MANAGER')
+const isWarehouse = computed(() => authority === 'WAREHOUSE_MANAGER')
+
+const isManager = computed(() => isGeneralManager.value || isSeniorManager.value)
 
 /**
  * 제품 항목을 detail table용 item 구조로 변환

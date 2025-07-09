@@ -13,6 +13,10 @@
       <template #label>이메일</template>
       <template #value>{{ purchaseDetail.drafter.email}}</template>
     </InfoItem>
+    <InfoItem>
+      <template #label>연락처</template>
+      <template #value>{{ purchaseDetail.drafter.contact}}</template>
+    </InfoItem>
   </InfoGroup>
 </template>
 

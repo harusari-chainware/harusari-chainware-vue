@@ -1,17 +1,17 @@
 <template>
   <section class="grid grid-2 gap-6">
-    <RequisitionDetailBasicInfo :requisition="requisition" />
-    <RequisitionDetailDate :requisition="requisition" />
+    <RequisitionDetailBasicInfo :requisitionDetail="requisitionDetail" />
+    <RequisitionDetailDate :requisitionDetail="requisitionDetail" />
   </section>
 
   <section class="grid grid-2 gap-6">
-    <RequisitionDetailDrafterInfo :requisition="requisition" />
-    <RequisitionDetailApproverInfo :requisition="requisition" />
+    <RequisitionDetailDrafterInfo :requisitionDetail="requisitionDetail" />
+    <RequisitionDetailApproverInfo :requisitionDetail="requisitionDetail" />
   </section>
 
   <section class="grid grid-2 gap-6">
-    <RequisitionDetailVendor :requisition="requisition" />
-    <RequisitionDetailWarehouse :requisition="requisition" />
+    <RequisitionDetailVendor :requisitionDetail="requisitionDetail" />
+    <RequisitionDetailWarehouse :requisitionDetail="requisitionDetail" />
   </section>
 </template>
 
@@ -24,7 +24,7 @@ import RequisitionDetailVendor from './RequisitionDetailVendor.vue'
 import RequisitionDetailWarehouse from './RequisitionDetailWarehouse.vue'
 
 defineProps({
-  requisition: {
+  requisitionDetail: {
     type: Object,
     required: true
   }
