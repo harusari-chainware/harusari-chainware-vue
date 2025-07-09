@@ -39,57 +39,52 @@
 
 <script setup>
 import { ref, computed, watch, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
-import { dummyPurchases } from '@/constants/dummy/purchase'
-
+import { useRouter, useRoute } from 'vue-router'
+import { getPurchaseOrders } from '@/features/purchase/PurchaseApi.js' // 실제 API
 import ListLayout from '@/components/layout/ListLayout.vue'
-import EmptyResult from "@/components/common/EmptyResult.vue";
-import Pagination from '@/components/common/Pagination.vue'
-import SkeletonList from "@/components/common/SkeletonList.vue";
-
-import CreateButton from '@/components/common/top-actions/CreateButton.vue'
-import SortDropdown from '@/components/common/top-actions/SortDropdown.vue'
-import SortOrderSelect from '@/components/common/top-actions/SortOrderSelect.vue'
-
+import EmptyResult from "@/components/common/EmptyResult.vue"
+import Pagination from "@/components/common/Pagination.vue"
+import SkeletonList from "@/components/common/SkeletonList.vue"
+import CreateButton from "@/components/common/top-actions/CreateButton.vue"
+import SortDropdown from "@/components/common/top-actions/SortDropdown.vue"
+import SortOrderSelect from "@/components/common/top-actions/SortOrderSelect.vue"
 import OrderFilters from '../components/PurchaseFilters.vue'
-import PurchaseTable from "@/features/purchase/components/PurchaseTable.vue";
+import PurchaseTable from "@/features/purchase/components/PurchaseTable.vue"
 
 const router = useRouter()
-const isLoading = ref(true)
+const route = useRoute()
 
-// 페이지네이션
-const currentPage = ref(1)
+const purchase = ref([])
+const isLoading = ref(true)
+const currentPage = ref(Number(route.query.page) || 1)
+const sortKey = ref(route.query.sortKey || 'createdAt')
+const sortOrder = ref(route.query.sortOrder || 'asc')
+const totalCount = ref(0)
 const itemsPerPage = 10
 
-// 정렬
-const sortKey = ref('createdAt')
-const sortOrder = ref('asc')
-
-const sortOptions = [
-  { label: '발주 등록일', value: 'createdAt' },
-  { label: '납기 요청일', value: 'dueDate' },
-  { label: '총 금액', value: 'totalAmount' }
-]
-
-// 더미 주문 데이터
-const purchase = ref(dummyPurchases)
-
-// 마운트 시 로딩 시뮬레이션
-onMounted(() => {
+const fetchPurchaseOrders = async () => {
   isLoading.value = true
-  setTimeout(() => {
-    purchase.value = dummyPurchases
+  try {
+    const params = {
+      page: currentPage.value - 1,
+      size: itemsPerPage,
+      sortKey: sortKey.value,
+      sortOrder: sortOrder.value
+      // TODO: filters도 함께 추가 가능
+    }
+    const res = await getPurchaseOrders(params)
+    purchase.value = res.data.data
+    totalCount.value = res.data.data.length // → 서버 응답에 totalCount가 따로 있으면 수정 필요
+  } catch (err) {
+    console.error('발주 목록 조회 실패', err)
+  } finally {
     isLoading.value = false
-  }, 1000) // 1초 후 데이터 주입
-})
+  }
+}
 
-// 정렬 기준 바뀔 때 쿼리 반영
-watch([sortKey, sortOrder], ([key, order]) => {
-  router.push({ query: { sortKey: key, sortOrder: order } })
-})
+onMounted(fetchPurchaseOrders)
 
-// 정렬 + 페이징된 결과 반환
-const totalCount = computed(() => purchase.value.length)
+watch([sortKey, sortOrder, currentPage], fetchPurchaseOrders)
 
 const pagedPurchase = computed(() => {
   const start = (currentPage.value - 1) * itemsPerPage
@@ -97,8 +92,7 @@ const pagedPurchase = computed(() => {
   return purchase.value.slice(start, end)
 })
 
-// 작성 페이지로 이동 (예시용으로 현재 페이지 유지)
 const goToCreate = () => {
-  router.push({name: 'OrderRegisterView'})
+  router.push({ name: 'OrderRegisterView' })
 }
 </script>

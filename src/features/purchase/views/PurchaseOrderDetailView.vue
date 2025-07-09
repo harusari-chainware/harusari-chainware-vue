@@ -35,30 +35,27 @@
 </template>
 
 <script setup>
+import { ref, onMounted } from 'vue'
+import { useRoute } from 'vue-router'
+import { getPurchaseOrderDetail } from '@/features/purchase/PurchaseApi.js'
 import DetailLayout from '@/components/layout/DetailLayout.vue'
-import StatusButton from "@/components/common/StatusButton.vue";
+import StatusButton from "@/components/common/StatusButton.vue"
 import PurchaseOrderDetailBasic from '../components/PurchaseOrderDetailBasic.vue'
 import PurchaseOrderDetailDetail from '../components/PurchaseOrderDetailDetail.vue'
-import { dummyPurchaseDetail } from '@/constants/dummy/purchaseDetail'
 
-import { ref, computed } from 'vue'
+const route = useRoute()
+const purchaseOrderId = route.params.purchaseOrderId || route.query.id
+const purchaseDetail = ref(null)
+const isLoading = ref(true)
 
-const purchaseDetail = dummyPurchaseDetail
-
-const handleEdit = () => {
-  alert('수정 버튼 클릭됨')
-}
-
-// 상세 조회에서 pagination을 적용한다면 아래 내용 추가
-const page = ref(1)
-const itemsPerPage = 10
-
-const pagedItems = computed(() => {
-  const start = (page.value - 1) * itemsPerPage
-  return purchaseDetail.items.slice(start, start + itemsPerPage)
+onMounted(async () => {
+  try {
+    const res = await getPurchaseOrderDetail(purchaseOrderId)
+    purchaseDetail.value = res.data.data
+  } catch (e) {
+    console.error('상세 조회 실패', e)
+  } finally {
+    isLoading.value = false
+  }
 })
-
-const handlePageChange = (newPage) => {
-  page.value = newPage
-}
 </script>

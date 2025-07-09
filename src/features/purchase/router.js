@@ -1,12 +1,13 @@
 export const purchaseRoutes = [
     {
-        path: '/purchase/list',
+        path: '/purchases/list',
         name: 'PurchaseOrderListView',
         component: () => import('@/features/purchase/views/PurchaseOrderListView.vue')
     },
     {
-        path: '/purchase/detail',
+        path: '/purchases/detail/:purchaseOrderId',
         name: 'PurchaseOrderDetailView',
-        component: () => import('@/features/purchase/views/PurchaseOrderDetailView.vue')
+        component: () => import('@/features/purchase/views/PurchaseOrderDetailView.vue'),
+        props: true
     },
 ];

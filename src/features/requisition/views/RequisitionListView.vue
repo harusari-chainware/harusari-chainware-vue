@@ -1,6 +1,5 @@
 <script setup>
 import { ref } from 'vue'
-import LayoutDefault from '@/components/layout/LayoutDefault.vue'
 
 // 필터 상태 관리
 const filters = ref({
