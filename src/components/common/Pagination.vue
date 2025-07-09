@@ -1,5 +1,5 @@
 <template>
-    <nav v-if="totalPages > 1" class="pagination-container" aria-label="페이지 네비게이션">
+    <nav v-if="totalPages > 0" class="pagination-container" aria-label="페이지 네비게이션">
         <ul class="pagination">
             <!-- 첫 페이지로 이동 -->
             <li
