@@ -1,6 +1,6 @@
 /* 사용자가 보는 routes와 view를 연결 */
 import MemberListView from "@/features/member/master/views/MemberListView.vue";
-// import MemberDummyView from "@/features/member/master/views/MemberDummyView.vue";
+import MemberDetailView from "@/features/member/master/views/MemberDetailView.vue";
 
 export const memberRoutes = [
     {
@@ -10,15 +10,15 @@ export const memberRoutes = [
         meta: {requiresAuth: true, roles: ['MASTER']}
     },
     {
-        path: '/member/register',
-        name: 'MemberRegister',
-        // component: MemberRegisterView,
+        path: '/member/:memberId',
+        name: 'MemberDetailView',
+        component: MemberDetailView,
         meta: {requiresAuth: true, roles: ['MASTER']}
     },
     {
-        path: '/member/login-history',
-        name: 'LoginHistory',
-        // component: LoginHistoryView,
+        path: '/member/register',
+        name: 'MemberRegister',
+        // component: MemberRegisterView,
         meta: {requiresAuth: true, roles: ['MASTER']}
     },
     // {

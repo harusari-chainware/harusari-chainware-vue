@@ -15,6 +15,7 @@ import { ref, onMounted, watch } from 'vue'
 import flatpickr from 'flatpickr'
 import 'flatpickr/dist/flatpickr.min.css'
 import '@/assets/css/flatpickr-custom.css'
+import { Korean } from 'flatpickr/dist/l10n/ko.js'
 
 const props = defineProps({
     label: String,
@@ -38,7 +39,7 @@ onMounted(() => {
         mode: 'range',
         dateFormat: 'Y-m-d',
         defaultDate: [props.modelValue?.start, props.modelValue?.end],
-        locale: 'ko',  // 한국어 로케일 설정
+        locale: Korean,  // 한국어 로케일 설정
         onChange: (selectedDates) => {
             // 날짜 범위 선택 시
             if (selectedDates.length === 1) {

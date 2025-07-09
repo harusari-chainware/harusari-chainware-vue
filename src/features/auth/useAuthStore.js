@@ -1,12 +1,13 @@
 import { defineStore } from "pinia";
 import router from "@/router";
-import { refreshApi as refreshApi } from "@/features/auth/api.js";
+import { refreshApi } from "@/features/auth/api.js";
 
 export const useAuthStore = defineStore("auth", {
     state: () => ({
         accessToken: "",
         email: "",
         saveId: false,
+        authority: ""
     }),
     actions: {
         setAccessToken(token) {
@@ -18,17 +19,22 @@ export const useAuthStore = defineStore("auth", {
         setSaveId(save) {
             this.saveId = save;
         },
+        setAuthority(authority) {
+            this.authority = authority;
+        },
         clearAuth() {
             if (!this.saveId) {
                 this.email = "";
             }
             this.accessToken = "";
+            this.authority = "";
+            localStorage.removeItem('auth');
         },
         async refreshToken() {
             try {
-                const res = await refreshApi(); // 쿠키 기반 요청
-                this.setAccessToken(res.data.accessToken); // 스토어 갱신
-                return res.data.accessToken; // Axios 재시도에서 사용
+                const res = await refreshApi();
+                this.setAccessToken(res.data.accessToken);
+                return res.data.accessToken;
             } catch (error) {
                 console.error("refreshToken 실패:", error);
                 this.clearAuth();
