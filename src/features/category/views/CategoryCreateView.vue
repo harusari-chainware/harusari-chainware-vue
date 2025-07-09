@@ -41,7 +41,7 @@ import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import ListLayout from '@/components/layout/ListLayout.vue'
 import CategoryForm from '../components/CategoryForm.vue'
-import {fetchAllListTopCategories, fetchAllTopCategories} from '@/api/categoryApi'
+import {fetchAllListTopCategories, fetchAllTopCategories} from '@/features/category/api.js'
 
 const router = useRouter()
 const formType = ref('top') // 기본값: 상위 카테고리
@@ -84,8 +84,10 @@ onMounted(() => {
 }
 
 .tab-buttons button.active {
-  background: #3b82f6;
+  background: #3aaed8;
   color: white;
-  border-color: #3b82f6;
+  border-color: #3aaed8;
 }
+
+
 </style>

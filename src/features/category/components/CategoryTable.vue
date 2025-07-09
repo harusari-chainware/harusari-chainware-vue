@@ -70,7 +70,8 @@ defineProps({
 
 // 열 정의
 const columns = [
-  { key: 'no', label: 'No', align: 'center', format: (_, __, index) => index + 1 },
+  // { key: 'no', label: 'No', align: 'center', format: (_, __, index) => index + 1 },
+  { key: 'no', label: 'No', align: 'center' },
   { key: 'topCategoryName', label: '상위 카테고리명', align: 'center' },
   { key: 'categoryName', label: '카테고리명', align: 'center' },
   { key: 'productCount', label: '제품 수', align: 'center' },

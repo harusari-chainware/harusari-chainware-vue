@@ -24,9 +24,4 @@ export const categoryRoutes = [
         name: 'CategoryDetailView',
         component: CategoryDetailView,
     },
-    // {
-    //     path: '/categories/:id',
-    //     name: 'CategoryDetailView',
-    //     component: CategoryDetailView,
-    // },
 ];

@@ -1,79 +1,79 @@
 <template>
-    <ListLayout
-            title="카테고리 목록"
-            description="모든 카테고리 목록을 조회하고 관리할 수 있습니다."
-    >
-        <!-- filters -->
-        <template #filters>
-            <CategoryFilters
-                    v-if="mergedCategories.length > 0"
-                    :top-categories="topCategoryOptions"
-                    @apply="handleSearch"
-            />
-        </template>
+  <ListLayout
+      title="카테고리 목록"
+      description="모든 카테고리 목록을 조회하고 관리할 수 있습니다."
+  >
+    <!-- filters -->
+    <template #filters>
+      <CategoryFilters
+          v-if="mergedCategories.length > 0"
+          :top-categories="topCategoryOptions"
+          @apply="handleSearch"
+      />
+    </template>
 
-        <!-- top-actions -->
-        <template #top-actions-left>
-            <CreateButton @click="openCreateModal">카테고리 추가</CreateButton>
-        </template>
+    <!-- top-actions -->
+    <template #top-actions-right>
+      <CreateButton @click="openCreateModal">카테고리 추가</CreateButton>
+    </template>
 
-        <!-- table -->
-        <template #table>
-            <SkeletonList v-if="isLoading" :rows="8" :columns="6" :cellWidth="120" />
-            <EmptyResult
-                    v-else-if="!isLoading && pagedTableRows.length === 0"
-                    message="등록된 카테고리가 없습니다."
-            />
-            <template v-else>
-                <CategoryTable
-                        :categories="pagedTableRows"
-                        @edit="openEditModal"
-                        @delete="openDeleteModal"
-                />
-                <Pagination
-                        v-model="page"
-                        :total-items="totalTopCount"
-                        :items-per-page="PAGE_SIZE"
-                        @update:modelValue="handlePageChange"
-                />
-            </template>
-        </template>
+    <!-- table -->
+    <template #table>
+      <SkeletonList v-if="isLoading" :rows="8" :columns="6" :cellWidth="120" />
+      <EmptyResult
+          v-else-if="!isLoading && pagedTableRows.length === 0"
+          message="등록된 카테고리가 없습니다."
+      />
+      <template v-else>
+        <CategoryTable
+            :categories="pagedTableRows"
+            @edit="openEditModal"
+            @delete="openDeleteModal"
+        />
+        <Pagination
+            v-model="page"
+            :total-items="totalTopCount"
+            :items-per-page="PAGE_SIZE"
+            @update:modelValue="handlePageChange"
+        />
+      </template>
+    </template>
 
-    </ListLayout>
+  </ListLayout>
 
-    <!-- 등록/수정 모달 -->
-    <CategoryModal
-            v-if="showModal"
-            :is-top="editType === 'TOP'"
-            :top-edit-data="editType === 'TOP' ? editTarget : null"
-            :category-edit-data="editType === 'SUB' ? editTarget : null"
-            :top-categories="topCategoryOptions"
-            @close="closeModal"
-            @refresh="refreshList"
-    />
+  <!-- 등록/수정 모달 -->
+  <CategoryModal
+      v-if="showModal"
+      :is-top="editType === 'TOP'"
+      :top-edit-data="editType === 'TOP' ? editTarget : null"
+      :category-edit-data="editType === 'SUB' ? editTarget : null"
+      :top-categories="topCategoryOptions"
+      @close="closeModal"
+      @refresh="refreshList"
+  />
 
-    <!-- 삭제 확인 모달 -->
-    <CategoryDeleteConfirmModal
-            v-if="deleteTarget"
-            :target-id="deleteTarget.id"
-            :is-top="deleteTarget.isTop"
-            @close="deleteTarget = null"
-            @deleted="refreshList"
-    />
+  <!-- 삭제 확인 모달 -->
+  <CategoryDeleteConfirmModal
+      v-if="deleteTarget"
+      :target-id="deleteTarget.id"
+      :is-top="deleteTarget.isTop"
+      @close="deleteTarget = null"
+      @deleted="refreshList"
+  />
 
-    <SelectCategoryTypeModal
-            v-if="showSelectModal"
-            @select="handleTypeSelected"
-            @close="showSelectModal = false"
-    />
+  <SelectCategoryTypeModal
+      v-if="showSelectModal"
+      @select="handleTypeSelected"
+      @close="showSelectModal = false"
+  />
 </template>
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import {
-    fetchAllListTopCategories,
-    fetchCategories
-} from '@/api/categoryApi'
+  fetchAllListTopCategories,
+  fetchCategories
+} from '@/features/category/api.js'
 
 import ListLayout from '@/components/layout/ListLayout.vue'
 import EmptyResult from "@/components/common/EmptyResult.vue";
@@ -84,15 +84,15 @@ import CategoryFilters from '../components/CategoryFilters.vue'
 import CategoryTable from '../components/CategoryTable.vue'
 import CategoryModal from '../components/CategoryModal.vue'
 import CategoryDeleteConfirmModal from '../components/CategoryDeleteConfirmModal.vue'
-// import SelectCategoryTypeModal from '../components/SelectCategoryTypeModal.vue'
+import SelectCategoryTypeModal from '../components/SelectCategoryTypeModal.vue'
 
-// ✅ 1. 원본 상태(항상 그대로 보관!)
+// 1. 원본 상태(항상 그대로 보관!)
 const mergedCategories = ref([])     // [{topCategoryId, topCategoryName, createdAt, modifiedAt, categories:[...]}]
 const isLoading = ref(true)
 const page = ref(1)
 const PAGE_SIZE = 5
 
-// ✅ 2. 필터(검색) 조건만 별도 상태로 관리
+// 2. 필터(검색) 조건만 별도 상태로 관리
 const filterCondition = ref({})
 
 // 모달/액션 관련
@@ -102,7 +102,7 @@ const editType = ref('SUB')
 const editTarget = ref(null)
 const deleteTarget = ref(null)
 
-// ✅ 3. 데이터 머지 & 상태 세팅 함수
+// 3. 데이터 머지 & 상태 세팅 함수
 const loadAndMergeCategories = async () => {
     isLoading.value = true
     try {
@@ -125,7 +125,7 @@ const loadAndMergeCategories = async () => {
     }
 }
 
-// ✅ 4. 필터용 드롭다운 (항상 원본 기준)
+// 4. 필터용 드롭다운 (항상 원본 기준)
 const topCategoryOptions = computed(() =>
         mergedCategories.value.map(item => ({
             label: item.topCategoryName,
@@ -134,7 +134,7 @@ const topCategoryOptions = computed(() =>
         }))
 )
 
-// ✅ 5. 화면에 보여줄 데이터는 filterCondition, 페이징까지 모두 computed!
+// 5. 화면에 보여줄 데이터는 filterCondition, 페이징까지 모두 computed!
 const filteredCategories = computed(() => {
     let list = mergedCategories.value;
     const filters = filterCondition.value;
@@ -190,7 +190,7 @@ const pagedTableRows = computed(() =>
         })
 );
 
-// ✅ 6. 검색(필터)시, 조건만 변경! (데이터 불변)
+// 6. 검색(필터)시, 조건만 변경! (데이터 불변)
 const handleSearch = (filters) => {
     console.log('[검색] 필터 조건:', filters);
     const normalized = { ...filters };
