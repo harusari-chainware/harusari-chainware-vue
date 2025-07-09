@@ -1,74 +1,75 @@
 <template>
-  <ul class="submenu">
-    <li v-for="item in items" :key="item.name">
-      <RouterLink
-          :to="item.route"
-          class="menu-link"
-          :class="{ 'active-link': isActive(item.route) }"
-      >
-        {{ item.name }}
-      </RouterLink>
-    </li>
-  </ul>
+    <ul class="sidebar-item-list">
+        <li
+                v-for="item in items"
+                :key="item.route"
+                @click="navigate(item.route)"
+                :class="{ active: isActive(item.route) }"
+        >
+            <i v-if="item.icon" :class="item.icon" class="item-icon"></i>
+            <span>{{ item.name }}</span>
+        </li>
+    </ul>
 </template>
 
 <script setup>
-import { computed } from 'vue'
-import { useRoute } from 'vue-router'
-// import { useUserStore } from '@/stores/user'
-import { routeAliasMap } from '@/constants/activeSidebarMap.js'
+import { useRouter, useRoute } from 'vue-router'
 
 const props = defineProps({
-  items: Array
+    items: {
+        type: Array,
+        required: true
+    }
 })
 
-// const userStore = useUserStore()
-// const userRole = userStore.role
-
-// const filteredItems = computed(() =>
-//     props.items.filter(item => item.roles.includes(userRole))
-// )
-
+const router = useRouter()
 const route = useRoute()
 
-const isActive = (itemRoute) => {
-  if (!itemRoute) return false
+const navigate = (routePath) => {
+    if (route.path !== routePath) {
+        router.push(routePath)
+    }
+}
 
-  const currentPath = route.path
-
-  // alias 매핑이 있다면 해당 기준으로 대체
-  const aliasTarget = Object.entries(routeAliasMap).find(([alias]) =>
-      currentPath.startsWith(alias)
-  )
-  const normalizedPath = aliasTarget ? aliasTarget[1] : currentPath
-
-  return normalizedPath.startsWith(itemRoute)
+const isActive = (routePath) => {
+    return route.path === routePath
 }
 </script>
 
 <style scoped>
-.submenu {
-  padding-left: 1.1rem;
-  list-style: none;
+.sidebar-item-list {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
 }
 
-.menu-link {
-  display: block;
-  padding: 0.4rem 0.6rem;
-  margin-bottom: 0.1rem;
-  text-decoration: none;
-  font-size: var(--font-sidebar-item);
-  color: var(--color-gray-700);
-  border-radius: 6px;
-  transition: background-color 0.2s;
+.sidebar-item-list li {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    font-size: var(--font-sidebar-item, 0.95rem);
+    color: var(--color-gray-700);
+    border-radius: 6px;
+    padding: 0.4rem 0.6rem;
+    transition: background 0.2s;
 }
 
-.menu-link:not(.active-link):hover {
-  background-color: var(--color-hover-light);
+.sidebar-item-list li:hover {
+    background-color: var(--color-hover-light, #f0f7fb);
 }
 
-.active-link {
-  background-color: var(--color-primary-light);
-  color:var(--color-primary);
+.sidebar-item-list li.active {
+    background-color: var(--color-primary-light, #e3f2fd);
+    color: var(--color-primary, #1976d2);
+}
+
+.item-icon {
+    font-size: 0.9rem;
+    width: 18px;
+    min-width: 18px;
+    text-align: center;
+    margin-right: 0.4rem;
 }
 </style>

@@ -30,9 +30,16 @@
                     마이페이지
                 </a>
                 <div v-if="showMypageDropdown" class="dropdown">
-                    <a @click="goToMypage">내 정보 조회</a>
-                    <a @click="logout">로그아웃</a>
+                    <a @click="goToMypage">
+                        <i class="fas fa-user"></i>
+                        내 정보 조회
+                    </a>
+                    <a @click="logout">
+                        <i class="fas fa-sign-out-alt"></i>
+                        로그아웃
+                    </a>
                 </div>
+
             </div>
         </nav>
     </header>
@@ -44,6 +51,7 @@ import {ref, defineEmits, defineProps, computed, onMounted, onBeforeUnmount} fro
 import {useRouter, useRoute} from 'vue-router'
 import {useAuthStore} from "@/features/auth/useAuthStore.js";
 import {logoutApi} from "@/features/auth/api.js";
+import '@fortawesome/fontawesome-free/css/all.min.css'
 
 const emits = defineEmits(['selectMenu'])
 const props = defineProps({
@@ -229,5 +237,11 @@ onBeforeUnmount(() => {
 .mypage-menu.mypage-active {
     background-color: #c3e9f5;
     color: var(--color-primary-dark);
+}
+
+.dropdown a {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
 }
 </style>
