@@ -43,39 +43,6 @@
           <input type="text" :value="categoryName" readonly />
         </div>
 
-        <!-- 상위 카테고리명 -->
-        <!--        <div class="info-row">-->
-        <!--          <label>상위 카테고리명</label>-->
-        <!--          <input v-if="isEditing" v-model="product.topCategoryName" class="modal-input" />-->
-        <!--          <input v-else type="text" :value="topCategoryName" readonly />-->
-        <!--        </div>-->
-        <!-- 상위 카테고리 -->
-<!--        <div class="info-row">-->
-<!--          <label>상위 카테고리명</label>-->
-<!--          <select v-if="isEditing" v-model="product.topCategoryId" class="modal-input">-->
-<!--            <option v-for="top in topCategories" :key="top.topCategoryId" :value="top.topCategoryId">-->
-<!--              {{ top.topCategoryName }}-->
-<!--            </option>-->
-<!--          </select>-->
-<!--          <input v-else type="text" :value="topCategoryName" readonly />-->
-<!--        </div>-->
-
-        <!-- 카테고리명 -->
-        <!--        <div class="info-row">-->
-        <!--          <label>카테고리명</label>-->
-        <!--          <input v-if="isEditing" v-model="product.categoryName" class="modal-input" />-->
-        <!--          <input v-else type="text" :value="categoryName" readonly />-->
-        <!--        </div>-->
-<!--        <div class="info-row">-->
-<!--          <label>카테고리명</label>-->
-<!--          <select v-if="isEditing" v-model="product.categoryId" class="modal-input">-->
-<!--            <option v-for="cat in getCategoryList(product.topCategoryId)" :key="cat.categoryId" :value="cat.categoryId">-->
-<!--              {{ cat.categoryName }}-->
-<!--            </option>-->
-<!--          </select>-->
-<!--          <input v-else type="text" :value="categoryName" readonly />-->
-<!--        </div>-->
-
         <!-- 단가 -->
         <div class="info-row">
           <label>단가</label>

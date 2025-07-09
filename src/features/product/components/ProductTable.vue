@@ -1,5 +1,3 @@
-producttable
-
 <template>
   <GenericTable :items="products" :columns="columns">
     <!-- 제품코드: 3자리 패딩 -->
@@ -60,7 +58,7 @@ watchEffect(() => {
         (top.categories || []).some(cat => String(cat.categoryId) === String(prod.categoryId))
     )
     if (!found) {
-      console.warn('매칭되는 카테고리 없음! productId:', prod.productId, 'categoryId:', prod.categoryId)
+      // console.warn('매칭되는 카테고리 없음! productId:', prod.productId, 'categoryId:', prod.categoryId)
       console.log('현재 카테고리 목록:', props.categories.map(top => ({
         topCategoryId: top.topCategoryId,
         topCategoryName: top.topCategoryName,
@@ -104,7 +102,7 @@ function padProductCode(productCode) {
 }
 
 const getDetailLink = (item) => {
-  return `/product/${item.productId}` // 상품 상세라면 productId로!
+  return `/product/${item.productId}`
 }
 
 const getCategoryName = (categoryId) => {

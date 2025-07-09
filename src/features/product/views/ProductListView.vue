@@ -148,8 +148,6 @@ const goDetail = (item) => {
   router.push(`/product/${item.productId}`)
 }
 
-const goAddProduct = () => { /* 추가 페이지로 이동 */ }
-
 // 최초 로딩
 onMounted(() => {
   loadProducts()

@@ -70,8 +70,6 @@ const name = ref('')
 const code = ref('')
 const selectedTopCategoryId = ref('')
 
-console.log('✅ CategoryForm.vue 렌더링됨')
-
 // 자동 대문자 변환
 watch(code, (val) => {
   code.value = val.toUpperCase()

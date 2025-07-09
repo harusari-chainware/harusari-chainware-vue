@@ -178,10 +178,10 @@ const resetFilters = () => {
   width: 100%;
 }
 .filter-label {
-  font-weight: 500;
+  font-weight: 450;
   color: var(--color-gray-900, #222);
-  margin-bottom: 6px;
-  font-size: 1.01rem;
+  margin-bottom: 5px;
+  font-size: 0.9rem;
   letter-spacing: -0.01em;
 }
 .filter-input {
