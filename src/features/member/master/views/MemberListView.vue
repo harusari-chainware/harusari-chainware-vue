@@ -52,7 +52,6 @@
                         v-model="currentPage"
                         :total-items="totalItems"
                         :items-per-page="itemsPerPage"
-                        :pages-per-group="5"
                 />
             </template>
         </template>
