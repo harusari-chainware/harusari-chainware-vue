@@ -1,6 +1,7 @@
 <template>
   <div class="filters-container-vertical">
-    <div class="filter-row">
+    <div class="filter-row filter-row-fields">
+<!--    <div class="filter-row">-->
       <FilterSelect
           label="상위 카테고리명"
           v-model="filters.topCategoryName"
@@ -11,8 +12,6 @@
           v-model="filters.categoryName"
           :options="categoryOptionsName"
       />
-    </div>
-    <div class="filter-row">
       <FilterSelect
           label="보관상태"
           v-model="filters.storeType"
@@ -23,8 +22,8 @@
           v-model="filters.productStatus"
           :options="productStatusOptions"
       />
-    </div>
-    <div class="filter-row align-end">
+<!--    </div>-->
+<!--    <div class="filter-row align-end">-->
       <div class="filter-input-wrap">
         <label class="filter-label">제품명</label>
         <input
@@ -35,13 +34,19 @@
         />
       </div>
       <div class="filter-input-wrap">
-        <label class="filter-label">등록일시</label>
-        <input
-            class="filter-input"
+        <FilterDate
+            label="등록일시"
             v-model="filters.createdAt"
-            type="date"
+            placeholder="날짜 선택"
         />
       </div>
+      </div>
+    <div class="filter-row filter-row-buttons">
+      <div></div>
+      <div></div>
+      <div></div>
+      <div></div>
+      <div></div>
       <div class="filter-buttons">
         <FilterButtons @reset="resetFilters" @apply="applyFilters" />
       </div>
@@ -54,6 +59,7 @@ import {onMounted, reactive, ref, watch} from 'vue'
 import FilterSelect from '@/components/common/filters/FilterSelect.vue'
 import FilterButtons from '@/components/common/filters/FilterButtons.vue'
 import {fetchAllListTopCategories, fetchAllTopCategories} from '@/features/category/api.js'
+import FilterDate from '@/components/common/filters/FilterDate.vue'
 
 const props = defineProps({
   topCategories: { type: Array, required: true }  // fetchAllTopCategories() 결과!
@@ -154,19 +160,29 @@ const resetFilters = () => {
 .filters-container-vertical {
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  margin-bottom: 2.5rem;
-  padding: 0 3rem 0 3rem;
-  max-width: 800px;
+  gap: 8px;
   margin-left: auto;
-  margin-right: auto;;
+  margin-right: auto;
 }
+
 .filter-row {
   display: grid;
-  grid-template-columns: repeat(4, 1fr); /* 4개 항목 똑같이 */
-  gap: 40px;
-  align-items: flex-end;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); /* 각 항목 최소 180px, 화면 크면 늘어남 */
+  gap: 28px;
+  align-items: center;
   width: 100%;
+}
+
+.filter-row > * {
+  width: 100%;
+  min-width: 0;
+}
+
+.filter-input,
+.filter-select-root,
+.filter-date-root {
+  width: 100%;
+  min-width: 0;
 }
 
 .align-end {
@@ -192,13 +208,15 @@ const resetFilters = () => {
   font-size: 1rem;
   padding: 0 13px;
   color: var(--color-gray-900, #222);
+  width: 100%;
 }
 
 .filter-buttons {
   margin-left: auto;
   display: flex;
   gap: 12px;
-  align-items: flex-end;
+  align-items: center;
+  justify-content: flex-end;
 }
 
 </style>

@@ -272,7 +272,6 @@ onMounted(() => {
 </script>
 
 <style scoped>
-/* 기존 스타일 그대로 유지 */
 .info-group {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
