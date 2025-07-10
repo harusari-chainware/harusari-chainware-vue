@@ -142,7 +142,9 @@ export const sidebarMap = {
                 { name: "판매 및 매출 패턴 조회", route: "/dashboard/sales", icon: "fas fa-chart-bar", roles: ["GENERAL_MANAGER", "SENIOR_MANAGER"] },
                 { name: "재고 회전율 조회", route: "/dashboard/inventory-turn", icon: "fas fa-sync-alt", roles: ["GENERAL_MANAGER", "SENIOR_MANAGER"] },
                 { name: "발주량 통계 조회", route: "/dashboard/purchase-stats", icon: "fas fa-chart-area", roles: ["GENERAL_MANAGER", "SENIOR_MANAGER"] },
-                { name: "폐기율 통계 조회", route: "/dashboard/dispose-stats", icon: "fas fa-trash-alt", roles: ["GENERAL_MANAGER", "SENIOR_MANAGER"] }
+                { name: "폐기율 통계 조회", route: "/dashboard/dispose-stats", icon: "fas fa-trash-alt", roles: ["GENERAL_MANAGER", "SENIOR_MANAGER"] },
+                { name: "메뉴 별 판매량 조회", route: "/dashboard/menu-sales", roles: ["GENERAL_MANAGER", "SENIOR_MANAGER"] },
+                { name: "주문량 통계 조회", route: "/dashboard/store-order-stats", roles: ["GENERAL_MANAGER", "SENIOR_MANAGER"] },
             ]
         }
     ],
