@@ -38,7 +38,7 @@ const columns = [
   { key: 'productCount', label: '품목 수', align: 'right' },
   { key: 'totalQuantity', label: '총 수량', align: 'right' },
   { key: 'totalPrice', label: '총 금액', align: 'right', format: formatCurrency },
-  { key: 'submittedAt', label: '제출일', align: 'center' },
+  { key: 'submittedAt', label: '상신일', align: 'center' },
   { key: 'reviewedAt', label: '검토일', align: 'center' },
   { key: 'requisitionStatus', label: '품의 상태', align: 'center' },
   { key: 'actions', label: '상세', align: 'center' }

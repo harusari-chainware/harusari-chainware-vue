@@ -1,7 +1,7 @@
 <template>
   <InfoGroup title="일시 정보">
     <InfoItem>
-      <template #label>발주 일시</template>
+      <template #label>품의 일시</template>
       <template #value>{{ formatDateTime(requisitionDetail.createdAt) }}</template>
     </InfoItem>
 

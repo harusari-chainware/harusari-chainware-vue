@@ -2,11 +2,11 @@
 <template>
   <InfoGroup title="기본 정보">
     <InfoItem>
-      <template #label>발주 코드</template>
-      <template #value>{{ requisitionDetail.purchaseOrderCode }}</template>
+      <template #label>품의 코드</template>
+      <template #value>{{ requisitionDetail.requisitionCode }}</template>
     </InfoItem>
     <InfoItem>
-      <template #label>발주 상태</template>
+      <template #label>품의 상태</template>
       <template #value>
         <StatusBadge :status="requisitionDetail.status" />
       </template>

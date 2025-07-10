@@ -89,15 +89,15 @@ export const sidebarMap = {
             title: "품의",
             icon: 'fas fa-signature',
             items: [
-                { name: "품의 조회", route: "/requisition/list", icon: "fas fa-magnifying-glass", roles: ["GENERAL_MANAGER", "SENIOR_MANAGER"] },
-                { name: "품의 등록", route: "/requisition/register", icon: "fas fa-file-circle-plus", roles: ["GENERAL_MANAGER"] }
+                { name: "품의 조회", route: "/requisitions/list", icon: "fas fa-magnifying-glass", roles: ["GENERAL_MANAGER", "SENIOR_MANAGER"] },
+                { name: "품의 등록", route: "/requisitions/register", icon: "fas fa-file-circle-plus", roles: ["GENERAL_MANAGER"] }
             ]
         },
         {
             title: "발주",
             icon: 'fas fa-cart-shopping',
             items: [
-                { name: "발주 조회", route: "/purchase/list", icon: "fas fa-magnifying-glass", roles: ["GENERAL_MANAGER", "SENIOR_MANAGER", "VENDOR_MANAGER"] }
+                { name: "발주 조회", route: "/purchases/list", icon: "fas fa-magnifying-glass", roles: ["GENERAL_MANAGER", "SENIOR_MANAGER", "VENDOR_MANAGER"] }
             ]
         },
         {

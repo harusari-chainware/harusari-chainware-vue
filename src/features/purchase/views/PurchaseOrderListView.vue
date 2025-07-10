@@ -69,7 +69,6 @@ const fetchPurchaseOrders = async () => {
     }
     const res = await getPurchaseOrders(params)
     purchase.value = res.data.data
-    totalCount.value = res.data.data.length // → 서버 응답에 totalCount가 따로 있으면 수정 필요
   } catch (err) {
     console.error('발주 목록 조회 실패', err)
   } finally {

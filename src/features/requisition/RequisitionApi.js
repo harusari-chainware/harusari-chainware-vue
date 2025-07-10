@@ -9,3 +9,7 @@ export function getRequisitionList(params) {
 export function getRequisitionById(requisitionId) {
     return api.get(`/requisitions/${requisitionId}`);
 }
+
+export function createRequisition(requisitionId) {
+    return api.post(`/requisitions`);
+}

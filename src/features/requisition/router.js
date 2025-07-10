@@ -1,13 +1,18 @@
 export const requisitionRoutes = [
     {
-        path: '/requisition/list',
+        path: '/requisitions/list',
         name: 'RequisitionListView',
         component: () => import('@/features/requisition/views/RequisitionListView.vue')
     },
     {
-        path: '/requisition/detail/:requisitionId',
+        path: '/requisitions/detail/:requisitionId',
         name: 'RequisitionDetailView',
         component: () => import('@/features/requisition/views/RequisitionDetailView.vue'),
         props: true
+    },
+    {
+        path: '/requisitions/register',
+        name: 'RequisitionRegisterView',
+        component: () => import('@/features/requisition/views/RequisitionRegisterView.vue'),
     },
 ];

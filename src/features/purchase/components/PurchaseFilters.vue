@@ -10,11 +10,11 @@
     />
 
     <!-- 거래처 담당자명 텍스트 검색 -->
-    <FilterText
+<!--    <FilterText
         label="거래처 담당자"
         v-model="filters.vendorManagerName"
         placeholder="거래처 담당자 이름 입력"
-    />
+    />-->
     <!-- 주문 상태 드롭다운 -->
     <FilterSelect
         label="발주 상태"
@@ -92,7 +92,9 @@ const applyFilters = () => {
   const query = {}
 
   if (filters.drafterName) query.drafterName = filters.drafterName
+/*
   if (filters.vendorManagerName) query.vendorManagerName = filters.vendorManagerName
+*/
   if (filters.vendorName) query.vendorName = filters.vendorName
   if (filters.purchaseStatus) query.purchaseStatus = filters.purchaseStatus
   if (filters.dueDateRange.start) query.dueStart = filters.dueDateRange.start

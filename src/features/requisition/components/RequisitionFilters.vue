@@ -1,53 +1,3 @@
-<template>
-  <div class="filters-container">
-    <FilterText
-        label="기안자"
-        v-model="filters.drafterName"
-        placeholder="기안자 이름 입력"
-    />
-
-    <FilterText
-        label="승인자"
-        v-model="filters.approverName"
-        placeholder="승인자 이름 입력"
-    />
-
-
-    <!-- 품의 상태 -->
-    <FilterSelect
-        label="품의 상태"
-        v-model="filters.requisitionStatus"
-        :options="requisitionStatusOptions"
-    />
-
-    <!-- 거래처명 -->
-    <FilterText
-        label="거래처명"
-        v-model="filters.vendorName"
-        placeholder="거래처 이름 입력"
-    />
-
-    <!-- 품의 등록일 -->
-    <FilterDateRange
-        label="품의 등록일"
-        v-model="filters.createdDateRange"
-    />
-
-    <!-- 거래처 검색 (모달) -->
-    <FilterSearchModal
-        label="거래처 선택"
-        :displayText="filters.selectedVendorName || '거래처 선택'"
-        @open="openVendorSearchModal"
-    />
-
-    <!-- 버튼 -->
-    <FilterButtons
-        @reset="resetFilters"
-        @search="applyFilters"
-    />
-  </div>
-</template>
-
 <script setup>
 import { reactive } from 'vue'
 import { useRouter } from 'vue-router'
@@ -72,12 +22,11 @@ const filters = reactive({
   selectedVendorName: ''
 })
 
-
 // 드롭다운 옵션
 const requisitionStatusOptions = [
   { label: '전체', value: '' },
-  { label: '작성 중', value: 'DRAFT' },
-  { label: '승인 대기', value: 'PENDING' },
+  { label: '작성 중', value: 'SAVED' },
+  { label: '상신됨', value: 'SUBMITTED' },
   { label: '승인 완료', value: 'APPROVED' },
   { label: '반려됨', value: 'REJECTED' }
 ]
@@ -86,26 +35,28 @@ const requisitionStatusOptions = [
 const applyFilters = () => {
   const query = {}
 
-  if (filters.createdMemberName) query.createdMemberName = filters.createdMemberName
-  if (filters.approvedMemberName) query.approvedMemberName = filters.approvedMemberName
+  if (filters.drafterName) query.drafterName = filters.drafterName
+  if (filters.approverName) query.approverName = filters.approverName
   if (filters.vendorName) query.vendorName = filters.vendorName
-  if (filters.requisitionStatus) query.requisitionStatus = filters.requisitionStatus
-  if (filters.createdDateRange.start) query.createdStart = filters.createdDateRange.start
-  if (filters.createdDateRange.end) query.createdEnd = filters.createdDateRange.end
-  if (filters.selectedVendorName) query.selectedVendorName = filters.selectedVendorName // UI용
+  if (filters.requisitionStatus) query.status = filters.requisitionStatus
+  if (filters.createdDateRange.start) query.createdFrom = filters.createdDateRange.start
+  if (filters.createdDateRange.end) query.createdTo = filters.createdDateRange.end
 
   router.push({ name: 'RequisitionListView', query })
 }
 
 // 초기화
 const resetFilters = () => {
-  filters.createdMemberName = ''
-  filters.approvedMemberName = ''
+  filters.drafterName = ''
+  filters.approverName = ''
   filters.vendorName = ''
   filters.requisitionStatus = ''
   filters.createdDateRange.start = ''
   filters.createdDateRange.end = ''
   filters.selectedVendorName = ''
+
+  // URL 쿼리 초기화 → 전체 목록 조회
+  router.push({ name: 'RequisitionListView', query: {} })
 }
 
 // 모달 열기
@@ -113,6 +64,50 @@ const openVendorSearchModal = () => {
   alert('거래처 검색 모달 열기 (예시)')
 }
 </script>
+
+<template>
+  <div class="filters-container">
+    <FilterText
+        label="기안자"
+        v-model="filters.drafterName"
+        placeholder="기안자 이름 입력"
+    />
+
+    <FilterText
+        label="결재자"
+        v-model="filters.approverName"
+        placeholder="결재자 이름 입력"
+    />
+
+    <FilterSelect
+        label="품의 상태"
+        v-model="filters.requisitionStatus"
+        :options="requisitionStatusOptions"
+    />
+
+    <FilterText
+        label="거래처명"
+        v-model="filters.vendorName"
+        placeholder="거래처 이름 입력"
+    />
+
+    <FilterDateRange
+        label="품의 등록일"
+        v-model="filters.createdDateRange"
+    />
+
+    <FilterSearchModal
+        label="거래처 선택"
+        :displayText="filters.selectedVendorName || '거래처 선택'"
+        @open="openVendorSearchModal"
+    />
+
+    <FilterButtons
+        @reset="resetFilters"
+        @apply="applyFilters"
+    />
+  </div>
+</template>
 
 <style scoped>
 .filters-container {
