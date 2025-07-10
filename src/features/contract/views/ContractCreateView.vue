@@ -16,20 +16,45 @@
           <div class="contract-box">
             <div class="row">
               <h4 class="section-title">거래처 정보</h4>
-
             </div>
+
+            <!-- 거래처명 + 검색/자동완성 -->
             <div class="row">
               <label>거래처명</label>
-              <input v-model="form.vendorName" class="input" />
-              <button class="section-btn">검색</button>
+              <div style="position:relative; width:220px;">
+                <input
+                    v-model="vendorNameInput"
+                    @input="searchVendors"
+                    @keydown.down="moveVendor(1)"
+                    @keydown.up="moveVendor(-1)"
+                    @keydown.enter="selectCurrentVendor"
+                    @blur="closeVendorSuggestions"
+                    placeholder="거래처명을 입력하세요"
+                    autocomplete="off"
+                    class="input"
+                    style="width: 100%;"
+                />
+                <ul v-if="showVendorSuggestions && filteredVendors.length" class="autocomplete-list">
+                  <li
+                      v-for="(v, idx) in filteredVendors"
+                      :key="v.vendorId"
+                      :class="{ 'selected': idx === selectedVendorIdx }"
+                      @mousedown.prevent="selectVendor(v)"
+                  >
+                    {{ v.vendorName }}
+                    <span class="sub-info">{{ v.vendorType }}</span>
+                  </li>
+                </ul>
               </div>
+              <button class="section-btn" @mousedown.prevent="searchBtnSelectVendor">검색</button>
+            </div>
             <div class="row">
               <label>사업자 등록번호</label>
-              <input v-model="form.businessNumber" class="input" />
+              <input v-model="form.vendorTaxId" class="input" readonly />
               <label>거래처 유형</label>
-              <input v-model="form.vendorType" class="input" />
+              <input v-model="form.vendorType" class="input" readonly />
               <label>계약 상태</label>
-              <input v-model="form.contractStatus" class="input" />
+              <input v-model="form.vendorStatus" class="input" readonly />
             </div>
           </div>
         </div>
@@ -124,16 +149,17 @@ import StatusButton from '@/components/common/StatusButton.vue'
 import { createContract } from '@/features/contract/api.js'
 import { fetchProducts } from '@/features/product/api.js'
 import { fetchCategoryDetail } from '@/features/category/api.js'
-import api from '@/api/axios.js'
+import { fetchVendors, fetchVendorContractInfo } from '@/features/vendor/api.js'
 
 const router = useRouter()
 
 const form = ref({
   // 거래처 정보
+  vendorId: '',
   vendorName: '',
   vendorType: '',
-  contractStatus: '',
-  businessNumber: '',
+  vendorStatus: '',
+  vendorTaxId: '',
   // 제품 정보
   productId: '',
   productName: '',
@@ -149,14 +175,92 @@ const form = ref({
   minOrderQty: '',
   leadTime: '',
   contractStartDate: '',
-  contractEndDate: ''
+  contractEndDate: '',
+  contractStatus: ''
 })
+
+// 거래처 자동완성 관련 변수
+const vendorNameInput = ref('')
+const filteredVendors = ref([])
+const showVendorSuggestions = ref(false)
+const selectedVendorIdx = ref(-1)
 
 // 자동완성 관련
 const productNameInput = ref('')
 const filteredProducts = ref([])
 const showSuggestions = ref(false)
 const selectedIdx = ref(-1)
+
+// 거래처 목록 불러오기
+const searchVendors = async () => {
+  if (!vendorNameInput.value) {
+    filteredVendors.value = []
+    showVendorSuggestions.value = false
+    return
+  }
+  try {
+    // (아래 fetchVendors는 반드시 vendor api.js에서 export 해야 함)
+    const res = await fetchVendors({
+      keyword: vendorNameInput.value,
+      size: 10,
+      page: 1
+    })
+    console.log('거래처 자동완성 응답', res.data);
+
+    // filteredVendors.value = res.data.data.content
+
+    // 1. 실제 응답 구조에 맞게 방어적으로 할당!
+    const content = res?.data?.data?.contents
+    filteredVendors.value = Array.isArray(content) ? content : []
+
+    console.log('filteredVendors:', filteredVendors.value)
+    showVendorSuggestions.value = true
+    selectedVendorIdx.value = -1
+  } catch (e) {
+    filteredVendors.value = []
+    showVendorSuggestions.value = false
+  }
+}
+
+// 거래처 선택(자동완성)
+const selectVendor = async (v) => {
+  form.value.vendorName = v.vendorName
+  form.value.vendorId = v.vendorId
+  vendorNameInput.value = v.vendorName
+  try {
+    // 상세 계약 정보 조회
+    const res = await fetchVendorContractInfo(v.vendorName)
+    form.value.vendorType = res.data.data.vendorType || ''
+    form.value.vendorTaxId = res.data.data.vendorTaxId || ''
+    form.value.vendorStatus = res.data.data.vendorStatus || ''
+  } catch (e) {
+    form.value.vendorType = ''
+    form.value.vendorTaxId = ''
+    form.value.vendorStatus = ''
+  }
+  showVendorSuggestions.value = false
+}
+const searchBtnSelectVendor = () => {
+  if (filteredVendors.value.length) {
+    selectVendor(filteredVendors.value[0])
+  }
+}
+const moveVendor = (dir) => {
+  if (!showVendorSuggestions.value || !filteredVendors.value.length) return
+  let next = selectedVendorIdx.value + dir
+  if (next < 0) next = filteredVendors.value.length - 1
+  if (next >= filteredVendors.value.length) next = 0
+  selectedVendorIdx.value = next
+}
+const selectCurrentVendor = () => {
+  if (selectedVendorIdx.value >= 0) {
+    selectVendor(filteredVendors.value[selectedVendorIdx.value])
+  }
+}
+const closeVendorSuggestions = () => {
+  setTimeout(() => showVendorSuggestions.value = false, 100)
+}
+
 
 const searchProducts = async () => {
   if (!productNameInput.value) {
@@ -227,17 +331,29 @@ const closeSuggestions = () => {
 }
 
 const handleSubmit = async () => {
-  try {
-    await createContract(form.value)
-    alert('계약이 등록되었습니다.')
-    router.push('/contract/list')
-  } catch (e) {
-    alert('계약 등록에 실패했습니다.')
+  const today = new Date();
+  const startDate = form.value.contractStartDate ? new Date(form.value.contractStartDate) : null;
+  const endDate = form.value.contractEndDate ? new Date(form.value.contractEndDate) : null;
+
+  if (startDate && endDate) {
+    // 종료일 이후면 EXPIRED, 나머지는 모두 ACTIVE
+    if (today > endDate) {
+      form.value.contractStatus = "EXPIRED";
+    } else {
+      form.value.contractStatus = "ACTIVE";
+    }
+  } else {
+    form.value.contractStatus = ""; // 날짜 누락시 빈값
   }
-}
-const handleCancel = () => {
-  router.push('/contract/list')
-}
+
+  try {
+    await createContract(form.value);
+    alert('계약이 등록되었습니다.');
+    router.push('/contract/list');
+  } catch (e) {
+    alert('계약 등록에 실패했습니다.');
+  }
+};
 </script>
 
 <style scoped>
