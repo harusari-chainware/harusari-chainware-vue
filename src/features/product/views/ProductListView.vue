@@ -12,7 +12,7 @@
     </template>
 
     <template #top-actions-right>
-      <CreateButton @click="openModal">파일 출력</CreateButton>
+<!--      <CreateButton @click="openModal">파일 출력</CreateButton>-->
       <CreateButton @click="goToCreatePage">제품 추가</CreateButton>
     </template>
 

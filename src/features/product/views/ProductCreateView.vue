@@ -1,5 +1,6 @@
 <template>
-  <RegisterLayout title="제품 등록" description="제품을 등록할 수 있습니다.">
+
+  <DetailLayout title="제품 등록">
     <!-- 상단 버튼 -->
     <template #actions>
       <StatusButton type="primary" @click="handleSubmit">등록</StatusButton>
@@ -65,7 +66,7 @@
         </div>
       </div>
     </template>
-  </RegisterLayout>
+  </DetailLayout>
 </template>
 
 <script setup>
@@ -75,8 +76,6 @@ import DetailLayout from '@/components/layout/DetailLayout.vue'
 import StatusButton from '@/components/common/StatusButton.vue'
 import {fetchAllListTopCategories, fetchAllTopCategories} from '@/features/category/api.js'
 import { createProduct } from '@/features/product/api.js'
-import ListLayout from "@/components/layout/ListLayout.vue";
-import RegisterLayout from "@/components/layout/RegisterLayout.vue";
 
 // 폼 상태
 const form = ref({

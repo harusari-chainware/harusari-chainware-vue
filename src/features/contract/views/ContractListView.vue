@@ -15,7 +15,7 @@
     </template>
 
     <template #top-actions-right>
-      <CreateButton @click="openModal">파일 출력</CreateButton>
+<!--      <CreateButton @click="openModal">파일 출력</CreateButton>-->
       <CreateButton @click="goToCreatePage">계약 추가</CreateButton>
     </template>
 
@@ -23,7 +23,9 @@
     <template #table>
       <ContractTable
           :contracts="contracts"
-          @detail="goDetail"
+          :total-count="totalCount"
+          :page="page"
+          :page-size="PAGE_SIZE"
       />
 
 <!--    <template #table>-->
@@ -61,9 +63,9 @@ const goToCreatePage = () => {
   router.push('/contract/register')
 }
 
-const openModal = () => {
-  alert('파일 출력 기능 준비 중!');
-}
+// const openModal = () => {
+//   alert('파일 출력 기능 준비 중!');
+// }
 
 const contracts = ref([])
 const totalCount = ref(0)

@@ -1,8 +1,11 @@
 <template>
   <GenericTable :items="contracts" :columns="columns">
     <!-- No 컬럼 -->
+<!--    <template #cell-no="{ index }">-->
+<!--      {{ index + 1 }}-->
+<!--    </template>-->
     <template #cell-no="{ index }">
-      {{ contracts.length - index }}
+      {{ totalCount - ((page - 1) * pageSize) - index }}
     </template>
 
     <!-- 기본 단가, 계약 단가, 최소 발주 수량 등 숫자 포맷 가능 -->
@@ -21,6 +24,12 @@
     </template>
     <template #cell-contractEndDate="{ value }">
       {{ formatDate(value) }}
+    </template>
+    <!-- 계약 상태 뱃지 -->
+    <template #cell-contractStatus="{ value }">
+      <span :class="['contract-status-badge', value === 'ACTIVE' ? 'active' : 'expired']">
+        {{ value === 'ACTIVE' ? '활성' : '만료' }}
+      </span>
     </template>
     <!-- 조회된 데이터 없음 메시지 -->
     <template #body>
@@ -45,7 +54,10 @@
 import GenericTable from "@/components/common/GenericTable.vue"
 
 const props = defineProps({
-  contracts: {  type: Array, required: true  }
+  contracts: { type: Array, required: true },
+  totalCount: { type: Number, required: true },
+  page: { type: Number, required: true },
+  pageSize: { type: Number, required: true }
 })
 
 const columns = [
@@ -82,6 +94,44 @@ const getDetailLink = (item) => {
 </script>
 
 <style scoped>
+/* 계약상태 뱃지 스타일 */
+.contract-status-badge {
+  display: inline-block;
+  min-width: 52px;
+  padding: 4px 18px;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 1em;
+  text-align: center;
+  border: none;
+}
+
+.contract-status-badge.active {
+  background: #eaf7fd;
+  color: #2cb2f0;
+}
+
+.contract-status-badge.expired {
+  background: #fbeaea;
+  color: #e04a4a;
+}
+
+.detail-link {
+  color: #43b3e0;
+  font-weight: 600;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+.detail-link:hover {
+  color: #143a6d;
+}
+.empty-msg {
+  text-align: center;
+  color: #b0b0b0;
+  padding: 30px 0;
+  font-size: 1.1rem;
+}
+
 .empty-msg {
   text-align: center;
   color: #b0b0b0;

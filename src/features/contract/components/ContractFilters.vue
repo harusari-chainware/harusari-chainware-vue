@@ -5,20 +5,14 @@
         <label class="label">제품명</label>
         <input v-model="filters.productName" class="input" placeholder="제품명" type="text" />
       </div>
-      <div class="filter-row">
-        <FilterSelect
-            label="상위 카테고리명"
-            v-model="filters.topCategoryName"
-            :options="topCategoryOptionsName"
-        />
-        <FilterSelect
-            label="카테고리명"
-            v-model="filters.categoryName"
-            :options="categoryOptionsName"
-        />
+      <div class="filter-label-input">
+        <label class="label">상위 카테고리명</label>
+        <FilterSelect v-model="filters.topCategoryName" :options="topCategoryOptionsName" />
       </div>
-    </div>
-    <div class="filter-row">
+      <div class="filter-label-input">
+        <label class="label">카테고리명</label>
+        <FilterSelect v-model="filters.categoryName" :options="categoryOptionsName" />
+      </div>
       <div class="filter-label-input">
         <label class="label">거래처명</label>
         <input v-model="filters.vendorName" class="input" placeholder="거래처명" type="text" />
@@ -31,20 +25,19 @@
         <label class="label">거래처 유형</label>
         <FilterSelect v-model="filters.vendorType" :options="vendorTypeOptions" />
       </div>
-    </div>
-    <div class="filter-row align-end">
       <div class="filter-label-input">
         <label class="label">계약 기준일</label>
         <input v-model="filters.contractDate" class="input" type="date" placeholder="계약 기준일" />
       </div>
+    </div>
+    <div class="filter-row filter-row-buttons">
       <div class="filter-buttons">
         <FilterButtons @reset="resetFilters" @apply="applyFilters" />
       </div>
-<!--      <button class="search-btn" @click="applyFilters">검색</button>-->
-<!--      <button class="reset-btn" @click="resetFilters">초기화</button>-->
     </div>
   </div>
 </template>
+
 
 <script setup>
 import {onMounted, reactive, ref, watch} from 'vue'
@@ -146,12 +139,52 @@ const resetFilters = () => {
   border-radius: 14px;
   margin-bottom: 30px;
 }
+
+/* 반응형 그리드 */
+.filters-container {
+  background: #f7fafd;
+  padding: 32px 24px 16px 24px;
+  border-radius: 14px;
+  margin-bottom: 30px;
+  overflow-x: auto;
+}
+
 .filter-row {
   display: grid;
-  grid-template-columns: repeat(4, 1fr); /* 4개 항목 똑같이 */
-  gap: 40px;
+  grid-template-columns: repeat(7, 1fr); /* 필드 개수에 맞게 숫자 맞추세요 */
+  gap: 32px;
   align-items: flex-end;
-  width: 100%;
+  min-width: 1100px;
+}
+
+.filter-row-buttons {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 18px;
+  padding-right: 6px;
+  /* min-width: 1100px; // 필요하면 추가 */
+}
+
+.filter-buttons {
+  display: flex;
+  gap: 12px;
+}
+
+@media (max-width: 1024px) {
+  .filter-row {
+    grid-template-columns: repeat(2, 1fr);  /* 태블릿: 2칸 */
+    gap: 24px;
+  }
+}
+@media (max-width: 600px) {
+  .filters-container {
+    padding: 16px 6px 8px 6px;
+    border-radius: 8px;
+  }
+  .filter-row {
+    grid-template-columns: 1fr;   /* 모바일: 1칸 */
+    gap: 14px;
+  }
 }
 .align-end {
   align-items: flex-end;
