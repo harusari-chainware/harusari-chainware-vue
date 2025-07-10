@@ -11,3 +11,11 @@ export const getMemberDetail = (memberId) => {
 export const getMemberLoginHistory = (memberId, params) => {
     return api.get(`/members/${memberId}/login-history`, {params})
 }
+
+export const updateMember = (memberId, params) => {
+    return api.put(`/members/${memberId}`, params)
+}
+
+export const deleteMember = (memberId) => {
+    return api.delete(`/members/${memberId}`);
+}
