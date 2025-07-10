@@ -13,15 +13,13 @@ import InfoGroup from '@/components/layout/detailview/InfoGroup.vue'
 import DetailTable from '@/components/layout/detailview/DetailTable.vue'
 
 defineProps({
-  history: {
-    type: Array,
-    required: true
-  }
+  history: Array
 })
 
 const columns = [
-  { key: 'status', label: '상태', align: 'center' },
-  { key: 'handler', label: '담당자', align: 'center' },
-  { key: 'date', label: '일시', align: 'center' }
+  { key: 'deliveryStatus', label: '상태', align: 'center' },
+  { key: 'handlerName', label: '담당자', align: 'center' },
+  { key: 'startedAt', label: '배송 시작 일시', align: 'center' },
+  { key: 'deliveredAt', label: '배송 완료 일시', align: 'center' }
 ]
 </script>

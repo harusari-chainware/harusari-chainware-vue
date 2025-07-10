@@ -1,5 +1,6 @@
 <template>
   <DetailLayout
+      v-if="!!orderData.orderInfo?.orderCode"
       title="주문 상세"
       description="주문의 기본 정보와 상세 내용을 확인할 수 있습니다."
   >
@@ -11,53 +12,71 @@
       <StatusButton type="return">반품하기</StatusButton>
     </template>
 
-
-    <!-- 기본 정보 그룹들 -->
+    <!-- 기본 정보 영역 -->
     <template #basic>
-      <OrderDetailBasic :order="order" />
+<!--      {{ orderData.orderInfo.orderCode }}-->
+      <OrderDetailBasic
+          v-if="orderData.orderInfo && orderData.franchiseOwnerInfo"
+          :orderInfo="orderData.orderInfo"
+          :franchiseOwnerInfo="orderData.franchiseOwnerInfo"
+          :deliveryHistory="orderData.deliveryHistory || []"
+          :rejectReason="orderData.rejectReason || ''"
+      />
     </template>
 
-    <!-- 상세 정보 테이블 -->
+    <!-- 상세 제품 테이블 -->
     <template #detail>
-      <!-- 상세 정보에 pagination 적용한다면 이걸로 -->
-<!--      <OrderDetailDetail-->
-<!--          v-model:page="page"-->
-<!--          :items="pagedItems"-->
-<!--          :total="order.items.length"-->
-<!--          :items-per-page="itemsPerPage"-->
-<!--      />-->
-
-      <!-- 상세 정보에 pagination 필요 없으면 간단하게 -->
-      <OrderDetailDetail :items="order.items" />
+<!--      <OrderDetailDetail :items="orderData.products || []" />-->
     </template>
   </DetailLayout>
 </template>
 
 <script setup>
+import {ref, onMounted, reactive} from 'vue'
+import { useRoute } from 'vue-router'
 import DetailLayout from '@/components/layout/DetailLayout.vue'
-import StatusButton from "@/components/common/StatusButton.vue";
+import StatusButton from '@/components/common/StatusButton.vue'
 import OrderDetailBasic from '../components/OrderDetailBasic.vue'
 import OrderDetailDetail from '../components/OrderDetailDetail.vue'
-import { dummyOrderDetail } from '@/constants/dummy/orderDetail'
+import { fetchOrderDetail } from '../api.js'
 
-import { ref, computed } from 'vue'
+const route = useRoute()
+const orderId = route.params.orderId
 
-const order = dummyOrderDetail
+const orderData = reactive({
+  orderInfo: {},
+  franchiseOwnerInfo: {},
+  deliveryHistory: [],
+  rejectReason: '',
+  products: []
+})
+
 
 const handleEdit = () => {
   alert('수정 버튼 클릭됨')
 }
 
-// 상세 조회에서 pagination을 적용한다면 아래 내용 추가
-const page = ref(1)
-const itemsPerPage = 10
+onMounted(async () => {
+  try {
+    const res = await fetchOrderDetail(orderId)
+    console.log('✅ fetchOrders 응답:', res)
+    console.log('📦 res.data:', res.data)
 
-const pagedItems = computed(() => {
-  const start = (page.value - 1) * itemsPerPage
-  return order.items.slice(start, start + itemsPerPage)
+    const detail = res.data.data // ✅ 진짜 데이터 추출
+
+    console.log('🧪 detail:', detail)
+
+    orderData.orderInfo = detail.orderInfo || {}
+    orderData.franchiseOwnerInfo = detail.franchiseOwnerInfo || {}
+    orderData.deliveryHistory = detail.deliveryHistory || []
+    orderData.rejectReason = detail.rejectReason || ''
+    orderData.products = detail.products || []
+
+    // console.log('✅ orderData 상태:', JSON.stringify(orderData, null, 2))
+  } catch (e) {
+    console.error('상세 조회 오류:', e)
+  }
 })
 
-const handlePageChange = (newPage) => {
-  page.value = newPage
-}
+
 </script>
