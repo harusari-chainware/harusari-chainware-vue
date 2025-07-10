@@ -11,13 +11,7 @@
           class="modal-input"
       >
         <option disabled value="">상위 카테고리를 선택하세요</option>
-<!--        <option-->
-<!--            v-for="top in topCategories"-->
-<!--            :key="top.topCategoryId"-->
-<!--            :value="String(top.topCategoryId)"-->
-<!--        >-->
-<!--          {{ top.topCategoryName }}-->
-<!--        </option>-->
+
         <option
             v-for="top in topCategories"
             :key="top.value"
@@ -58,7 +52,7 @@ import {
   updateCategory,
   createTopCategory,
   updateTopCategory,
-} from '@/api/categoryApi'
+} from '@/features/category/api.js'
 
 const props = defineProps({
   isTop: { type: Boolean, default: false },
@@ -81,11 +75,6 @@ watch(code, (val) => {
 })
 const selectedTopCategoryId = ref('')
 
-// 상위 카테고리명 찾아주는 computed
-// const selectedTopCategoryName = computed(() => {
-//   const top = props.topCategories.find(tc => tc.topCategoryId === selectedTopCategoryId.value)
-//   return top ? top.topCategoryName : ''
-// })
 const selectedTopCategoryName = computed(() => {
   const top = props.topCategories.find(tc => tc.value === selectedTopCategoryId.value)
   return top ? top.label : ''
@@ -103,18 +92,6 @@ watch(
     },
     { immediate: true }
 )
-// watch(
-//     [() => props.topEditData, () => props.categoryEditData, () => props.topCategoryId],
-//     ([top, cat, topId]) => {
-//       name.value = top?.topCategoryName || cat?.categoryName || ''
-//       code.value = cat?.categoryCode || ''
-//       // 반드시 문자열!
-//       selectedTopCategoryId.value = cat?.topCategoryId !== undefined
-//           ? String(cat.topCategoryId)
-//           : (topId !== undefined ? String(topId) : '')
-//     },
-//     { immediate: true }
-// )
 
 const handleSubmit = async () => {
   if (!name.value.trim()) {
@@ -145,9 +122,9 @@ const handleSubmit = async () => {
           topCategoryId: selectedTopCategoryId.value,
           categoryName: name.value,
           categoryCode: code.value
-
         })
       }
+      alert('수정이 완료되었습니다.')
     } else {
       if (props.isTop) {
         await createTopCategory({ topCategoryName: name.value })
@@ -158,8 +135,8 @@ const handleSubmit = async () => {
           categoryCode: code.value
         })
       }
+      alert('등록이 완료되었습니다.')
     }
-
     emit('refresh')
     emit('close')
   } catch (err) {
@@ -177,36 +154,103 @@ const handleSubmit = async () => {
 .modal-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.4);
+  background: rgba(45, 53, 81, 0.17); /* 더 세련된 블러 느낌 */
   display: flex;
   align-items: center;
   justify-content: center;
+  z-index: 1000;
 }
 
 .modal-box {
   background: #fff;
-  padding: 2rem;
-  width: 400px;
-  border-radius: 10px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  padding: 36px 28px 24px 28px;
+  width: 100%;
+  max-width: 420px;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px 0 rgba(58, 174, 216, 0.13), 0 1.5px 6px rgba(0,0,0,0.06);
+  display: flex;
+  flex-direction: column;
 }
 
 .modal-title {
-  font-size: 20px;
-  margin-bottom: 1rem;
+  font-size: 1.23rem;
+  font-weight: 700;
+  color: #23233c;
+  letter-spacing: -0.02em;
+  margin-bottom: 30px;
 }
 
 .modal-input {
   width: 100%;
-  padding: 0.6rem;
-  margin-bottom: 1.5rem;
-  border: 1px solid #ccc;
-  border-radius: 6px;
+  border: 1.4px solid #e4e7ee;
+  background: #fafbfc;
+  border-radius: 8px;
+  font-size: 1rem;
+  padding: 13px 15px;
+  margin-bottom: 18px;
+  transition: border 0.18s;
+}
+.modal-input:focus {
+  outline: none;
+  border-color: #3aaed8;
+  background: #fff;
+}
+
+select.modal-input {
+  color: #23233c;
+  font-weight: 500;
 }
 
 .modal-actions {
   display: flex;
   justify-content: flex-end;
-  gap: 10px;
+  gap: 12px;
+  margin-top: 6px;
+}
+.modal-actions button {
+  min-width: 82px;
+  border: none;
+  border-radius: 7px;
+  padding: 11px 0;
+  font-size: 1rem;
+  cursor: pointer;
+  font-weight: 600;
+  background: #f4f5fa;
+  color: #53536a;
+  transition: background 0.15s, color 0.12s;
+}
+.modal-actions button:last-child {
+  background: #3aaed8;
+  color: #fff;
+}
+.modal-actions button:last-child:hover {
+  background: #1196cd;
+}
+.modal-actions button:first-child:hover {
+  background: #e4e7ee;
+}
+
+/* 반응형 */
+@media (max-width: 600px) {
+  .modal-box {
+    padding: 16px 6px 16px 6px;
+    min-width: 0;
+    width: 98vw;
+    border-radius: 9px;
+  }
+  .modal-title {
+    font-size: 1.09rem;
+    margin-bottom: 18px;
+  }
+  .modal-input {
+    font-size: 0.97rem;
+    padding: 11px 10px;
+    margin-bottom: 14px;
+  }
+  .modal-actions button {
+    font-size: 0.98rem;
+    min-width: 70px;
+    padding: 8px 0;
+  }
 }
 </style>

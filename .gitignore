@@ -25,6 +25,8 @@ coverage
 *.njsproj
 *.sln
 *.sw?
+getDisposal.html
+postdisposal.html
 
 *.tsbuildinfo
 

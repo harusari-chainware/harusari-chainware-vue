@@ -1,6 +1,7 @@
 /* 사용자가 보는 routes와 view를 연결 */
 import MemberListView from "@/features/member/master/views/MemberListView.vue";
-// import MemberDummyView from "@/features/member/master/views/MemberDummyView.vue";
+import MemberDetailView from "@/features/member/master/views/MemberDetailView.vue";
+import MemberDummyView from "@/features/member/master/views/MemberDummyView.vue";
 
 export const memberRoutes = [
     {
@@ -10,27 +11,27 @@ export const memberRoutes = [
         meta: {requiresAuth: true, roles: ['MASTER']}
     },
     {
+        path: '/member/:memberId',
+        name: 'MemberDetailView',
+        component: MemberDetailView,
+        meta: {requiresAuth: true, roles: ['MASTER']}
+    },
+    {
         path: '/member/register',
         name: 'MemberRegister',
         // component: MemberRegisterView,
         meta: {requiresAuth: true, roles: ['MASTER']}
     },
     {
-        path: '/member/login-history',
-        name: 'LoginHistory',
-        // component: LoginHistoryView,
-        meta: {requiresAuth: true, roles: ['MASTER']}
+        path: '/mypage/info',
+        name: 'MemberDummy5View',
+        component: MemberDummyView,
+        requiresAuth: true,
+        roles: [
+            'MASTER', 'GENERAL_MANAGER', 'SENIOR_MANAGER',
+            'WAREHOUSE_MANAGER', 'FRANCHISE_MANAGER', 'VENDOR_MANAGER'
+        ]
     },
-    // {
-    //     path: '/mypage/info',
-    //     name: 'MemberDummy5View',
-    //     component: MemberDummyView,
-    //     requiresAuth: true,
-    //     roles: [
-    //         'MASTER', 'GENERAL_MANAGER', 'SENIOR_MANAGER',
-    //         'WAREHOUSE_MANAGER', 'FRANCHISE_MANAGER', 'VENDOR_MANAGER'
-    //     ]
-    // },
     {
         path: '/mypage/password',
         name: 'ChangePassword',
