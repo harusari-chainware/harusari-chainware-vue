@@ -3,68 +3,93 @@
       title="제품에 대한 계약 등록"
       description="제품에 대한 계약 등록을 등록할 수 있습니다."
   >
-    <!-- 상단 버튼: actions slot -->
     <template #actions>
       <StatusButton type="primary" @click="handleSubmit">등록</StatusButton>
       <StatusButton type="default" @click="handleCancel">취소</StatusButton>
     </template>
 
-    <!-- 본문 폼: basic slot (꼭 div로 래핑!) -->
     <template #basic>
       <div>
-        <!-- 계약 기본 정보 선택 -->
+        <!-- 계약 기본 정보 -->
         <div class="contract-section">
           <h2 class="section-title">계약 기본 정보 선택</h2>
           <div class="contract-box">
             <div class="row">
-              <button class="section-btn">거래처 정보</button>
-              <button class="section-btn">검색</button>
+              <h4 class="section-title">거래처 정보</h4>
+
             </div>
             <div class="row">
               <label>거래처명</label>
               <input v-model="form.vendorName" class="input" />
+              <button class="section-btn">검색</button>
+              </div>
+            <div class="row">
+              <label>사업자 등록번호</label>
+              <input v-model="form.businessNumber" class="input" />
               <label>거래처 유형</label>
               <input v-model="form.vendorType" class="input" />
               <label>계약 상태</label>
               <input v-model="form.contractStatus" class="input" />
-            </div>
-            <div class="row">
-              <label>사업자 등록번호</label>
-              <input v-model="form.businessNumber" class="input" />
             </div>
           </div>
         </div>
 
         <!-- 계약 대상 제품 선택 -->
         <div class="contract-section">
-          <h2 class="section-title">계약 대상 제품 선택</h2>
-          <div class="contract-box">
+          <div class="contract-box" style="position: relative;">
             <div class="row">
-              <button class="section-btn">제품 정보</button>
-              <button class="section-btn">검색</button>
+              <h4 class="section-title">제품 정보</h4>
             </div>
             <div class="row">
               <label>제품명</label>
-              <input v-model="form.productName" class="input" />
-              <label>카테고리</label>
-              <input v-model="form.categoryName" class="input" />
-              <label>상위 카테고리</label>
-              <input v-model="form.topCategoryName" class="input" />
-              <label>하위 카테고리</label>
-              <input v-model="form.subCategoryName" class="input" />
-              <label>보관상태</label>
-              <input v-model="form.storeType" class="input" />
+              <div style="position:relative; width:220px;">
+                <input
+                    v-model="productNameInput"
+                    @input="searchProducts"
+                    @keydown.down="move(1)"
+                    @keydown.up="move(-1)"
+                    @keydown.enter="selectCurrent"
+                    @blur="closeSuggestions"
+                    placeholder="제품명을 입력하세요"
+                    autocomplete="off"
+                    class="input"
+                    style="width: 100%;"
+                />
+                <!-- 자동완성 리스트 -->
+                <ul v-if="showSuggestions && filteredProducts.length" class="autocomplete-list">
+                  <li
+                      v-for="(p, idx) in filteredProducts"
+                      :key="p.productId"
+                      :class="{ 'selected': idx === selectedIdx }"
+                      @mousedown.prevent="selectProduct(p)"
+                  >
+                    {{ p.productName }}
+                    <span class="sub-info">{{ p.productCode }}</span>
+                  </li>
+                </ul>
+              </div>
+              <button class="section-btn">검색</button>
             </div>
-            <div class="row">
+
+              <div class="row">
+              <label>상위 카테고리</label>
+              <input v-model="form.topCategoryName" class="input" readonly />
+              <label>카테고리</label>
+              <input v-model="form.subCategoryName" class="input" readonly />
+                <label>보관상태</label>
+                <input v-model="form.storeType" class="input" readonly />
+              </div>
+                <div class="row">
+
               <label>기본 단가</label>
-              <input v-model="form.basePrice" class="input" type="number" />
+              <input v-model="form.basePrice" class="input" type="number" readonly />
               <label>단위 수량</label>
-              <input v-model="form.unitQuantity" class="input" type="number" />
+              <input v-model="form.unitQuantity" class="input" type="number" readonly />
               <label>단위 규격</label>
-              <input v-model="form.unitSpec" class="input" />
+              <input v-model="form.unitSpec" class="input" readonly />
+            </div>
             </div>
           </div>
-        </div>
 
         <!-- 계약 정보 입력 -->
         <div class="contract-section">
@@ -73,7 +98,7 @@
             <div class="row">
               <label>계약 단가</label>
               <input v-model="form.contractPrice" class="input" type="number" />
-              <label>MOQ</label>
+              <label>최소 발주 수량</label>
               <input v-model="form.minOrderQty" class="input" type="number" />
               <label>납기일</label>
               <input v-model="form.leadTime" class="input" />
@@ -97,6 +122,9 @@ import { useRouter } from "vue-router"
 import DetailLayout from '@/components/layout/DetailLayout.vue'
 import StatusButton from '@/components/common/StatusButton.vue'
 import { createContract } from '@/features/contract/api.js'
+import { fetchProducts } from '@/features/product/api.js'
+import { fetchCategoryDetail } from '@/features/category/api.js'
+import api from '@/api/axios.js'
 
 const router = useRouter()
 
@@ -107,6 +135,7 @@ const form = ref({
   contractStatus: '',
   businessNumber: '',
   // 제품 정보
+  productId: '',
   productName: '',
   categoryName: '',
   topCategoryName: '',
@@ -122,6 +151,80 @@ const form = ref({
   contractStartDate: '',
   contractEndDate: ''
 })
+
+// 자동완성 관련
+const productNameInput = ref('')
+const filteredProducts = ref([])
+const showSuggestions = ref(false)
+const selectedIdx = ref(-1)
+
+const searchProducts = async () => {
+  if (!productNameInput.value) {
+    filteredProducts.value = []
+    showSuggestions.value = false
+    return
+  }
+  try {
+    const res = await fetchProducts({
+        productName: productNameInput.value,
+        size: 10,
+        productStatusFilter: 'ACTIVE_ONLY'
+    })
+    filteredProducts.value = res.data.data.products
+    showSuggestions.value = true
+    selectedIdx.value = -1
+  } catch (e) {
+    filteredProducts.value = []
+    showSuggestions.value = false
+  }
+}
+
+// 자동완성에서 항목 클릭/엔터 선택 시
+const selectProduct = async (p) => {
+  // 제품 정보 채우기
+  form.value.productId = p.productId
+  form.value.productName = p.productName
+  productNameInput.value = p.productName
+  form.value.basePrice = p.basePrice
+  form.value.unitQuantity = p.unitQuantity
+  form.value.unitSpec = p.unitSpec
+  form.value.storeType = p.storeType
+
+  // 카테고리 정보 추가 조회
+  if (p.categoryId) {
+    try {
+      const res = await fetchCategoryDetail(p.categoryId)
+      form.value.categoryName = res.data.data.categoryMeta.categoryName || ''
+      form.value.topCategoryName = res.data.data.topCategory.topCategoryName || ''
+    } catch (e) {
+      form.value.categoryName = ''
+      form.value.topCategoryName = ''
+    }
+  } else {
+    form.value.categoryName = ''
+    form.value.topCategoryName = ''
+  }
+  // 하위 카테고리명은 따로 없다면 categoryName만 사용
+  form.value.subCategoryName = form.value.categoryName
+  showSuggestions.value = false
+}
+
+// 키보드 위/아래/엔터 지원
+const move = (dir) => {
+  if (!showSuggestions.value || !filteredProducts.value.length) return
+  let next = selectedIdx.value + dir
+  if (next < 0) next = filteredProducts.value.length - 1
+  if (next >= filteredProducts.value.length) next = 0
+  selectedIdx.value = next
+}
+const selectCurrent = () => {
+  if (selectedIdx.value >= 0) {
+    selectProduct(filteredProducts.value[selectedIdx.value])
+  }
+}
+const closeSuggestions = () => {
+  setTimeout(() => showSuggestions.value = false, 100)
+}
 
 const handleSubmit = async () => {
   try {
@@ -151,6 +254,7 @@ const handleCancel = () => {
   border-radius: 12px;
   padding: 26px 32px 18px 32px;
   margin-bottom: 8px;
+  position: relative;
 }
 .row {
   display: flex;
@@ -184,4 +288,42 @@ label {
   color: #26435c;
   margin-right: 5px;
 }
+.autocomplete-list {
+  position: absolute;
+  top: 37px;
+  left: 0;
+  z-index: 10;
+  background: #fff;
+  border: 1px solid #c4c4c4;
+  border-radius: 7px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  max-height: 220px;
+  overflow-y: auto;
+  width: 220px;
+}
+.autocomplete-list li {
+  padding: 7px 12px;
+  cursor: pointer;
+}
+.autocomplete-list li.selected {
+  background: #d2e8ff;
+  font-weight: 600;
+}
+.sub-info {
+  color: #888;
+  font-size: 12px;
+  margin-left: 12px;
+}
+
+.input[type="number"]::-webkit-outer-spin-button,
+.input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.input[type="number"] {
+  -moz-appearance: textfield;
+}
+
 </style>
