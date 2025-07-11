@@ -1,22 +1,31 @@
 <template>
-
-  <DetailLayout title="제품 등록">
-    <!-- 상단 버튼 -->
-    <template #actions>
-      <StatusButton type="primary" @click="handleSubmit">등록</StatusButton>
-      <StatusButton type="default" @click="handleCancel">취소</StatusButton>
-    </template>
-
-    <!-- 폼 입력 영역 -->
+  <ProductLayout title="제품 등록" description="제품을 등록할 수 있습니다.">
     <template #basic>
       <div class="product-form-card">
         <h2 class="form-title">제품 정보 입력</h2>
         <div class="form-grid">
+          <!-- 좌측 컬럼 -->
           <div class="form-col">
             <div class="form-row">
               <label>제품명</label>
               <input v-model="form.productName" type="text" class="input" />
             </div>
+            <div class="form-row">
+              <label>단가</label>
+              <input v-model="form.basePrice" type="number" min="0" class="input" autocomplete="off" />
+            </div>
+            <div class="form-row">
+              <label>제품 단위</label>
+              <input v-model="form.unitQuantity" type="number" min="0" class="input" placeholder="수량" autocomplete="off" />
+              <input v-model="form.unitSpec" type="text" class="input ml-2" placeholder="규격" />
+            </div>
+            <div class="form-row">
+              <label>원산지</label>
+              <input v-model="form.origin" type="text" class="input" />
+            </div>
+          </div>
+          <!-- 우측 컬럼 -->
+          <div class="form-col">
             <div class="form-row">
               <label>카테고리</label>
               <select v-model="form.topCategoryId" class="input">
@@ -34,14 +43,6 @@
               <input v-model="form.categoryCode" class="input ml-2" placeholder="카테고리 코드" readonly />
             </div>
             <div class="form-row">
-              <label>단가</label>
-              <input v-model="form.basePrice" type="number" min="0" class="input" autocomplete="off" />
-            </div>
-            <div class="form-row">
-              <label>원산지</label>
-              <input v-model="form.origin" type="text" class="input" />
-            </div>
-            <div class="form-row">
               <label>보관상태</label>
               <select v-model="form.storeType" class="input">
                 <option v-for="opt in storeTypeOptions" :value="opt.value" :key="opt.value">
@@ -51,12 +52,7 @@
             </div>
             <div class="form-row">
               <label>안전 재고 수량</label>
-              <input v-model="form.safetyStock" type="number" min="0" class="input" autocomplete="off"  />
-            </div>
-            <div class="form-row">
-              <label>제품 단위</label>
-              <input v-model="form.unitQuantity" type="number" min="0" class="input" placeholder="수량" autocomplete="off"  />
-              <input v-model="form.unitSpec" type="text" class="input ml-2" placeholder="규격" />
+              <input v-model="form.safetyStock" type="number" min="0" class="input" autocomplete="off" />
             </div>
             <div class="form-row">
               <label>유통기한</label>
@@ -66,16 +62,20 @@
         </div>
       </div>
     </template>
-  </DetailLayout>
+  </ProductLayout>
+    <div class="form-actions">
+      <StatusButton type="primary" @click="handleSubmit">등록</StatusButton>
+      <StatusButton type="default" @click="handleCancel">취소</StatusButton>
+    </div>
 </template>
 
 <script setup>
-import { ref, onMounted, computed, watch } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
-import DetailLayout from '@/components/layout/DetailLayout.vue'
 import StatusButton from '@/components/common/StatusButton.vue'
 import {fetchAllListTopCategories, fetchAllTopCategories} from '@/features/category/api.js'
 import { createProduct } from '@/features/product/api.js'
+import ProductLayout from "@/features/product/components/ProductLayout.vue";
 
 // 폼 상태
 const form = ref({
@@ -168,21 +168,31 @@ const handleCancel = () => {
 
 <style scoped>
 .product-form-card {
-  background: #f7f9fa;
-  padding: 40px 40px 32px 40px;
-  border-radius: 18px;
-  max-width: 1100px;
+  gap: 2rem;
+  transition: all 0.3s ease;
+  background-color: var(--color-white);
+  border: 1px solid var(--color-border-light);
+  border-radius: 10px;
+  padding: 2rem;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.03);
   margin: 40px auto 0 auto;
-  box-shadow: 0 2px 16px rgba(50,50,80,0.05);
+  width: 100%;
 }
 .form-title {
-  font-size: 20px;
-  font-weight: 600;
-  margin-bottom: 30px;
+  font-size: var(--font-page-title-small);
+  font-weight: bold;
+  color: var(--color-gray-700);
+  border-left: 3px solid var(--color-primary);
+  padding-left: 0.75rem;
+  margin-left: 0.5rem;
+  margin-bottom: 3rem;
 }
 .form-grid {
   display: flex;
-  gap: 48px;
+  gap: 16px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-left: 2rem;
 }
 .form-col {
   flex: 1;
@@ -191,7 +201,7 @@ const handleCancel = () => {
 .form-row {
   display: flex;
   align-items: center;
-  margin-bottom: 22px;
+  margin-bottom: 2rem;
 }
 .form-row label {
   flex: 0 0 100px;
@@ -200,12 +210,15 @@ const handleCancel = () => {
   color: #2b2b2b;
 }
 .input {
-  flex: 1;
-  padding: 8px 12px;
-  border: 1px solid #d8dde2;
-  border-radius: 7px;
-  background: #fff;
-  font-size: 15px;
+  padding: 0.5rem 0.75rem;
+  background-color: var(--color-gray-50);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  font-size: var(--font-info-value);
+  color: var(--color-gray-900);
+  min-height: 2.2rem;
+  display: flex;
+  align-items: center;
 }
 .ml-2 {
   margin-left: 12px;
@@ -218,6 +231,28 @@ const handleCancel = () => {
 }
 .input[type="number"] {
   -moz-appearance: textfield; /* Firefox */
+}
+
+.form-grid {
+  display: flex;
+  gap: 48px;
+}
+.form-col {
+  flex: 1;
+  min-width: 330px;
+}
+@media (max-width: 900px) {
+  .form-grid {
+    flex-direction: column;
+    gap: 24px;
+  }
+}
+
+.form-actions {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  margin-top: 40px;
 }
 
 </style>

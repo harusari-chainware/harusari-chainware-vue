@@ -26,8 +26,10 @@
         <FilterSelect v-model="filters.vendorType" :options="vendorTypeOptions" />
       </div>
       <div class="filter-label-input">
-        <label class="label">계약 기준일</label>
-        <input v-model="filters.contractDate" class="input" type="date" placeholder="계약 기준일" />
+        <FilterDate
+            label="계약 기준일"
+            v-model="filters.contractDate"
+        />
       </div>
     </div>
     <div class="filter-row filter-row-buttons">
@@ -38,12 +40,12 @@
   </div>
 </template>
 
-
 <script setup>
 import {onMounted, reactive, ref, watch} from 'vue'
 import FilterSelect from '@/components/common/filters/FilterSelect.vue'
 import FilterButtons from '@/components/common/filters/FilterButtons.vue'
 import {fetchAllListTopCategories, fetchAllTopCategories} from '@/features/category/api.js'
+import FilterDate from '@/components/common/filters/FilterDate.vue'
 
 const topCategories = ref([]) // 전체(상위+하위) 카테고리(카테고리 드롭다운에 사용)
 const topCategoryListOnly = ref([]) // 상위만 (상위 카테고리 드롭다운 전용)

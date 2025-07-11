@@ -57,7 +57,6 @@
   </GenericTable>
 </template>
 
-
 <script setup>
 import GenericTable from '@/components/common/GenericTable.vue'
 

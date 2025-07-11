@@ -61,7 +61,6 @@ watchEffect(() => {
       value: String(tc.topCategoryId ?? tc.value)
     }))
 
-
   } else {
     topCategoryNameOptions.value = []
   }
@@ -69,7 +68,6 @@ watchEffect(() => {
 
 // 상위 카테고리 선택 시 하위 카테고리 옵션 변경
 watch(() => filters.topCategoryId, (newTopId) => {
-  console.log('드롭다운 선택됨:', newTopId, typeof newTopId)
   console.log('props.topCategories:', props.topCategories.map(tc => ({
     topCategoryId: tc.topCategoryId,
     topCategoryName: tc.topCategoryName,
@@ -83,13 +81,10 @@ watch(() => filters.topCategoryId, (newTopId) => {
   const selectedTop = props.topCategories.find(
       t => String(t.topCategoryId ?? t.value) === String(newTopId)
   )
-  console.log('드롭다운 선택됨:', newTopId)
-  console.log('selectedTop:', selectedTop)
   if (!selectedTop || !Array.isArray(selectedTop.categories)) {
     categoryNameOptions.value = [{ label: '전체', value: '' }]
     return
   }
-  console.log('하위 카테고리 목록:', selectedTop.categories)
   categoryNameOptions.value = [
     ...selectedTop.categories.map(cat => ({
       label: cat.categoryName,
