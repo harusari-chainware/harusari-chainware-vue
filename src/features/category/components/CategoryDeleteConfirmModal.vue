@@ -64,7 +64,7 @@ const handleDelete = async () => {
     doneModal.value = { show: true, type: 'delete', isTop: props.isTop }
   } catch (e) {
     ErrorMsg.value = (e?.response?.data?.message)
-        ? `삭제 실패: ${e.response.data.message}`
+        ? e.response.data.message
         : '삭제 실패했습니다. 서버 오류'
     ErrorOpen.value = true
     emit('close')

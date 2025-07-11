@@ -63,7 +63,6 @@ import {
 } from '@/features/category/api.js'
 import CategoryErrorModal from "@/features/category/components/CategoryErrorModal.vue";
 
-
 const props = defineProps({
   isTop: { type: Boolean, default: false },
   isModal: { type: Boolean, default: true },
