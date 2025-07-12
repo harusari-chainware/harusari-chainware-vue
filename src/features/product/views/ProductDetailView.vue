@@ -7,7 +7,7 @@
     <template #actions>
       <template v-if="!isEditing">
         <StatusButton type="primary" @click="startEdit">수정</StatusButton>
-        <StatusButton type="danger" @click="handleDelete">삭제</StatusButton>
+        <StatusButton type="danger" @click="openDeleteModal">삭제</StatusButton>
       </template>
       <template v-else>
         <StatusButton type="primary" @click="handleSave">저장</StatusButton>
@@ -46,8 +46,17 @@
         <!-- 단가 -->
         <div class="info-row">
           <label>단가</label>
-          <input v-if="isEditing" v-model="product.basePrice" class="modal-input" />
-          <input v-else type="text" :value="product.basePrice" readonly />
+          <input
+              v-if="isEditing"
+              v-model="product.basePrice"
+              class="modal-input"
+          />
+          <input
+              v-else
+              type="text"
+              :value="formattedBasePrice"
+              readonly
+          />
         </div>
 
         <!-- 안전 재고 수량 -->
@@ -83,7 +92,17 @@
         <!-- 유통기한 -->
         <div class="info-row">
           <label>유통기한</label>
-          <input type="text" v-model="product.shelfLife" :readonly="!isEditing" />
+          <input
+              v-if="isEditing"
+              v-model="product.shelfLife"
+              class="modal-input"
+          />
+          <input
+              v-else
+              type="text"
+              :value="formattedShelfLife"
+              readonly
+          />
         </div>
 
         <!-- 등록일시, 수정일시 -->
@@ -139,6 +158,30 @@
       </div>
     </template>
   </DetailLayout>
+
+  <!-- 등록/수정 완료 모달 -->
+  <ProductDoneModal
+      v-if="doneModal.show"
+      :type="doneModal.type"
+      @close="doneModal.show = false"
+  />
+
+  <div>
+    <ProductErrorModal
+        v-if="ErrorOpen"
+        :message="ErrorMsg"
+        @close="ErrorOpen = false"
+    />
+  </div>
+
+  <!-- 삭제 확인 모달 -->
+  <ProductDeleteConfirmModal
+      v-if="deleteTarget"
+      :target-id="deleteTarget.id"
+      @close="deleteTarget = null"
+      @deleted="router.push('/product/list')"
+  />
+
 </template>
 
 <script setup>
@@ -149,7 +192,12 @@ import { fetchAllTopCategories } from '@/features/category/api.js'
 import DetailLayout from "@/components/layout/DetailLayout.vue";
 import StatusButton from "@/components/common/StatusButton.vue";
 import Pagination from "@/components/common/Pagination.vue";
+import ProductErrorModal from "@/features/product/components/ProductErrorModal.vue";
+import ProductDoneModal from "@/features/product/components/ProductDoneModal.vue";
+import ProductDeleteConfirmModal from "@/features/product/components/ProductDeleteConfirmModal.vue";
+import { useRouter } from 'vue-router';
 
+const router = useRouter();
 const route = useRoute();
 const productId = route.params.productId;
 
@@ -170,6 +218,26 @@ const product = ref({});
 const contracts = ref([]);
 const isEditing = ref(false);
 
+const ErrorOpen = ref(false)
+const ErrorMsg = ref('')
+
+const deleteTarget = ref(null)
+const openDeleteModal = () => {
+  deleteTarget.value = { id: product.value.productId };
+};
+
+function showError(msg) {
+  ErrorMsg.value = msg
+  ErrorOpen.value = true
+}
+
+// 등록/수정 완료 모달 상태
+const doneModal = ref({
+  show: false,
+  type: 'edit',    //  'register' | 'edit' | 'delete'
+  isTop: false
+})
+
 const categoryName = computed(() =>
     getCategoryName(product.value.categoryId)
 );
@@ -182,13 +250,21 @@ const getCategoryList = (topCategoryId) => {
   return top ? top.categories : [];
 };
 
+const formattedBasePrice = computed(() => {
+  if (!product.value.basePrice && product.value.basePrice !== 0) return '';
+  // 숫자일 경우만 변환
+  return product.value.basePrice.toLocaleString('ko-KR') + '원';
+});
+
+const formattedShelfLife = computed(() => {
+  if (!product.value.shelfLife && product.value.shelfLife !== 0) return '';
+  return product.value.shelfLife + '일';
+});
+
 const loadProductDetail = async () => {
   try {
-    console.log('productId:', productId); // 여기에 정상적으로 10이 찍히나?
     const res = await fetchProductDetail(productId, page.value, itemsPerPage.value);
-    console.log('API 응답:', res.data); // 여기서 위 JSON이 찍히나?
     const data = res.data.data;
-    console.log('data:', data);
     product.value = {
       ...data.product,
       topCategoryId: findTopCategoryIdByCategoryId(data.product.categoryId),
@@ -199,16 +275,10 @@ const loadProductDetail = async () => {
     };
     contracts.value = data.contracts ?? [];
 
-    console.log('product.value.categoryId:', product.value.categoryId);
-    console.log('topCategories:', topCategories.value);
-    console.log('categoryName:', categoryName.value);
-    console.log('topCategoryName:', topCategoryName.value);
-
   } catch (e) {
     console.error('제품 정보를 불러오지 못했습니다:', e);
   }
 };
-
 
 const startEdit = () => {
   isEditing.value = true;
@@ -219,7 +289,6 @@ const handleSave = async () => {
     // 저장할 값 준비 (product.value를 그대로 써도 됨)
     const payload = {
       ...product.value,
-      // 필요시, 추가/제외할 필드 조정!
       productId: product.value.productId,
       productName: product.value.productName,
       productCode: product.value.productCode,
@@ -241,33 +310,32 @@ const handleSave = async () => {
     await loadProductDetail();
 
     isEditing.value = false;
-    alert("저장되었습니다.");
+    doneModal.value = { show: true, type: 'edit' };
   } catch (e) {
-    alert("저장 실패: " + (e?.response?.data?.message || e.message));
+    showError("저장 실패: " + (e?.response?.data?.message || e.message));
   }
 };
 
-
-const handleDelete = async () => {
-  if (isDeleting.value) return; // 중복 방지
-
-  if (!confirm("정말로 이 제품을 삭제하시겠습니까?")) {
-    return;
-  }
-
-  isDeleting.value = true; // 실제 삭제 시작 전에 true
-
-  try {
-    await deleteProduct(product.value.productId);
-
-    alert("삭제되었습니다.");
-    window.history.back();
-  } catch (e) {
-    alert("삭제 실패: " + (e?.response?.data?.message || e.message));
-  } finally {
-    isDeleting.value = false; // 항상 복구!
-  }
-};
+// const handleDelete = async () => {
+//   if (isDeleting.value) return; // 중복 방지
+//
+//   if (!confirm("정말로 이 제품을 삭제하시겠습니까?")) {
+//     return;
+//   }
+//
+//   isDeleting.value = true; // 실제 삭제 시작 전에 true
+//
+//   try {
+//     await deleteProduct(product.value.productId);
+//
+//     alert("삭제되었습니다.");
+//     window.history.back();
+//   } catch (e) {
+//     alert("삭제 실패: " + (e?.response?.data?.message || e.message));
+//   } finally {
+//     isDeleting.value = false; // 항상 복구!
+//   }
+// };
 
 
 const cancelEdit = () => {

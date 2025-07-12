@@ -10,14 +10,18 @@ const contractId = route.params.contractId
 const contract = ref({})
 const isLoading = ref(true)
 
-onMounted(async () => {
+async function loadDetail() {
+  isLoading.value = true
   const res = await fetchContractDetail(contractId)
   contract.value = res.data.data
   isLoading.value = false
-})
+}
+
+onMounted(loadDetail)
+
 </script>
 
 <template>
   <div v-if="isLoading">로딩중...</div>
-  <ContractForm v-else :contract="contract" />
+  <ContractForm v-else :contract="contract" @refresh="loadDetail" />
 </template>

@@ -47,6 +47,7 @@
                   class="input"
                   maxlength="2"
                   placeholder="2자리 코드(영문 대문자)"
+                  @input="onCodeInput"
               />
             </div>
           </div>
@@ -56,8 +57,20 @@
     </template>
   </CategoryLayout>
   <div class="form-actions">
-    <StatusButton type="primary" @click="handleSubmit">등록</StatusButton>
-    <StatusButton type="default" @click="goBack">취소</StatusButton>
+    <button
+        type="button"
+        class="status-btn primary"
+        @click="handleSubmit"
+    >
+      등록
+    </button>
+    <button
+        type="button"
+        class="status-btn"
+        @click="goBack"
+    >
+      취소
+    </button>
   </div>
 
   <!-- 등록/수정 모달 -->
@@ -119,62 +132,78 @@ const loadTopCategories = async () => {
 }
 onMounted(loadTopCategories)
 
+const onCodeInput = (e) => {
+  subForm.value.categoryCode = e.target.value.replace(/[^A-Za-z]/g, '').toUpperCase().slice(0,2)
+}
+
 const handleSubmit = async () => {
+  // 상위 카테고리 입력 여부
   const isTopInput = !!topForm.value.topCategoryName;
-  const isSubInput =
-      !!subForm.value.topCategoryId &&
-      !!subForm.value.categoryName &&
-      !!subForm.value.categoryCode;
+  // 하위 카테고리 필드별 입력 여부
+  const isTopCategorySelected = !!subForm.value.topCategoryId;
+  const isSubNameInput = !!subForm.value.categoryName;
+  const isSubCodeInput = !!subForm.value.categoryCode;
 
-  // 둘 다 입력이 안된 경우
-  if (!isTopInput && !isSubInput) {
-    showError('상위 카테고리 또는 카테고리 정보를 입력하세요.');
-    return;
-  }
-  // 하위카테고리 쪽에서 3개 모두 입력이 아닌 경우
-  if (
-      (subForm.value.topCategoryId || subForm.value.categoryName || subForm.value.categoryCode) &&
-      !isSubInput
-  ) {
-    showError('카테고리 등록 시 상위 카테고리, 카테고리명, 카테고리 코드를 모두 입력하세요.');
+  // 1. 전체 아무것도 입력 안 했을 때
+  if (!isTopInput && !isTopCategorySelected && !isSubNameInput && !isSubCodeInput) {
+    showError('상위 카테고리를 입력해주세요.');
     return;
   }
 
+  // 2. 하위 카테고리 등록(카테고리) 필드별 체크
+  if (isTopCategorySelected && (!isSubNameInput || !isSubCodeInput)) {
+    if (!isSubNameInput) {
+      showError('카테고리명을 입력해주세요.');
+      return;
+    }
+    if  (isSubCodeInput || !/^[A-Z]{2}$/.test(subForm.value.categoryCode)) {
+      showError('카테고리 코드는 대문자 2자리로 입력해주세요. (예: CF)');
+      return;
+    }
+  }
+
+  // 3. 카테고리명만 입력돼있고 상위 카테고리 미선택시
+  if (!isTopCategorySelected && (isSubNameInput || isSubCodeInput)) {
+    showError('상위 카테고리를 선택해주세요.');
+    return;
+  }
+
+  // 4. 정상 입력일 때 등록 진행
   try {
     let topRegistered = false;
     let subRegistered = false;
+
     // 상위 카테고리 등록
     if (isTopInput) {
       await createTopCategory(topForm.value);
       topRegistered = true;
     }
     // 하위 카테고리 등록
-    if (isSubInput) {
+    if (isTopCategorySelected && isSubNameInput && isSubCodeInput) {
       await createCategory(subForm.value);
       subRegistered = true;
     }
     if  (topRegistered) {
-      doneModal.value = {show: true, type: 'register', isTop: true}; // 상위만
+      doneModal.value = {show: true, type: 'register', isTop: true};
     } else if (subRegistered) {
-      doneModal.value = {show: true, type: 'register', isTop: false}; // 하위만
+      doneModal.value = {show: true, type: 'register', isTop: false};
     }
-    // goBack()은 완료 모달 닫힐 때 실행 (아래 Tip 참고)
+    // goBack()은 완료 모달 닫힐 때 실행
   } catch (e) {
-    // Axios 에러 구조에 따라 response.data.message가 중복에 대한 안내라면 분기
     let msg = ''
     if (e.response && e.response.data && e.response.data.message) {
       msg = e.response.data.message
       if (e.response.status === 20001 || 21001) {
-        showError('동일한 이름의 카테고리가 이미 존재합니다.')
-        return
+        showError('동일한 이름의 카테고리가 이미 존재합니다.');
+        return;
       }
-      // 다른 서버 에러메시지도 바로 안내
-      showError(msg)
-      return
+      showError(msg);
+      return;
     }
-    showError('등록 실패했습니다.')
+    showError('등록 실패했습니다.');
   }
 }
+
 
 const goBack = () => {
   router.push('/category/list')
@@ -233,4 +262,23 @@ const goBack = () => {
   .form-grid { flex-direction: column; gap: 24px;}
   .form-actions { margin-top: 24px;}
 }
+
+.status-btn {
+  padding: 6px 16px;
+  font-size: var(--font-button);
+  font-weight: 500;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+  white-space: nowrap;
+}
+.status-btn.primary {
+  background: var(--color-primary);
+  color: #fff;
+}
+.status-btn.primary:hover {
+  background: var(--color-primary);
+}
+
 </style>

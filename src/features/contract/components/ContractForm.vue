@@ -45,7 +45,7 @@
           </div>
           <div class="form-group">
             <label>기본 단가</label>
-            <input type="text" :value="formatNumber(contract.basePrice)" readonly />
+            <input type="text" :value="formatPrice(contract.basePrice)" readonly />
           </div>
           <div class="form-group">
             <label>단위 수량</label>
@@ -60,13 +60,6 @@
     </template>
 
     <template #detail>
-<!--      <div class="modal-actions">-->
-<!--        <button v-if="!isEditing" class="save" @click="startEdit">계약 수정</button>-->
-<!--        <button v-if="!isEditing" class="expire" @click="expireContract">계약 만료</button>-->
-<!--        <button v-if="isEditing" class="save" @click="saveEdit">저장</button>-->
-<!--        <button v-if="isEditing" class="cancel" @click="cancelEdit">취소</button>-->
-<!--      </div>-->
-
 
       <div class="modal-actions">
         <!-- 만료 전: 수정/만료 버튼 -->
@@ -78,7 +71,7 @@
         <button
             v-if="!isEditing && contract.contractStatus !== 'EXPIRED'"
             class="expire"
-            @click="expireContract"
+            @click="expireModalOpen = true"
         >계약 만료</button>
         <!-- 수정 중 && 만료 전: 저장/취소 -->
         <button
@@ -106,7 +99,16 @@
       <div class="product-detail-grid">
         <div class="form-group">
           <label>계약 단가</label>
-          <input :readonly="!isEditing" v-model="edit.contractPrice" />
+          <input
+              v-if="isEditing"
+              v-model="edit.contractPrice"
+              :readonly="!isEditing"
+          />
+          <input
+              v-else
+              :value="formatPrice(edit.contractPrice)"
+              readonly
+          />
         </div>
         <div class="form-group">
           <label>최소 발주 수량(MOQ)</label>
@@ -114,7 +116,16 @@
         </div>
         <div class="form-group">
           <label>납기일</label>
-          <input :readonly="!isEditing" v-model="edit.leadTime" />
+          <input
+              v-if="isEditing"
+              v-model="edit.leadTime"
+              :readonly="!isEditing"
+          />
+          <input
+              v-else
+              :value="formatDay(edit.leadTime)"
+              readonly
+          />
         </div>
         <div class="form-group">
           <label>계약 시작일</label>
@@ -141,6 +152,12 @@
     </template>
   </DetailLayout>
 
+  <ContractExpireConfirmModal
+      v-if="expireModalOpen"
+      :contract-id="contract.contractId"
+      @close="expireModalOpen = false"
+      @expired="handleExpireSuccess"
+  />
   <ContractDoneModal
       v-if="doneModalOpen"
       :type="doneModalType"
@@ -159,6 +176,7 @@ import { updateContract } from '@/features/contract/api.js'
 import DetailLayout from "@/components/layout/DetailLayout.vue";
 import ContractErrorModal from "@/features/contract/components/ContractErrorModal.vue";
 import ContractDoneModal from "@/features/contract/components/ContractDoneModal.vue";
+import ContractExpireConfirmModal from "@/features/contract/components/ContractExpireConfirmModal.vue";
 
 const props = defineProps({
   contract: { type: Object, required: true }
@@ -178,6 +196,15 @@ const ErrorMsg = ref('')
 function showError(msg) {
   ErrorMsg.value = msg
   ErrorOpen.value = true
+}
+
+const expireModalOpen = ref(false)
+
+function handleExpireSuccess() {
+  console.log('만료 처리 성공, 새로고침 emit')
+  doneModalType.value = 'expire'
+  doneModalOpen.value = true
+  emit('refresh')
 }
 
 // contract → edit 복사
@@ -244,84 +271,36 @@ function cancelEdit() {
   }
 }
 
-// 계약 만료 처리
-async function expireContract() {
-  if (props.contract.contractStatus === 'EXPIRED') {
-    alert('이미 만료된 계약입니다.')
-    return
-  }
-  if (!confirm('정말로 계약을 만료 처리하시겠습니까?')) return
-  try {
-    await updateContract(props.contract.contractId, {
-      contractStatus: 'EXPIRED'
-    })
-    alert('계약이 만료되었습니다.')
-    emit('refresh')
-  } catch (e) {
-    alert('만료 처리 실패: ' + (e.response?.data?.message || e.message))
-  }
-}
-
-
-
-
-// // 편집 시작
-// function startEdit() {
-//   isEditing.value = true
-// }
-//
-// // 저장
-// async function saveEdit() {
-//   try {
-//     await updateContract(props.contract.contractId, {
-//       contractPrice: edit.value.contractPrice,
-//       minOrderQty: edit.value.minOrderQty,
-//       leadTime: edit.value.leadTime,
-//       contractStartDate: edit.value.contractStartDate,
-//       contractEndDate: edit.value.contractEndDate,
-//       // contractStatus는 변경 X
-//     })
-//     alert('계약 정보가 수정되었습니다.')
-//     isEditing.value = false
-//     emit('refresh')
-//   } catch (e) {
-//     alert('수정 실패: ' + (e.response?.data?.message || e.message))
-//   }
-// }
-//
-// // 편집 취소
-// function cancelEdit() {
-//   isEditing.value = false
-//   // contract → edit 복구
-//   edit.value = {
-//     contractPrice: props.contract.contractPrice ?? "",
-//     minOrderQty: props.contract.minOrderQty ?? "",
-//     leadTime: props.contract.leadTime ?? "",
-//     contractStartDate: props.contract.contractStartDate ?? "",
-//     contractEndDate: props.contract.contractEndDate ?? "",
-//     contractStatus: props.contract.contractStatus ?? "",
-//   }
-// }
-//
 // // 계약 만료 처리
 // async function expireContract() {
-//   if (!confirm('정말로 계약을 만료 처리하시겠습니까?')) return
+//   if (props.contract.contractStatus === 'EXPIRED') {
+//     showError('이미 만료된 계약입니다.')
+//     return
+//   }
 //   try {
 //     await updateContract(props.contract.contractId, {
 //       contractStatus: 'EXPIRED'
 //     })
-//     alert('계약이 만료되었습니다.')
+//     doneModalType.value = 'expire'
+//     doneModalOpen.value = true
 //     emit('refresh')
 //   } catch (e) {
-//     alert('만료 처리 실패: ' + (e.response?.data?.message || e.message))
+//     showError('만료 처리 실패: ' + (e.response?.data?.message || e.message))
 //   }
 // }
 
-
-// 숫자 콤마 포매터
 function formatNumber(val) {
   if (val == null || val === "" || isNaN(val)) return "-"
   return Number(val).toLocaleString()
+}
+
+function formatPrice(val) {
+  if (val == null || val === "" || isNaN(val)) return "-";
+  return Number(val).toLocaleString() + "원";
+}
+function formatDay(val) {
+  if (val == null || val === "" || isNaN(val)) return "-";
+  return val + "일";
 }
 </script>
 

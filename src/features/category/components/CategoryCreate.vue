@@ -21,7 +21,6 @@
 </template>
 
 <script setup>
-import { useSlots } from 'vue'
 defineProps({
   title: String,
   description: String

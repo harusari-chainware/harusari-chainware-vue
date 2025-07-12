@@ -186,6 +186,10 @@ function showError(msg) {
   ErrorOpen.value = true
 }
 
+const onDeleteSuccess = () => {
+  router.push('/categories')
+}
+
 // 등록/수정 완료 모달 상태
 const doneModal = ref({
   show: false,

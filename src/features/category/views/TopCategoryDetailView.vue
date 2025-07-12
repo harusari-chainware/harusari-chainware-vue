@@ -84,7 +84,7 @@
       :category-edit-data="selectedCategory"
       :top-categories="topCategories"
       @close="showCategoryModal = false"
-      @refresh="loadTopCategory"
+      @refresh="handleRefresh"
   />
 
   <!-- 등록/수정 완료 모달 -->
@@ -109,7 +109,7 @@
       :target-id="deleteTarget.id"
       :is-top="deleteTarget.isTop"
       @close="deleteTarget = null"
-      @deleted="refreshList"
+      @deleted="loadTopCategory"
   />
 
 </template>
@@ -169,14 +169,9 @@ const editedCategory = ref({
 // 등록/수정 완료 모달 상태
 const doneModal = ref({
   show: false,
-  type: 'edit',    // 'register' | 'edit'
+  type: 'edit',    //  'register' | 'edit' | 'delete'
   isTop: false
 })
-
-const handleDelete = () => {
-  // 실제 삭제 로직 or 삭제 모달 띄우기
-  deleteTarget.value = { id: topCategoryId, isTop: true }
-}
 
 const topCategories = ref([])
 
@@ -184,9 +179,6 @@ const loadTopCategory = async () => {
   // 1. 상세 데이터(카테고리 목록 포함)
   const res = await fetchTopCategoryWithProducts(topCategoryId)
   const topCategoryData = res.data.data
-
-  console.log('[A] API categories:', topCategoryData.categories)
-
 
   // 2. 드롭다운용 상위카테고리 리스트
   const allListRes = await fetchAllListTopCategories()
@@ -204,9 +196,6 @@ const loadTopCategory = async () => {
       ? allTopRes.data.data.topCategories
       : []
 
-  console.log('[B] allTopCategories:', allTopCategories)
-
-  console.log('[C] 병합 전 categories:', topCategoryData.categories)
   // 4. 하위카테고리 병합 (카테고리 코드/상위명/ID 등)
   topCategoryData.categories = (topCategoryData.categories ?? []).map(cat => {
     let matchedTop = allTopCategories.find(top =>
@@ -221,12 +210,7 @@ const loadTopCategory = async () => {
       topCategoryName: matchedTop?.topCategoryName ?? ''
     }
   })
-
-  console.log('[D] 병합 후 categories:', topCategoryData.categories)
-
   detail.value = topCategoryData
-
-  console.log('[E] 최종 detail.categories:', detail.value.categories)
 }
 
 const saveEdit = async () => {
@@ -238,14 +222,13 @@ const saveEdit = async () => {
     isEditing.value = false
     await loadTopCategory()
   } catch (e) {
-    return showError( '수정 실패했습니다.')
+    showError( '수정 실패했습니다.')
   }
 }
 
 const pagedCategories = computed(() => {
   const start = (page.value - 1) * itemsPerPage
   const arr = detail.value.categories.slice(start, start + itemsPerPage)
-  console.log('[F] pagedCategories:', arr)
   return arr
 })
 
@@ -268,6 +251,19 @@ const cancelCategoryEdit = () => {
   }
 }
 
+const handleRefresh = async (opts = {}) => {
+  await loadTopCategory()
+  showCategoryModal.value = false // 모달 닫기
+  // 수정 완료 모달 옵션으로 오면 띄움
+  if (opts && opts.showDone) {
+    doneModal.value = {
+      show: true,
+      type: opts.type ?? 'edit',
+      isTop: opts.isTop ?? false
+    }
+  }
+}
+
 const saveCategoryEdit = async (category) => {
   try {
     await updateCategory(category.categoryId, { ...editedCategory.value })
@@ -284,30 +280,19 @@ const getTopCategoryName = (id) => {
   return match ? match.topCategoryName : '-'
 }
 
-const deleteCategoryHandler = async (category) => {
-  if (category.productCount > 0) {
-    return showError( '해당 카테고리에 연결된 제품이 있어 삭제할 수 없습니다.')
+const handleDelete = () => {
+  if (detail.value.categories.length > 0) {
+    return showError( '하위 카테고리가 존재하여 삭제할 수 없습니다.')
   }
-  deleteTarget.value = { id: category.categoryId, isTop: false }
-
-  const handleDelete = () => {
-    if (detail.value.categories.length > 0) {
-      return showError( '하위 카테고리가 존재하여 삭제할 수 없습니다.')
-    }
-    deleteTarget.value = { id: topCategoryId, isTop: true }
-  }
-
-  try {
-    await deleteCategory(category.categoryId)
-    doneModal.value = { show: true, type: 'delete', isTop: false }
-    await loadTopCategory()
-  } catch (e) {
-    console.error(e)
-    return showError( '카테고리 삭제 실패했습니다.')
-  }
+  deleteTarget.value = { id: topCategoryId, isTop: true }
 }
 
-
+const deleteCategoryHandler = (category) => {
+  if (category.productCount > 0) {
+    return showError('해당 카테고리에 연결된 제품이 있어 삭제할 수 없습니다.')
+  }
+  deleteTarget.value = { id: category.categoryId, isTop: false }
+}
 
 onMounted(() => {
   loadTopCategory()

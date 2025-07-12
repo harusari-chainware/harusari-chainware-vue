@@ -67,6 +67,22 @@
       <StatusButton type="primary" @click="handleSubmit">등록</StatusButton>
       <StatusButton type="default" @click="handleCancel">취소</StatusButton>
     </div>
+
+  <!-- 등록/수정 완료 모달 -->
+  <ProductDoneModal
+      v-if="doneModal.show"
+      :type="doneModal.type"
+      @close="handleDoneClose"
+  />
+
+  <div>
+    <ProductErrorModal
+        v-if="ErrorOpen"
+        :message="ErrorMsg"
+        @close="ErrorOpen = false"
+    />
+  </div>
+
 </template>
 
 <script setup>
@@ -76,6 +92,8 @@ import StatusButton from '@/components/common/StatusButton.vue'
 import {fetchAllListTopCategories, fetchAllTopCategories} from '@/features/category/api.js'
 import { createProduct } from '@/features/product/api.js'
 import ProductLayout from "@/features/product/components/ProductLayout.vue";
+import ProductDoneModal from "@/features/product/components/ProductDoneModal.vue";
+import ProductErrorModal from "@/features/product/components/ProductErrorModal.vue";
 
 // 폼 상태
 const form = ref({
@@ -91,6 +109,22 @@ const form = ref({
   unitSpec: '',
   shelfLife: '',
 })
+
+const ErrorOpen = ref(false)
+const ErrorMsg = ref('')
+
+function showError(msg) {
+  ErrorMsg.value = msg
+  ErrorOpen.value = true
+}
+
+// 등록/수정 완료 모달 상태
+const doneModal = ref({
+  show: false,
+  type: 'register',    //  'register' | 'edit' | 'delete'
+})
+
+const router = useRouter()
 
 // 드롭다운용 옵션
 const topCategoryOptions = ref([])
@@ -138,8 +172,6 @@ watch(() => form.value.categoryId, (newVal) => {
   form.value.categoryCode = selected ? selected.code : ''
 })
 
-const router = useRouter()
-
 const storeTypeOptions = [
   { value: '', label: '선택' },
   { value: 'ROOM_TEMPERATURE', label: 'ROOM_TEMPERATURE' },
@@ -148,20 +180,22 @@ const storeTypeOptions = [
 ]
 
 const submitting = ref(false)
+
 const handleSubmit = async () => {
   if (submitting.value) return;
   submitting.value = true;
   try {
     await createProduct(form.value)
-    router.push('/product/list')
+    doneModal.value = { show: true, type: 'register' }
   } catch (e) {
-    alert('제품 등록에 실패했습니다.')
+    showError('제품 등록에 실패했습니다.');
   } finally {
     submitting.value = false;
   }
 }
 
-const handleCancel = () => {
+const handleDoneClose  = () => {
+  doneModal.value.show = false
   router.push('/product/list')
 }
 </script>

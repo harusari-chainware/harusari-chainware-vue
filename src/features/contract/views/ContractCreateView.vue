@@ -133,12 +133,10 @@
             </div>
             <div class="row">
               <label>계약 시작일</label>
-<!--              <input v-model="form.contractStartDate" class="input" type="date" />-->
               <FilterDate
                   v-model="form.contractStartDate "
               />
               <label>계약 종료일</label>
-<!--              <input v-model="form.contractEndDate" class="input" type="date" />-->
               <FilterDate
                   v-model="form.contractEndDate"
               />
@@ -151,23 +149,27 @@
     </template>
   </ContractLayout>
   <div class="form-actions">
-    <StatusButton type="primary" @click="handleSubmit">등록</StatusButton>
-    <StatusButton type="default" @click="goBack">취소</StatusButton>
+    <button class="primary" @click="handleSubmit">등록</button>
+    <button class="default" @click="goBack">취소</button>
   </div>
 
   <div>
-  <ContractDoneModal
-      v-if="modal.show"
-      :type="modal.type"
-      @close="modal.show = false"
-  />
+    <ContractDoneModal
+        v-if="doneModalOpen"
+        :type="doneModalType"
+        @close="() => { doneModalOpen = false; router.push('/contract/list') }"
+    />
+    <ContractErrorModal
+        v-if="ErrorOpen"
+        :message="ErrorMsg"
+        @close="ErrorOpen = false"
+    />
   </div>
 </template>
 
 <script setup>
 import { ref } from "vue"
 import { useRouter } from "vue-router"
-import StatusButton from '@/components/common/StatusButton.vue'
 import { createContract } from '@/features/contract/api.js'
 import { fetchProducts } from '@/features/product/api.js'
 import { fetchCategoryDetail } from '@/features/category/api.js'
@@ -175,6 +177,7 @@ import { fetchVendors, fetchVendorContractInfo } from '@/features/vendor/api.js'
 import ContractLayout from "@/features/contract/components/ContractLayout.vue";
 import FilterDate from '@/components/common/filters/FilterDate.vue'
 import ContractDoneModal from "@/features/contract/components/ContractDoneModal.vue";
+import ContractErrorModal from "@/features/contract/components/ContractErrorModal.vue";
 
 const router = useRouter()
 
@@ -216,10 +219,16 @@ const filteredProducts = ref([])
 const showSuggestions = ref(false)
 const selectedIdx = ref(-1)
 
-const modal = ref({
-  show: false,
-  type: 'register' // 'register' | 'edit' | 'delete'
-})
+const doneModalOpen = ref(false)
+const doneModalType = ref('register')
+
+const ErrorOpen = ref(false)
+const ErrorMsg = ref('')
+
+function showError(msg) {
+  ErrorMsg.value = msg
+  ErrorOpen.value = true
+}
 
 // 등록 성공시
 const onRegisterSuccess = () => {
@@ -392,10 +401,10 @@ const handleSubmit = async () => {
 
   try {
     await createContract(form.value);
-    modal.value = { show: true, type: 'register' }
-    router.push('/contract/list');
+    doneModalType.value = 'register'
+    doneModalOpen.value = true
   } catch (e) {
-    alert('계약 등록에 실패했습니다.');
+    showError('계약 등록에 실패했습니다.\n' + (e?.response?.data?.message ?? e.message))
   }
 };
 </script>
@@ -515,5 +524,32 @@ label {
   gap: 24px;
   margin-top: 40px;
 }
+
+.form-actions button.primary {
+  padding: 6px 16px;
+  font-size: var(--font-button);
+  font-weight: 500;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+  white-space: nowrap;
+  background-color: var(--color-primary);
+  color: white;
+}
+
+.form-actions button.default {
+  padding: 6px 16px;
+  font-size: var(--font-button);
+  font-weight: 500;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: 1px solid #d1d5db;
+  white-space: nowrap;
+  background-color: var(--color-gray-200);
+  color: #000000;
+}
+
 
 </style>

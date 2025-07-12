@@ -1,7 +1,7 @@
 <template>
   <div class="modal-backdrop">
     <div class="modal-box">
-      <h2 class="modal-title">{{ title }}</h2>
+      <h2 class="modal-title">알림</h2>
       <p>{{ message }}</p>
       <div class="modal-actions">
         <button @click="emit('close')">확인</button>
@@ -11,40 +11,24 @@
 </template>
 
 <script setup>
-import { defineProps, defineEmits } from 'vue'
-
-const props = defineProps({
-  type: {
-    type: String,
-    default: 'register', // 'register' | 'edit' | 'delete' | 'expire'
-    validator: v => ['register', 'edit', 'delete', 'expire'].includes(v)
-  }
-})
-
+import { defineProps, defineEmits, onMounted, onUnmounted } from 'vue'
+const props = defineProps({ message: String })
 const emit = defineEmits(['close'])
 
-const titleMap = {
-  register: '거래처별 계약 제품 등록 완료',
-  edit: '거래처별 계약 제품 수정 완료',
-  delete: '거래처별 계약 제품 삭제 완료',
-  expire: '계약 만료 처리 완료'  // 추가
-}
-const title = titleMap[props.type] ?? '완료'
-
-const messageMap = {
-  register: '거래처별 계약 제품이 성공적으로 등록되었습니다.',
-  edit: '거래처별 계약 제품이 성공적으로 수정되었습니다.',
-  delete: '거래처별 계약 제품이 성공적으로 삭제되었습니다.',
-  expire: '계약이 성공적으로 만료 처리되었습니다.'  // 추가
-}
-const message = messageMap[props.type] ?? '완료되었습니다.'
+onMounted(() => {
+  const handler = e => {
+    if (e.key === 'Escape') emit('close')
+  }
+  window.addEventListener('keydown', handler)
+  onUnmounted(() => window.removeEventListener('keydown', handler))
+})
 </script>
 
 <style scoped>
 .modal-backdrop {
   position: fixed;
+  background: transparent !important;
   inset: 0;
-  background: rgba(40, 50, 65, 0.19);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -64,13 +48,13 @@ const message = messageMap[props.type] ?? '완료되었습니다.'
 .modal-title {
   font-size: 1.15rem;
   font-weight: 700;
-  color: #3796ff;
+  color: #f8a203;
   margin-bottom: 17px;
   letter-spacing: -0.01em;
   text-align: left;
 }
 .modal-box p {
-  color: #282b32;
+  color: #000;
   font-size: 1.01rem;
   margin-bottom: 7px;
 }
@@ -88,12 +72,12 @@ const message = messageMap[props.type] ?? '완료되었습니다.'
   font-size: 1rem;
   cursor: pointer;
   font-weight: 600;
-  background: #3796ff;
+  background: #f8a203;
   color: #fff;
   transition: background 0.16s, color 0.16s;
 }
 .modal-actions button:hover {
-  background: #226cd3;
+  background: #f8a203;
 }
 @media (max-width: 540px) {
   .modal-box {

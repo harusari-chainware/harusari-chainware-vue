@@ -11,33 +11,35 @@
 </template>
 
 <script setup>
-import { defineProps, defineEmits } from 'vue'
+import { defineProps, defineEmits, computed } from 'vue'
 
 const props = defineProps({
   type: {
     type: String,
-    default: 'register', // 'register' | 'edit' | 'delete' | 'expire'
-    validator: v => ['register', 'edit', 'delete', 'expire'].includes(v)
+    default: 'register', // 'register' | 'edit' | 'delete'
+    validator: v => ['register', 'edit', 'delete'].includes(v)
   }
 })
 
 const emit = defineEmits(['close'])
 
-const titleMap = {
-  register: '거래처별 계약 제품 등록 완료',
-  edit: '거래처별 계약 제품 수정 완료',
-  delete: '거래처별 계약 제품 삭제 완료',
-  expire: '계약 만료 처리 완료'  // 추가
-}
-const title = titleMap[props.type] ?? '완료'
+const title = computed(() => {
+  switch (props.type) {
+    case 'register': return '등록 완료'
+    case 'edit':     return '수정 완료'
+    case 'delete':   return '삭제 완료'
+    default:         return '완료'
+  }
+})
 
-const messageMap = {
-  register: '거래처별 계약 제품이 성공적으로 등록되었습니다.',
-  edit: '거래처별 계약 제품이 성공적으로 수정되었습니다.',
-  delete: '거래처별 계약 제품이 성공적으로 삭제되었습니다.',
-  expire: '계약이 성공적으로 만료 처리되었습니다.'  // 추가
-}
-const message = messageMap[props.type] ?? '완료되었습니다.'
+const message = computed(() => {
+  switch (props.type) {
+    case 'register': return '제품 정보가 성공적으로 등록되었습니다.'
+    case 'edit':     return '제품 정보가 성공적으로 수정되었습니다.'
+    case 'delete':   return '제품 정보가 성공적으로 삭제되었습니다.'
+    default:         return '완료되었습니다.'
+  }
+})
 </script>
 
 <style scoped>
