@@ -49,3 +49,19 @@ export const vendorMemberRegister = (formData) => {
         headers: {'Content-Type': 'multipart/form-data'}
     });
 }
+
+export const getMyProfile = () => {
+    return api.get('/members/me');
+};
+
+export const updateMyInfo = (formData) => {
+    return api.put('/members/me', JSON.stringify(formData), {
+        headers: {'Content-Type': 'application/json'}
+    });
+}
+
+export const changePassword = (formData) => {
+    return api.put("/members/password", JSON.stringify(formData), {
+        headers: {'Content-Type': 'application/json'}
+    });
+}
