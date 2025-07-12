@@ -2,6 +2,7 @@
 import MemberListView from "@/features/member/master/views/MemberListView.vue";
 import MemberDetailView from "@/features/member/master/views/MemberDetailView.vue";
 import MemberDummyView from "@/features/member/master/views/MemberDummyView.vue";
+import MemberRegisterView from "@/features/member/master/views/MemberRegisterView.vue";
 
 export const memberRoutes = [
     {
@@ -19,7 +20,7 @@ export const memberRoutes = [
     {
         path: '/member/register',
         name: 'MemberRegister',
-        // component: MemberRegisterView,
+        component: MemberRegisterView,
         meta: {requiresAuth: true, roles: ['MASTER']}
     },
     {

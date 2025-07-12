@@ -113,12 +113,9 @@ async function handleLogin() {
 }
 </script>
 
-<style>
-@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css');
-
+<style scoped>
 * {
     box-sizing: border-box;
-    font-family: 'Noto Sans KR', sans-serif;
     margin: 0;
     padding: 0;
 }
@@ -272,7 +269,6 @@ input[type="password"]:focus {
 }
 
 button:hover {
-    background: linear-gradient(135deg, #349ec5, #40a7cb);
     transform: scale(1.02);
 }
 

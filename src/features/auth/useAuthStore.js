@@ -23,12 +23,8 @@ export const useAuthStore = defineStore("auth", {
             this.authority = authority;
         },
         clearAuth() {
-            if (!this.saveId) {
-                this.email = "";
-            }
             this.accessToken = "";
             this.authority = "";
-            localStorage.removeItem('auth');
         },
         async refreshToken() {
             try {
