@@ -357,12 +357,10 @@ button {
   font-size: 13px;
   font-weight: 500;
   outline: none;
-  border: none;
   cursor: pointer;
   transition: all 0.15s;
   background: #f5f7fa;
   color: #357ae8;
-  border: 1px solid #c1d3f9;
   margin: 0 2px;
 }
 .action-btn:hover {
