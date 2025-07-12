@@ -44,7 +44,7 @@
                   </li>
                 </ul>
               </div>
-              <button class="section-btn" @mousedown.prevent="searchBtnSelectVendor">검색</button>
+              <button class="section-btn" @click="searchBtnSelectVendor">검색</button>
             </div>
             <div class="row">
               <label>사업자 등록번호</label>
@@ -89,7 +89,8 @@
                   </li>
                 </ul>
               </div>
-              <button class="section-btn">검색</button>
+              <button class="section-btn" @click="searchBtnSelectProduct">검색</button>
+<!--              <button class="section-btn">검색</button>-->
             </div>
 
             <div class="row">
@@ -247,11 +248,11 @@ const onDeleteSuccess = () => {
 
 // 거래처 목록 불러오기
 const searchVendors = async () => {
-  if (!vendorNameInput.value) {
-    filteredVendors.value = []
-    showVendorSuggestions.value = false
-    return
-  }
+  // if (!vendorNameInput.value) {
+  //   filteredVendors.value = []
+  //   showVendorSuggestions.value = false
+  //   return
+  // }
   try {
     // (아래 fetchVendors는 반드시 vendor api.js에서 export 해야 함)
     const res = await fetchVendors({
@@ -294,11 +295,24 @@ const selectVendor = async (v) => {
   }
   showVendorSuggestions.value = false
 }
-const searchBtnSelectVendor = () => {
-  if (filteredVendors.value.length) {
-    selectVendor(filteredVendors.value[0])
-  }
-}
+// const searchBtnSelectVendor = () => {
+//   if (filteredVendors.value.length) {
+//     selectVendor(filteredVendors.value[0])
+//   }
+// }
+
+const searchBtnSelectVendor = async () => {
+  await searchVendors();
+  showVendorSuggestions.value = true;
+  selectedVendorIdx.value = filteredVendors.value.length > 0 ? 0 : -1;
+};
+
+const searchBtnSelectProduct = async () => {
+  await searchProducts();
+  showSuggestions.value = true;
+  selectedIdx.value = filteredProducts.value.length > 0 ? 0 : -1;
+};
+
 const moveVendor = (dir) => {
   if (!showVendorSuggestions.value || !filteredVendors.value.length) return
   let next = selectedVendorIdx.value + dir
@@ -316,11 +330,11 @@ const closeVendorSuggestions = () => {
 }
 
 const searchProducts = async () => {
-  if (!productNameInput.value) {
-    filteredProducts.value = []
-    showSuggestions.value = false
-    return
-  }
+  // if (!productNameInput.value) {
+  //   filteredProducts.value = []
+  //   showSuggestions.value = false
+  //   return
+  // }
   try {
     const res = await fetchProducts({
         productName: productNameInput.value,
