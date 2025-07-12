@@ -10,6 +10,10 @@
       <span>{{ getCategoryName(item.categoryId) || '-' }}</span>
     </template>
 
+    <template #cell-basePrice="{ value }">
+      <span>{{ formatPrice(value) }}</span>
+    </template>
+
     <!-- 보관상태 -->
     <template #cell-storeType="{ value }">
       <span>{{ value }}</span>
@@ -121,6 +125,12 @@ function padProductCode(productCode) {
   if (parts.length !== 3) return productCode;
   const num = parts[2].padStart(3, '0');
   return `${parts[0]}-${parts[1]}-${num}`;
+}
+
+function formatPrice(value) {
+  if (value == null || value === '') return '-';
+  if (isNaN(value)) return value;
+  return Number(value).toLocaleString('ko-KR') + '원';
 }
 
 const getDetailLink = (item) => {

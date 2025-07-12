@@ -12,7 +12,7 @@ const isLoading = ref(true)
 
 onMounted(async () => {
   const res = await fetchContractDetail(contractId)
-  contract.value = res.data.data // 실제 응답에 맞게 구조 맞추세요
+  contract.value = res.data.data
   isLoading.value = false
 })
 </script>

@@ -17,7 +17,6 @@
     </template>
 
     <template #table>
-
       <ProductTable
           :products="pagedProducts"
           :categories="topCategories"
@@ -50,9 +49,9 @@ const goToCreatePage = () => {
   router.push('/product/register')
 }
 
-const openModal = () => {
-  alert('파일 출력 기능 준비 중!');
-}
+// const openModal = () => {
+//   alert('파일 출력 기능 준비 중!');
+// }
 
 // --- 필터/상태 ---
 const filters = reactive({

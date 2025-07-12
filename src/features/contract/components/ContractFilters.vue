@@ -135,71 +135,54 @@ const resetFilters = () => {
 </script>
 
 <style scoped>
-.filters-container {
-  background: #f7fafd;
-  padding: 32px 24px 16px 24px;
-  border-radius: 14px;
-  margin-bottom: 30px;
-}
-
-/* 반응형 그리드 */
-.filters-container {
-  background: #f7fafd;
-  padding: 32px 24px 16px 24px;
-  border-radius: 14px;
-  margin-bottom: 30px;
-  overflow-x: auto;
-}
-
-.filter-row {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr); /* 필드 개수에 맞게 숫자 맞추세요 */
-  gap: 32px;
-  align-items: flex-end;
-  min-width: 1100px;
-}
-
-.filter-row-buttons {
-  display: flex;
-  justify-content: flex-end;
-  margin-top: 18px;
-  padding-right: 6px;
-  /* min-width: 1100px; // 필요하면 추가 */
-}
-
-.filter-buttons {
-  display: flex;
-  gap: 12px;
-}
-
-@media (max-width: 1024px) {
-  .filter-row {
-    grid-template-columns: repeat(2, 1fr);  /* 태블릿: 2칸 */
-    gap: 24px;
-  }
-}
-@media (max-width: 600px) {
-  .filters-container {
-    padding: 16px 6px 8px 6px;
-    border-radius: 8px;
-  }
-  .filter-row {
-    grid-template-columns: 1fr;   /* 모바일: 1칸 */
-    gap: 14px;
-  }
-}
-.align-end {
-  align-items: flex-end;
-}
-
-.filter-input {
+.filters-container input,
+.filters-container select {
   border: 1px solid #e4e7ee;
   border-radius: 8px;
   background: #fafbfc;
   height: 38px;
   font-size: 1rem;
   padding: 0 13px;
-  color: var(--color-gray-900, #222);
+  color: #222;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.filter-row {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr); /* PC: 7칸 */
+  gap: 32px;
+  align-items: flex-end;
+  width: 100%;
+}
+
+.filter-label-input {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;    /* 겹침 방지용! */
+  width: 100%;     /* 부모 그리드 안에서 꽉 채움 */
+}
+
+.input,
+select,
+.filter-label-input > * {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.label {
+  font-weight: 500;
+  margin-bottom: 5px;
+}
+
+/* 버튼 영역 */
+.filter-row-buttons {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 18px;
+  padding-right: 6px;
 }
 
 .filter-buttons {
@@ -221,22 +204,36 @@ const resetFilters = () => {
   margin-left: 12px;
 }
 .reset-btn { background: #bfc7d3; color: #25435c; }
-.filter-label-input {
-  display: flex;
-  flex-direction: column;
-  min-width: 140px;
+
+/* 반응형: 칸 수 점진적으로 줄이기 */
+@media (max-width: 1200px) {
+  .filter-row {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 18px;
+  }
 }
-.label {
-  font-weight: 500;
-  margin-bottom: 5px;
+@media (max-width: 900px) {
+  .filter-row {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
 }
-.input {
-  border: 1px solid #e4e7ee;
-  border-radius: 8px;
-  background: #fafbfc;
-  height: 38px;
-  font-size: 1rem;
-  padding: 0 13px;
-  color: #222;
+@media (max-width: 600px) {
+  .filters-container {
+    padding: 16px 6px 8px 6px;
+    border-radius: 8px;
+  }
+  .filter-row {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
 }
+
+.filter-label[data-v-6c98926b] {
+  font-weight: 600;
+  font-size: 16px;                  /* 폰트 사이즈 16px */
+  color: var(--color-gray-800);
+  margin-bottom: 12px;
+}
+
 </style>

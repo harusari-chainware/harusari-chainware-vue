@@ -140,12 +140,25 @@
       </div>
     </template>
   </DetailLayout>
+
+  <ContractDoneModal
+      v-if="doneModalOpen"
+      :type="doneModalType"
+      @close="doneModalOpen = false"
+  />
+  <ContractErrorModal
+      v-if="ErrorOpen"
+      :message="ErrorMsg"
+      @close="ErrorOpen = false"
+  />
 </template>
 
 <script setup>
 import { ref, watch } from 'vue'
 import { updateContract } from '@/features/contract/api.js'
 import DetailLayout from "@/components/layout/DetailLayout.vue";
+import ContractErrorModal from "@/features/contract/components/ContractErrorModal.vue";
+import ContractDoneModal from "@/features/contract/components/ContractDoneModal.vue";
 
 const props = defineProps({
   contract: { type: Object, required: true }
@@ -155,6 +168,17 @@ const emit = defineEmits(['refresh'])
 
 const isEditing = ref(false)
 const edit = ref({})
+
+const doneModalOpen = ref(false)
+const doneModalType = ref('edit')
+
+const ErrorOpen = ref(false)
+const ErrorMsg = ref('')
+
+function showError(msg) {
+  ErrorMsg.value = msg
+  ErrorOpen.value = true
+}
 
 // contract → edit 복사
 watch(
@@ -175,7 +199,7 @@ watch(
 // 편집 시작
 function startEdit() {
   if (props.contract.contractStatus === 'EXPIRED') {
-    alert('만료된 계약은 수정할 수 없습니다.')
+    showError('만료된 계약은 수정할 수 없습니다.')
     return
   }
   isEditing.value = true
@@ -184,7 +208,7 @@ function startEdit() {
 // 저장
 async function saveEdit() {
   if (props.contract.contractStatus === 'EXPIRED') {
-    alert('만료된 계약은 수정할 수 없습니다.');
+    showError('만료된 계약은 수정할 수 없습니다.');
     isEditing.value = false;
     return;
   }
@@ -197,11 +221,12 @@ async function saveEdit() {
       contractEndDate: edit.value.contractEndDate,
       // contractStatus는 변경 X
     })
-    alert('계약 정보가 수정되었습니다.')
+    doneModalType.value = 'edit'
+    doneModalOpen.value = true
     isEditing.value = false
     emit('refresh')
   } catch (e) {
-    alert('수정 실패: ' + (e.response?.data?.message || e.message))
+    showError( e.response?.data?.message || e.message)
   }
 }
 
