@@ -47,14 +47,14 @@
 </template>
 
 <script setup>
-import {ref} from 'vue'
-import {useRouter} from 'vue-router'
+import { ref, watch } from 'vue'
+import { useRouter } from 'vue-router'
 import InputField from '@/components/common/fields/InputField.vue'
 import SelectField from '@/components/common/fields/SelectField.vue'
-import {updateMember, deleteMember} from '@/features/member/api.js'
+import { updateMember, deleteMember } from '@/features/member/api.js'
 
 const props = defineProps({
-    member: {type: Object, required: true}
+    member: { type: Object, required: true }
 })
 
 const emit = defineEmits(['refresh'])
@@ -68,18 +68,16 @@ const form = ref({
     position: ''
 })
 
-// 권한 옵션 (시스템 포함)
 const authorityOptions = [
-    {label: '마스터', value: 'MASTER'},
-    {label: '일반 관리자', value: 'GENERAL_MANAGER'},
-    {label: '책임 관리자', value: 'SENIOR_MANAGER'},
-    {label: '창고 관리자', value: 'WAREHOUSE_MANAGER'},
-    {label: '가맹점 담당자', value: 'FRANCHISE_MANAGER'},
-    {label: '거래처 담당자', value: 'VENDOR_MANAGER'},
-    {label: '시스템', value: 'SYSTEM'}
+    { label: '마스터', value: 'MASTER' },
+    { label: '일반 관리자', value: 'GENERAL_MANAGER' },
+    { label: '책임 관리자', value: 'SENIOR_MANAGER' },
+    { label: '창고 관리자', value: 'WAREHOUSE_MANAGER' },
+    { label: '가맹점 담당자', value: 'FRANCHISE_MANAGER' },
+    { label: '거래처 담당자', value: 'VENDOR_MANAGER' },
+    { label: '시스템', value: 'SYSTEM' }
 ]
 
-// Label → Enum 매핑
 const labelToValueMap = {
     '마스터': 'MASTER',
     '일반 관리자': 'GENERAL_MANAGER',
@@ -93,7 +91,7 @@ const labelToValueMap = {
 function formatDateTime(dateTime) {
     if (!dateTime) return '-'
     const date = new Date(dateTime)
-    return date.toLocaleString('ko-KR', {timeZone: 'Asia/Seoul'})
+    return date.toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' })
 }
 
 function formatPhoneNumber(phoneNumber) {
@@ -110,29 +108,21 @@ function formatPhoneNumber(phoneNumber) {
 
 function authorityBadgeClass(label) {
     switch (label) {
-        case '마스터':
-            return 'badge-master'
-        case '일반 관리자':
-            return 'badge-general'
-        case '책임 관리자':
-            return 'badge-senior'
-        case '창고 관리자':
-            return 'badge-warehouse'
-        case '가맹점 담당자':
-            return 'badge-franchise'
-        case '거래처 담당자':
-            return 'badge-vendor'
-        case '시스템':
-            return 'badge-system'
-        default:
-            return 'badge-default'
+        case '마스터': return 'badge-master'
+        case '일반 관리자': return 'badge-general'
+        case '책임 관리자': return 'badge-senior'
+        case '창고 관리자': return 'badge-warehouse'
+        case '가맹점 담당자': return 'badge-franchise'
+        case '거래처 담당자': return 'badge-vendor'
+        case '시스템': return 'badge-system'
+        default: return 'badge-default'
     }
 }
 
 const rows = [
-    {label: '회원 ID', value: props.member.memberId},
-    {label: '이메일', value: props.member.email},
-    {label: '이름', value: props.member.name, editable: true, key: 'name'},
+    { label: '회원 ID', value: props.member.memberId },
+    { label: '이메일', value: props.member.email },
+    { label: '이름', value: props.member.name, editable: true, key: 'name' },
     {
         label: '권한',
         value: props.member.authorityLabelKr,
@@ -141,11 +131,11 @@ const rows = [
         key: 'authorityName',
         badgeClass: authorityBadgeClass(props.member.authorityLabelKr)
     },
-    {label: '전화번호', value: formatPhoneNumber(props.member.phoneNumber), editable: true, key: 'phoneNumber'},
-    {label: '생년월일', value: props.member.birthDate},
-    {label: '직책', value: props.member.position, editable: true, key: 'position'},
-    {label: '가입일', value: formatDateTime(props.member.joinAt)},
-    {label: '수정일', value: formatDateTime(props.member.modifiedAt)},
+    { label: '전화번호', value: formatPhoneNumber(props.member.phoneNumber), editable: true, key: 'phoneNumber' },
+    { label: '생년월일', value: props.member.birthDate },
+    { label: '직책', value: props.member.position, editable: true, key: 'position' },
+    { label: '가입일', value: formatDateTime(props.member.joinAt) },
+    { label: '수정일', value: formatDateTime(props.member.modifiedAt) },
     {
         label: '탈퇴 여부',
         value: props.member.isDeleted ? '탈퇴' : '활동 중',
@@ -159,7 +149,7 @@ const enterEditMode = () => {
     form.value = {
         name: props.member.name ?? '',
         authorityName: labelToValueMap[props.member.authorityLabelKr] ?? 'MASTER',
-        phoneNumber: props.member.phoneNumber ?? '',
+        phoneNumber: formatPhoneNumber(props.member.phoneNumber ?? ''),
         position: props.member.position ?? ''
     }
 }
@@ -173,11 +163,14 @@ const handleSave = async () => {
         alert('권한을 선택해주세요.')
         return
     }
-    if (!confirm('회원 정보를 수정하시겠습니까?')) {
-        return
-    }
+    if (!confirm('회원 정보를 수정하시겠습니까?')) return
+
     try {
-        await updateMember(props.member.memberId, form.value)
+        const payload = {
+            ...form.value,
+            phoneNumber: form.value.phoneNumber.replace(/\D/g, '')
+        }
+        await updateMember(props.member.memberId, payload)
         emit('refresh')
         isEditMode.value = false
     } catch (error) {
@@ -187,18 +180,29 @@ const handleSave = async () => {
 }
 
 const handleDelete = async () => {
-    if (!confirm('정말로 이 회원을 탈퇴 처리하시겠습니까?')) {
-        return
-    }
+    if (!confirm('정말로 이 회원을 탈퇴 처리하시겠습니까?')) return
+
     try {
         await deleteMember(props.member.memberId)
         alert('회원이 탈퇴 처리되었습니다.')
-        router.push('/member/list')
+        await router.push('/member/list')
     } catch (error) {
         console.error('회원 탈퇴 실패:', error)
         alert('회원 탈퇴 처리에 실패했습니다.')
     }
 }
+
+watch(() => form.value.phoneNumber, (val) => {
+    if (!val) return
+    const digits = val.replace(/\D/g, '')
+    if (digits.length <= 3) {
+        form.value.phoneNumber = digits
+    } else if (digits.length <= 7) {
+        form.value.phoneNumber = digits.replace(/(\d{3})(\d{1,4})/, '$1-$2')
+    } else {
+        form.value.phoneNumber = digits.replace(/(\d{3})(\d{4})(\d{1,4})/, '$1-$2-$3')
+    }
+})
 </script>
 
 <style scoped>
