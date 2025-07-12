@@ -1,8 +1,9 @@
 /* 사용자가 보는 routes와 view를 연결 */
 import MemberListView from "@/features/member/master/views/MemberListView.vue";
 import MemberDetailView from "@/features/member/master/views/MemberDetailView.vue";
-import MemberDummyView from "@/features/member/master/views/MemberDummyView.vue";
 import MemberRegisterView from "@/features/member/master/views/MemberRegisterView.vue";
+import ChangePasswordView from "@/features/member/mypage/views/ChangePasswordView.vue";
+import MyProfileView from "@/features/member/mypage/views/MyProfileView.vue";
 
 export const memberRoutes = [
     {
@@ -24,9 +25,9 @@ export const memberRoutes = [
         meta: {requiresAuth: true, roles: ['MASTER']}
     },
     {
-        path: '/mypage/info',
-        name: 'MemberDummy5View',
-        component: MemberDummyView,
+        path: '/mypage/profile',
+        name: 'MyProfile',
+        component: MyProfileView,
         requiresAuth: true,
         roles: [
             'MASTER', 'GENERAL_MANAGER', 'SENIOR_MANAGER',
@@ -34,9 +35,9 @@ export const memberRoutes = [
         ]
     },
     {
-        path: '/mypage/password',
+        path: '/mypage/change-password',
         name: 'ChangePassword',
-        // component: ChangePasswordView,
+        component: ChangePasswordView,
         meta: {
             requiresAuth: true,
             roles: [
