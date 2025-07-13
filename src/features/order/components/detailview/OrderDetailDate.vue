@@ -6,7 +6,7 @@
     </InfoItem>
     <InfoItem>
       <template #label>수정 일시</template>
-      <template #value>{{ orderInfo.modifiedAt }}</template>
+      <template #value>{{ orderInfo.modifiedAt || '-' }}</template>
     </InfoItem>
   </InfoGroup>
 </template>

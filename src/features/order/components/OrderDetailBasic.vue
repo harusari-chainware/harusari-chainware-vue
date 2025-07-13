@@ -7,10 +7,13 @@
 
   <section class="grid grid-2 gap-6">
     <OrderDetailFranchise :franchiseOwnerInfo="franchiseOwnerInfo" />
-    <OrderDetailDeliveryHistory :history="deliveryHistory" />
+    <OrderDetailSummary :orderInfo="orderInfo" />
   </section>
 
-  <OrderDetailSummary :orderInfo="orderInfo" />
+  <OrderDetailDeliveryHistory
+      v-if="deliveryHistory.length"
+      :history="deliveryHistory"
+  />
   <OrderDetailRejectReason :reason="rejectReason" v-if="rejectReason" />
 </template>
 

@@ -7,12 +7,12 @@
     <InfoItem>
       <template #label>주문 상태</template>
       <template #value>
-        <StatusBadge :status="orderInfo.orderStatus || ''" />
+        <StatusBadge :status="orderInfo.orderStatus || '-'" />
       </template>
     </InfoItem>
     <InfoItem>
       <template #label>관련 배송 코드</template>
-      <template #value>{{ orderInfo.deliveryCode }}</template>
+      <template #value>{{ orderInfo.deliveryCode || '-' }}</template>
     </InfoItem>
   </InfoGroup>
 </template>

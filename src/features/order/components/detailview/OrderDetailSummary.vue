@@ -1,8 +1,8 @@
 <template>
-  <InfoGroup title="주문 정보" :columns="2">
+  <InfoGroup title="주문 정보">
     <InfoItem>
       <template #label>총 제품 수</template>
-      <template #value>{{ orderInfo.totalProductCount }}개</template>
+      <template #value>{{ formatAmount(orderInfo.totalProductCount) }}</template>
     </InfoItem>
     <InfoItem>
       <template #label>총 금액</template>
@@ -18,7 +18,7 @@
 <script setup>
 import InfoGroup from '@/components/layout/detailview/InfoGroup.vue'
 import InfoItem from '@/components/layout/detailview/InfoItem.vue'
-import { formatCurrency } from '@/utils/tableUtils.js'
+import {formatAmount, formatCurrency} from '@/utils/tableUtils.js'
 
 defineProps({
   orderInfo: Object

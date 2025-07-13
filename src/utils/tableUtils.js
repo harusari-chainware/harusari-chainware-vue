@@ -3,6 +3,12 @@ export const formatCurrency = (value) => {
     return `${value.toLocaleString()}원`;
 };
 
+// 개수
+export const formatAmount = (value) => {
+    if (typeof value !== 'number') return '-';
+    return `${value.toLocaleString()}개`;
+};
+
 //  날짜 (yyyy-MM-dd) 포맷
 export const formatDate = (value) => {
     if (!value) return '-';

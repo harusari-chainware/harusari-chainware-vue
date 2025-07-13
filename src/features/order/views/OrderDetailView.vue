@@ -14,7 +14,6 @@
 
     <!-- 기본 정보 영역 -->
     <template #basic>
-<!--      {{ orderData.orderInfo.orderCode }}-->
       <OrderDetailBasic
           v-if="orderData.orderInfo && orderData.franchiseOwnerInfo"
           :orderInfo="orderData.orderInfo"
@@ -26,7 +25,7 @@
 
     <!-- 상세 제품 테이블 -->
     <template #detail>
-<!--      <OrderDetailDetail :items="orderData.products || []" />-->
+      <OrderDetailDetail :items="orderData.products || []" />
     </template>
   </DetailLayout>
 </template>
