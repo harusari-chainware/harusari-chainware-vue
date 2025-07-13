@@ -82,8 +82,15 @@
         </div>
         <div class="col-span-2">
           <label>주소</label>
+<!--          <div v-if="!isEditing" class="readonly-field">-->
+<!--            {{ form.vendorAddress?.zipcode || '' }}<br>-->
+<!--            {{ form.vendorAddress?.addressRoad || '' }} {{ form.vendorAddress?.addressDetail || '' }}-->
+<!--          </div>-->
           <div v-if="!isEditing" class="readonly-field">
-            {{ form.vendorAddress?.zipcode || '' }} {{ form.vendorAddress?.addressRoad || '' }} {{ form.vendorAddress?.addressDetail || '' }}
+            {{ form.vendorAddress?.zipcode || '' }}
+            <span style="margin-left: 2em;">
+    {{ form.vendorAddress?.addressRoad || '' }}<span v-if="form.vendorAddress?.addressDetail"> {{ form.vendorAddress.addressDetail }}</span>
+  </span>
           </div>
           <div v-else style="display:flex; gap:6px;">
             <input v-model="form.vendorAddress.zipcode" class="input" placeholder="도로명주소" style="flex:2;" />

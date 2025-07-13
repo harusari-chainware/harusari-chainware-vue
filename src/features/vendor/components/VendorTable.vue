@@ -11,8 +11,13 @@
     <!-- 거래처 주소: road + detail 합침 -->
     <template #cell-vendorAddress="{ item }">
       <span>
+        {{ item.vendorAddress?.zipcode || '' }}<br>
         {{ item.vendorAddress?.addressRoad || '' }}{{ item.vendorAddress?.addressDetail ? ' ' + item.vendorAddress.addressDetail : '' }}
       </span>
+<!--      <span>{{ item.vendorAddress?.zipcode || '' }}</span>-->
+<!--      <span style="margin-left: 1.5em;">-->
+<!--    {{ item.vendorAddress?.addressRoad || '' }}{{ item.vendorAddress?.addressDetail ? ' ' + item.vendorAddress.addressDetail : '' }}-->
+<!--  </span>-->
     </template>
 
     <template #cell-vendorManagerName="{ value }">
@@ -122,7 +127,7 @@ function formatDate(dateString) {
   border-radius: 40px;
   min-width: 60px;
   text-align: center;
-  font-size: 1.15rem;
+  font-size: 0.8rem;
   padding: 0.25em 1.2em 0.25em 1.2em;
   line-height: 1.6;
   letter-spacing: -0.02em;
