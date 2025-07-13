@@ -2,8 +2,7 @@
   <div class="modal-backdrop">
     <div class="modal-box">
       <h2 class="modal-title">삭제 확인</h2>
-      <p> {{ isTop ? '상위 카테고리' : '카테고리' }}를 삭제하시겠습니까?</p>
-
+      <p>거래처별 계약 제품을 삭제하시겠습니까?</p>
       <div class="modal-actions">
         <button @click="emit('close')">취소</button>
         <button @click="handleDelete">삭제</button>
@@ -11,33 +10,28 @@
     </div>
   </div>
 
-  <!-- 등록/수정 완료 모달 -->
-  <CategoryDoneModal
+  <!-- 완료 모달 -->
+  <ContractDoneModal
       v-if="doneModal.show"
       :type="doneModal.type"
-      :is-top="doneModal.isTop"
-      @close="handleDoneClose"
+      @close="doneModal.show = false"
   />
 
-  <div>
-    <CategoryErrorModal
-        v-if="ErrorOpen"
-        :message="ErrorMsg"
-        @close="handleErrorClose"
-    />
-  </div>
-
+  <ContractErrorModal
+      v-if="ErrorOpen"
+      :message="ErrorMsg"
+      @close="ErrorOpen = false"
+  />
 </template>
 
 <script setup>
-import {defineProps, defineEmits, ref} from 'vue'
-import { deleteCategory, deleteTopCategory } from '@/features/category/api.js'
-import CategoryErrorModal from "@/features/category/components/CategoryErrorModal.vue";
-import CategoryDoneModal from "@/features/category/components/CategoryDoneModal.vue";
+import { defineProps, defineEmits, ref } from 'vue'
+import ContractErrorModal from "@/features/contract/components/ContractErrorModal.vue"
+import ContractDoneModal from "@/features/contract/components/ContractDoneModal.vue"
+import {deleteContract} from "@/features/contract/api.js";
 
 const props = defineProps({
-  targetId: Number,
-  isTop: Boolean
+  contractId: Number,
 })
 
 const emit = defineEmits(['close', 'deleted'])
@@ -45,40 +39,25 @@ const emit = defineEmits(['close', 'deleted'])
 const ErrorOpen = ref(false)
 const ErrorMsg = ref('')
 
-const handleErrorClose = () => {
-  ErrorOpen.value = false
-  emit('close')
-}
-
-// 등록/수정 완료 모달 상태
+// 완료 모달 상태
 const doneModal = ref({
   show: false,
-  type: 'delete',    // 'register' | 'edit'
-  isTop: false
+  type: 'delete'
 })
 
 const handleDelete = async () => {
   try {
-    if (props.isTop) {
-      await deleteTopCategory(props.targetId)
-    } else {
-      await deleteCategory(props.targetId)
-    }
-    doneModal.value = { show: true, type: 'delete', isTop: props.isTop }
-    // emit('deleted')는 완료모달 닫을 때
+    await deleteContract(props.contractId)
+    emit('deleted')
+    emit('close')
+    doneModal.value = { show: true, type: 'delete' }
   } catch (e) {
     ErrorMsg.value = (e?.response?.data?.message)
         ? e.response.data.message
         : '삭제 실패했습니다. 서버 오류'
     ErrorOpen.value = true
+    emit('close')
   }
-}
-
-// 완료 모달에서 확인 누르면 닫기
-const handleDoneClose = () => {
-  doneModal.value.show = false
-  emit('deleted')
-  emit('close')
 }
 </script>
 
@@ -92,7 +71,6 @@ const handleDoneClose = () => {
   justify-content: center;
   z-index: 1000;
 }
-
 .modal-box {
   background: #fff;
   padding: 38px 28px 28px 28px;
@@ -104,7 +82,6 @@ const handleDoneClose = () => {
   flex-direction: column;
   align-items: stretch;
 }
-
 .modal-title {
   font-size: 1.15rem;
   font-weight: 700;
@@ -113,13 +90,11 @@ const handleDoneClose = () => {
   letter-spacing: -0.01em;
   text-align: left;
 }
-
 .modal-box p {
   color: #282b32;
   font-size: 1.01rem;
   margin-bottom: 7px;
 }
-
 .modal-actions {
   display: flex;
   justify-content: flex-end;
@@ -149,7 +124,6 @@ const handleDoneClose = () => {
 .modal-actions button:last-child:hover {
   background: #de3838;
 }
-
 @media (max-width: 540px) {
   .modal-box {
     padding: 17px 7px 17px 7px;

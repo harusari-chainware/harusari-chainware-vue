@@ -43,6 +43,14 @@
       </div>
     </div>
   </div>
+
+  <div>
+    <CategoryErrorModal
+        v-if="ErrorOpen"
+        :message="ErrorMsg"
+        @close="ErrorOpen = false"
+    />
+  </div>
 </template>
 
 <script setup>
@@ -53,6 +61,7 @@ import {
   createTopCategory,
   updateTopCategory,
 } from '@/features/category/api.js'
+import CategoryErrorModal from "@/features/category/components/CategoryErrorModal.vue";
 
 const props = defineProps({
   isTop: { type: Boolean, default: false },
@@ -68,6 +77,14 @@ const isEdit = computed(() => !!props.topEditData || !!props.categoryEditData)
 
 const name = ref('')
 const code = ref('')
+
+const ErrorOpen = ref(false)
+const ErrorMsg = ref('')
+
+function showError(msg) {
+  ErrorMsg.value = msg
+  ErrorOpen.value = true
+}
 
 // 대문자 자동 변환
 watch(code, (val) => {
@@ -95,19 +112,15 @@ watch(
 
 const handleSubmit = async () => {
   if (!name.value.trim()) {
-    alert('카테고리 이름을 입력해주세요.')
-    return
+    return showError('카테고리 이름을 입력해주세요.')
   }
 
   if (!props.isTop) {
-    if (selectedTopCategoryId.value) {
-      if (!/^[A-Z]{2}$/.test(code.value)) {
-        alert('카테고리 코드는 대문자 2자리여야 합니다. 예: AB')
-        return
-      }
-    } else {
-      alert('상위 카테고리를 선택해주세요.')
-      return
+    if (!selectedTopCategoryId.value) {
+      return showError('상위 카테고리를 선택해주세요.')
+    }
+    if (!/^[A-Z]{2}$/.test(code.value)) {
+      return showError('카테고리 코드는 대문자 2자리여야 합니다. 예: AB')
     }
   }
 
@@ -124,7 +137,7 @@ const handleSubmit = async () => {
           categoryCode: code.value
         })
       }
-      alert('수정이 완료되었습니다.')
+      emit('refresh', { showDone: true, type: 'edit', isTop: props.isTop })
     } else {
       if (props.isTop) {
         await createTopCategory({ topCategoryName: name.value })
@@ -135,16 +148,16 @@ const handleSubmit = async () => {
           categoryCode: code.value
         })
       }
-      alert('등록이 완료되었습니다.')
+      emit('refresh', { showDone: true, type: 'register', isTop: props.isTop })
     }
     emit('refresh')
     emit('close')
   } catch (err) {
     console.error('❌ 등록/수정 실패:', err)
     if (err.response?.status === 409) {
-      alert('이미 존재하는 카테고리입니다.')
+      return showError('이미 존재하는 카테고리입니다.')
     } else {
-      alert('오류가 발생했습니다. 다시 시도해주세요.')
+      return showError('오류가 발생했습니다. 다시 시도해주세요.')
     }
   }
 }

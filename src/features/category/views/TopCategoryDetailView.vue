@@ -66,10 +66,8 @@
                 <button @click="cancelCategoryEdit">취소</button>
               </template>
               <template v-else>
-                <!--                <button @click="startCategoryEdit(category)">수정</button>-->
-                <button @click="openCategoryEditModal(category)">수정</button>
-                <!--                <button @click="deleteCategory(category)">삭제</button>-->
-                <button @click="deleteCategoryHandler(category)">삭제</button>
+                <button class="action-btn" @click="openCategoryEditModal(category)">수정</button>
+                <button class="action-btn red" @click="deleteCategoryHandler(category)">삭제</button>
               </template>
             </td>
           </tr>
@@ -86,18 +84,34 @@
       :category-edit-data="selectedCategory"
       :top-categories="topCategories"
       @close="showCategoryModal = false"
-      @refresh="loadTopCategory"
+      @refresh="handleRefresh"
   />
 
-  <template v-if="showDeleteModal">
-    <div class="modal-backdrop">
-      <div class="modal-box">
-        <h3>삭제 불가</h3>
-        <p>하위 카테고리가 존재하여 삭제할 수 없습니다.</p>
-        <button class="confirm-btn" @click="showDeleteModal = false">확인</button>
-      </div>
-    </div>
-  </template>
+  <!-- 등록/수정 완료 모달 -->
+  <CategoryDoneModal
+      v-if="doneModal.show"
+      :type="doneModal.type"
+      :is-top="doneModal.isTop"
+      @close="doneModal.show = false"
+  />
+
+  <div>
+    <CategoryErrorModal
+        v-if="ErrorOpen"
+        :message="ErrorMsg"
+        @close="ErrorOpen = false"
+    />
+  </div>
+
+  <!-- 삭제 확인 모달 -->
+  <CategoryDeleteConfirmModal
+      v-if="deleteTarget"
+      :target-id="deleteTarget.id"
+      :is-top="deleteTarget.isTop"
+      @close="deleteTarget = null"
+      @deleted="loadTopCategory"
+  />
+
 </template>
 
 <script setup>
@@ -115,6 +129,9 @@ import {
   deleteCategory
 } from '@/features/category/api.js'
 import CategoryModal from '@/features/category/components/CategoryModal.vue'
+import CategoryErrorModal from "@/features/category/components/CategoryErrorModal.vue";
+import CategoryDoneModal from "@/features/category/components/CategoryDoneModal.vue";
+import CategoryDeleteConfirmModal from "@/features/category/components/CategoryDeleteConfirmModal.vue";
 
 const showCategoryModal = ref(false)
 const selectedCategory = ref(null)
@@ -131,15 +148,29 @@ const detail = ref({
 })
 
 const isEditing = ref(false)
-const showDeleteModal = ref(false)
 const page = ref(1)
 const itemsPerPage = 5
+const ErrorOpen = ref(false)
+const ErrorMsg = ref('')
+const deleteTarget = ref(null)
+
+function showError(msg) {
+  ErrorMsg.value = msg
+  ErrorOpen.value = true
+}
 
 const editingCategoryId = ref(null)
 const editedCategory = ref({
   categoryName: '',
   categoryCode: '',
   topCategoryId: ''
+})
+
+// 등록/수정 완료 모달 상태
+const doneModal = ref({
+  show: false,
+  type: 'edit',    //  'register' | 'edit' | 'delete'
+  isTop: false
 })
 
 const topCategories = ref([])
@@ -187,17 +218,18 @@ const saveEdit = async () => {
     await updateTopCategory(topCategoryId, {
       topCategoryName: detail.value.topCategoryName
     })
-    alert('수정 완료되었습니다.')
+    doneModal.value = { show: true, type: 'edit', isTop: true }
     isEditing.value = false
     await loadTopCategory()
   } catch (e) {
-    alert('수정 실패했습니다.')
+    showError( '수정 실패했습니다.')
   }
 }
 
 const pagedCategories = computed(() => {
   const start = (page.value - 1) * itemsPerPage
-  return detail.value.categories.slice(start, start + itemsPerPage)
+  const arr = detail.value.categories.slice(start, start + itemsPerPage)
+  return arr
 })
 
 const openCategoryEditModal = (category) => {
@@ -219,14 +251,27 @@ const cancelCategoryEdit = () => {
   }
 }
 
+const handleRefresh = async (opts = {}) => {
+  await loadTopCategory()
+  showCategoryModal.value = false // 모달 닫기
+  // 수정 완료 모달 옵션으로 오면 띄움
+  if (opts && opts.showDone) {
+    doneModal.value = {
+      show: true,
+      type: opts.type ?? 'edit',
+      isTop: opts.isTop ?? false
+    }
+  }
+}
+
 const saveCategoryEdit = async (category) => {
   try {
     await updateCategory(category.categoryId, { ...editedCategory.value })
     await loadTopCategory()
     cancelCategoryEdit()
-    alert('하위 카테고리 수정 완료')
+    doneModal.value = { show: true, type: 'edit', isTop: false }
   } catch (e) {
-    alert('하위 카테고리 수정 실패')
+    return showError('하위 카테고리 수정 실패했습니다.')
   }
 }
 
@@ -235,34 +280,18 @@ const getTopCategoryName = (id) => {
   return match ? match.topCategoryName : '-'
 }
 
-const deleteCategoryHandler = async (category) => {
-  if (category.productCount > 0) {
-    alert('해당 카테고리에 연결된 제품이 있어 삭제할 수 없습니다.')
-    return
-  }
-
-  if (!confirm(`카테고리 "${category.categoryName}"을 정말 삭제하시겠습니까?`)) {
-    return
-  }
-
-  try {
-    await deleteCategory(category.categoryId)
-    alert('카테고리가 삭제되었습니다.')
-    await loadTopCategory()
-  } catch (e) {
-    console.error(e)
-    alert('카테고리 삭제 실패')
-  }
-}
-
 const handleDelete = () => {
   if (detail.value.categories.length > 0) {
-    showDeleteModal.value = true
-    return
+    return showError( '하위 카테고리가 존재하여 삭제할 수 없습니다.')
   }
-  if (confirm('정말 삭제하시겠습니까?')) {
-    alert('삭제 처리')
+  deleteTarget.value = { id: topCategoryId, isTop: true }
+}
+
+const deleteCategoryHandler = (category) => {
+  if (category.productCount > 0) {
+    return showError('해당 카테고리에 연결된 제품이 있어 삭제할 수 없습니다.')
   }
+  deleteTarget.value = { id: category.categoryId, isTop: false }
 }
 
 onMounted(() => {
@@ -272,7 +301,6 @@ onMounted(() => {
 </script>
 
 <style scoped>
-/* 기존 스타일 그대로 유지 */
 .info-group {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -321,29 +349,36 @@ button {
   background: #eee;
   cursor: pointer;
 }
-.modal-backdrop {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.4);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-}
-.modal-box {
-  background: #fff;
-  padding: 2rem;
-  border-radius: 10px;
-  width: 320px;
-  text-align: center;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
-}
-.confirm-btn {
-  margin-top: 1rem;
-  padding: 6px 12px;
-  background: #ffc107;
-  border: none;
-  border-radius: 4px;
+
+.action-btn {
+  min-width: 44px;
+  padding: 5px 10px;
+  border-radius: 5px;
+  font-size: 13px;
+  font-weight: 500;
+  outline: none;
   cursor: pointer;
+  transition: all 0.15s;
+  background: #f5f7fa;
+  color: #357ae8;
+  margin: 0 2px;
+}
+.action-btn:hover {
+  background: #e3eefd;
+  color: #185adf;
+  border-color: #357ae8;
+  box-shadow: 0 1px 4px rgba(53, 122, 232, 0.09);
+}
+
+.action-btn.red {
+  background: #fff5f5;
+  color: #df2121;
+  border: 1px solid #f7cccc;
+}
+.action-btn.red:hover {
+  background: #ffe5e5;
+  color: #a30c0c;
+  border-color: #df2121;
+  box-shadow: 0 1px 4px rgba(223,33,33,0.07);
 }
 </style>

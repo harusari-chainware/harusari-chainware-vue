@@ -12,6 +12,12 @@ export const updateProduct = (productId, productData) => {
     return api.put(`/product/${productId}`, productData); // 단수 + PK path param
 };
 
+// 제품 상태만 수정 (PUT, body 사용)
+export const updateProductStatus = (productId, productStatus) => {
+    return api.put(`/product/${productId}`, { productStatus });
+    // body: { productStatus: 0 } 또는 { productStatus: 1 }
+};
+
 // 제품 삭제 (Soft Delete 또는 실제 삭제)
 export const deleteProduct = (productId) => {
     return api.delete(`/product/${productId}`); // 단수 + PK

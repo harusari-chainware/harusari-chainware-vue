@@ -1,5 +1,3 @@
-producttable
-
 <template>
   <GenericTable :items="products" :columns="columns">
     <!-- 제품코드: 3자리 패딩 -->
@@ -12,16 +10,28 @@ producttable
       <span>{{ getCategoryName(item.categoryId) || '-' }}</span>
     </template>
 
+    <template #cell-basePrice="{ value }">
+      <span>{{ formatPrice(value) }}</span>
+    </template>
+
     <!-- 보관상태 -->
     <template #cell-storeType="{ value }">
       <span>{{ value }}</span>
     </template>
 
-    <!-- 제품상태: true/false or enum 매핑 -->
-    <template #cell-productStatus="{ value }">
-      <span>
-        {{ value === true || value === 'ACTIVE' ? '활성' : '비활성' }}
-      </span>
+    <template #cell-productStatus="{ value, item }">
+  <span
+      class="status-badge"
+      :class="{
+      'status-active': value === 1 || value === true || value === 'ACTIVE',
+      'status-inactive': value === 0 || value === false || value === 'INACTIVE'
+    }"
+      style="cursor:pointer"
+      @click="toggleProductStatus(item)"
+      title="클릭 시 상태 변경"
+  >
+    {{ value === 1 || value === true || value === 'ACTIVE' ? '활성' : '비활성' }}
+  </span>
     </template>
 
     <!-- 등록일시 포맷 -->
@@ -46,8 +56,22 @@ producttable
 </template>
 
 <script setup>
+import { defineProps } from 'vue'
 import { watchEffect } from 'vue'
+import { updateProductStatus } from '@/features/product/api.js'
 import GenericTable from '@/components/common/GenericTable.vue'
+
+function toggleProductStatus(item) {
+  const newStatus = (item.productStatus === 1 || item.productStatus === true || item.productStatus === 'ACTIVE')
+      ? 0 : 1;
+  updateProductStatus(item.productId, newStatus)
+      .then(() => {
+        item.productStatus = newStatus; // 성공시 즉시 반영
+      })
+      .catch(err => {
+        alert('상태 변경 실패: ' + (err.response?.data?.message || err.message));
+      });
+}
 
 const props = defineProps({
   products: { type: Array, required: true },
@@ -60,7 +84,7 @@ watchEffect(() => {
         (top.categories || []).some(cat => String(cat.categoryId) === String(prod.categoryId))
     )
     if (!found) {
-      console.warn('매칭되는 카테고리 없음! productId:', prod.productId, 'categoryId:', prod.categoryId)
+      // console.warn('매칭되는 카테고리 없음! productId:', prod.productId, 'categoryId:', prod.categoryId)
       console.log('현재 카테고리 목록:', props.categories.map(top => ({
         topCategoryId: top.topCategoryId,
         topCategoryName: top.topCategoryName,
@@ -103,8 +127,14 @@ function padProductCode(productCode) {
   return `${parts[0]}-${parts[1]}-${num}`;
 }
 
+function formatPrice(value) {
+  if (value == null || value === '') return '-';
+  if (isNaN(value)) return value;
+  return Number(value).toLocaleString('ko-KR') + '원';
+}
+
 const getDetailLink = (item) => {
-  return `/product/${item.productId}` // 상품 상세라면 productId로!
+  return `/product/${item.productId}`
 }
 
 const getCategoryName = (categoryId) => {
@@ -143,4 +173,31 @@ function formatDate(dateString) {
   cursor: pointer;
 }
 .detail-btn:hover { background: var(--color-primary-dark, #1599c6); }
+.detail-link {
+  color: #43b3e0;
+  font-weight: 600;
+  cursor: pointer;
+  transition: color 0.15s;
+}
+
+.status-badge {
+  display: inline-block;
+  min-width: 64px;
+  padding: 0 16px;
+  height: 32px;
+  line-height: 32px;
+  border-radius: 16px;
+  font-weight: 600;
+  text-align: center;
+  font-size: 1rem;
+  margin: 4px 0;
+}
+.status-active {
+  background: #e8f6fa;
+  color: #2196f3;
+}
+.status-inactive {
+  background: #fffbe8;
+  color: #d97c00;
+}
 </style>

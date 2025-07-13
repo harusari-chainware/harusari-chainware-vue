@@ -43,6 +43,14 @@
       </div>
     </div>
   </div>
+
+  <div>
+    <CategoryErrorModal
+        v-if="ErrorOpen"
+        :message="ErrorMsg"
+        @close="ErrorOpen = false"
+    />
+  </div>
 </template>
 
 <script setup>
@@ -53,6 +61,7 @@ import {
   createTopCategory,
   updateTopCategory,
 } from '@/features/category/api.js'
+import CategoryErrorModal from "@/features/category/components/CategoryErrorModal.vue";
 
 const props = defineProps({
   isTop: { type: Boolean, default: false },
@@ -60,7 +69,8 @@ const props = defineProps({
   topEditData: { type: Object, default: null },
   categoryEditData: { type: Object, default: null },
   topCategoryId: { type: Number, default: null },
-  topCategories: { type: Array, default: () => [] }
+  topCategories: { type: Array, default: () => [] },
+  hideTitle: { type: Boolean, default: false }
 })
 
 const emit = defineEmits(['close', 'refresh', 'submitted', 'cancelled'])
@@ -70,7 +80,12 @@ const name = ref('')
 const code = ref('')
 const selectedTopCategoryId = ref('')
 
-console.log('✅ CategoryForm.vue 렌더링됨')
+const ErrorOpen = ref(false)
+const ErrorMsg = ref('')
+function showError(msg) {
+  ErrorMsg.value = msg
+  ErrorOpen.value = true
+}
 
 // 자동 대문자 변환
 watch(code, (val) => {
@@ -94,18 +109,16 @@ const emitCancel = () => {
 
 const handleSubmit = async () => {
   if (!name.value.trim()) {
-    alert('카테고리 이름을 입력해주세요.')
-    return
+    return showError('카테고리 이름을 입력해주세요.')
   }
 
   if (!props.isTop) {
     if (!selectedTopCategoryId.value) {
-      alert('상위 카테고리를 선택해주세요.')
-      return
+      return showError('상위 카테고리를 선택해주세요.')
+
     }
     if (!/^[A-Z]{2}$/.test(code.value)) {
-      alert('카테고리 코드는 대문자 2자리여야 합니다. 예: AB')
-      return
+      return showError('카테고리 코드는 대문자 2자리여야 합니다. 예: AB')
     }
   }
 
@@ -138,9 +151,9 @@ const handleSubmit = async () => {
   } catch (err) {
     console.error('❌ 등록/수정 실패:', err)
     if (err.response?.status === 409) {
-      alert('이미 존재하는 카테고리입니다.')
+      return showError('이미 존재하는 카테고리입니다.')
     } else {
-      alert('오류가 발생했습니다. 다시 시도해주세요.')
+      return showError('오류가 발생했습니다. 다시 시도해주세요.')
     }
   }
 }
