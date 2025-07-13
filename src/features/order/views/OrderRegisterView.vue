@@ -47,8 +47,8 @@
 </template>
 
 <script setup>
-import { reactive, ref, onMounted, computed } from 'vue'
-import { fetchMyFranchise, fetchProducts, registerOrder } from '@/features/order/api'
+import { reactive, ref, onMounted, computed, watch} from 'vue'
+import { fetchMyFranchise, registerOrder } from '@/features/order/api'
 import RegisterLayout from '@/components/layout/RegisterLayout.vue'
 import OrderRegisterLeft from '../components/OrderRegisterLeft.vue'
 import OrderRegisterRightPanel from '../components/OrderRegisterRightPanel.vue'
@@ -83,24 +83,38 @@ function openProductSearch() {
 
 // 제품 선택 처리
 function handleSelectProducts(products) {
+  console.log('[선택된 products]', products)
   const existingIds = new Set(form.items.map(i => i.productId))
   const newItems = products.filter(p => !existingIds.has(p.productId))
-      .map(p => ({
-        productId: p.productId,
-        productCode: p.productCode,
-        productName: p.productName,
-        unit: `${p.unitQuantity}${p.unitSpec}`,
-        storeType: p.storeType,
-        unitPrice: p.basePrice,
-        quantity: 1
-      }))
+      .map(p => {
+        console.log('[product 정보]', {
+          id: p.productId,
+          quantity: p.unitQuantity,
+          spec: p.unitSpec
+        })
+        return {
+          productId: p.productId,
+          productCode: p.productCode,
+          productName: p.productName,
+          unit: p.unit,
+          storeType: p.storeType,
+          unitPrice: p.basePrice,
+          quantity: 1
+        }
+      })
+
+  console.log('[추가될 newItems]', newItems)
+
   form.items.push(...newItems)
   showRightPanel.value = false
 }
 
-// 항목 제거
-function handleRemove(itemToRemove) {
-  form.items = form.items.filter(i => i.productId !== itemToRemove.productId)
+// 선택한 제품 삭제
+function handleRemove(item) {
+  const index = form.items.findIndex(i => i.productId === item.productId)
+  if (index !== -1) {
+    form.items.splice(index, 1)
+  }
 }
 
 // 수량 변경
@@ -125,13 +139,17 @@ async function submit() {
   try {
     await registerOrder(request)
     alert('주문이 등록되었습니다.')
-    router.push('/orders')
+    await router.push('/order/list')
   } catch (e) {
-    alert('등록 실패: ' + e.message)
+    alert('등록 실패: ' + (e.response?.data?.message || e.message))
   }
 }
 
 function cancel() {
   router.push('/orders')
 }
+
+watch(() => form.items, (newVal) => {
+  console.log('[현재 선택된 제품 목록]', newVal)
+}, { deep: true })
 </script>

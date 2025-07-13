@@ -47,8 +47,8 @@ const buttonClass = computed(() => {
   justify-content: center;
   align-items: center;
   width: 50px;
-  height: 32px;
-  font-size: 14px;
+  height: 25px;
+  font-size: 12px;
   font-weight: 500;
   border-radius: 6px;
   border: none;

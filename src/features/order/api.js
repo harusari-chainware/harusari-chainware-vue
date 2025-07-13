@@ -15,9 +15,14 @@ export async function fetchMyFranchise() {
     return await api.get('/orders/my-franchise')
 }
 
-// 제품 목록 조회
-export async function fetchProducts(params) {
-    return await api.get('/products', { params })
+// 제품 목록 조회 (상태 필터 포함)
+export async function fetchActiveProducts(params = {}) {
+    return await api.get('/products', {
+        params: {
+            productStatusFilter: 'ACTIVE_ONLY',
+            ...params
+        }
+    });
 }
 
 // 주문 등록
