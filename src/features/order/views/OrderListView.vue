@@ -2,7 +2,7 @@
   <ListLayout title="주문 목록" description="모든 주문 목록을 조회하고 관리할 수 있습니다.">
     <!-- filters -->
     <template #filters>
-      <OrderFilters v-model:filters="filters" @search="loadOrders" @reset="resetFilters" />
+      <OrderFilters v-model:filters="filters" @search="handleSearch" @reset="resetFilters" />
     </template>
 
     <!-- top-actions -->
@@ -83,6 +83,13 @@ const loadOrders = async () => {
   } finally {
     isLoading.value = false
   }
+}
+
+const handleSearch = () => {
+  console.log("검색됨")
+  currentPage.value = 1
+  loadOrders()
+  console.log("loadOrders 실행됨")
 }
 
 const resetFilters = () => {
