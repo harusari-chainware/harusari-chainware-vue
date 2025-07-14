@@ -12,12 +12,11 @@
     </template>
 
     <template #top-actions-right>
-      <CreateButton @click="openModal">파일 출력</CreateButton>
+<!--      <CreateButton @click="openModal">파일 출력</CreateButton>-->
       <CreateButton @click="goToCreatePage">제품 추가</CreateButton>
     </template>
 
     <template #table>
-
       <ProductTable
           :products="pagedProducts"
           :categories="topCategories"
@@ -50,9 +49,9 @@ const goToCreatePage = () => {
   router.push('/product/register')
 }
 
-const openModal = () => {
-  alert('파일 출력 기능 준비 중!');
-}
+// const openModal = () => {
+//   alert('파일 출력 기능 준비 중!');
+// }
 
 // --- 필터/상태 ---
 const filters = reactive({
@@ -147,8 +146,6 @@ const handleReset = () => {
 const goDetail = (item) => {
   router.push(`/product/${item.productId}`)
 }
-
-const goAddProduct = () => { /* 추가 페이지로 이동 */ }
 
 // 최초 로딩
 onMounted(() => {

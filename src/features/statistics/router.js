@@ -1,35 +1,51 @@
-import DashboardDummyView from '../statistics/views/DashboardDummyView.vue'
+import TotalSalesStatisticsView from "@/features/statistics/views/TotalSalesStatisticsView.vue";
+import PurchaseOrderStatisticsView from "@/features/statistics/views/PurchaseOrderStatisticsView.vue";
+import StoreOrderStatisticsView from "@/features/statistics/views/StoreOrderStatisticsView.vue";
+import PredictionComparisonStatisticsView from "@/features/statistics/views/PredictionComparisonStatisticsView.vue";
+import MenuSalesStatisticsView from "@/features/statistics/views/MenuSalesStatisticsView.vue";
+import InventoryTurnoverStatisticsView from "@/features/statistics/views/InventoryTurnoverStatisticsView.vue";
+import DisposalStatisticsView from "@/features/statistics/views/DisposalStatisticsView.vue";
+import PredictionAccuracyStatisticsView from "@/features/statistics/views/PredictionAccuracyStatisticsView.vue";
 
 /* 사용자가 보는 routes와 view를 연결 */
 export const dashboardRoutes = [
     {
         path: '/dashboard/prediction',
-        name: 'DashboardDummy1View',
-        component: DashboardDummyView
+        name: 'PredictionComparisonStatisticsView',
+        component: PredictionComparisonStatisticsView
     },
     {
         path: '/dashboard/accuracy',
-        name: 'DashboardDummy2View',
-        component: DashboardDummyView
+        name: 'PredictionAccuracyStatisticsView',
+        component: PredictionAccuracyStatisticsView
     },
     {
         path: '/dashboard/sales',
-        name: 'DashboardDummy3View',
-        component: DashboardDummyView
+        name: 'TotalSalesStatisticsView',
+        component: TotalSalesStatisticsView
+    },{
+        path: '/dashboard/menu-sales',
+        name: 'MenuSalesStatisticsView',
+        component: MenuSalesStatisticsView
     },
     {
         path: '/dashboard/inventory-turn',
-        name: 'DashboardDummy4View',
-        component: DashboardDummyView
+        name: 'InventoryTurnoverStatisticsView',
+        component: InventoryTurnoverStatisticsView
     },
     {
         path: '/dashboard/purchase-stats',
-        name: 'DashboardDummy5View',
-        component: DashboardDummyView
+        name: 'PurchaseOrderStatistics',
+        component: PurchaseOrderStatisticsView,
     },
     {
         path: '/dashboard/dispose-stats',
-        name: 'DashboardDummy6View',
-        component: DashboardDummyView
+        name: 'DisposalStatisticsView',
+        component: DisposalStatisticsView
     },
+    {
+        path: '/dashboard/store-order-stats',
+        name: 'StoreOrderStatisticsView',
+        component: StoreOrderStatisticsView
+    }
 ];

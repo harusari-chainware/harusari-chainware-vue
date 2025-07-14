@@ -38,6 +38,11 @@ api.interceptors.response.use(
             const originalRequest = error.config;
 
             if (originalRequest.url.includes('/auth/refresh')) {
+                // 리프레시 토큰도 만료된 경우
+                authStore.clearAuth();
+                router.push('/login').then(() => {
+                    window.location.reload(); // 또는 router.push('/login')
+                });
                 return Promise.reject(error);
             }
 

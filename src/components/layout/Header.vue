@@ -112,7 +112,7 @@ const toggleMypageDropdown = () => {
 const goToMypage = () => {
     emits('selectMenu', '마이페이지')
     showMypageDropdown.value = false
-    router.push('/mypage/info')
+    router.push('/mypage/profile')
 }
 
 const logout = async () => {

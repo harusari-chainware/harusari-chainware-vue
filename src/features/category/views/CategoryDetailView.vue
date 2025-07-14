@@ -34,7 +34,6 @@
           <input v-else type="text" :value="category.topCategoryName" readonly />
         </div>
 
-
         <!-- 카테고리명 -->
         <div class="info-row">
           <label>카테고리명</label>
@@ -125,11 +124,36 @@
       </div>
     </template>
   </DetailLayout>
+
+  <!-- 등록/수정 완료 모달 -->
+  <CategoryDoneModal
+      v-if="doneModal.show"
+      :type="doneModal.type"
+      :is-top="doneModal.isTop"
+      @close="doneModal.show = false"
+  />
+
+  <div>
+    <CategoryErrorModal
+        v-if="ErrorOpen"
+        :message="ErrorMsg"
+        @close="ErrorOpen = false"
+    />
+  </div>
+
+  <!-- 삭제 확인 모달 -->
+  <CategoryDeleteConfirmModal
+      v-if="deleteTarget"
+      :target-id="deleteTarget.id"
+      :is-top="deleteTarget.isTop"
+      @close="deleteTarget = null"
+      @deleted="onDeleteSuccess"
+  />
 </template>
 
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import DetailLayout from '@/components/layout/DetailLayout.vue'
 import StatusButton from '@/components/common/StatusButton.vue'
 import Pagination from '@/components/common/Pagination.vue'
@@ -140,6 +164,9 @@ import {
   updateCategory,
   deleteCategory
 } from '@/features/category/api.js'
+import CategoryErrorModal from "@/features/category/components/CategoryErrorModal.vue";
+import CategoryDeleteConfirmModal from "@/features/category/components/CategoryDeleteConfirmModal.vue";
+import CategoryDoneModal from "@/features/category/components/CategoryDoneModal.vue";
 
 function getDisplayProductCode(product, categoryCode) {
   // product.sequence 또는 product.productId 중 원하는 값 사용!
@@ -150,6 +177,25 @@ function getDisplayProductCode(product, categoryCode) {
 }
 
 const isLoading = ref(true)
+
+const deleteTarget = ref(null)
+const ErrorOpen = ref(false)
+const ErrorMsg = ref('')
+function showError(msg) {
+  ErrorMsg.value = msg
+  ErrorOpen.value = true
+}
+
+const onDeleteSuccess = () => {
+  router.push('/categories')
+}
+
+// 등록/수정 완료 모달 상태
+const doneModal = ref({
+  show: false,
+  type: 'edit',    // 'register' | 'edit'
+  isTop: false
+})
 
 const route = useRoute()
 const categoryId = route.params.categoryId
@@ -275,8 +321,7 @@ const handleEditOrSave = async () => {
     if (isEditing.value) {
 
       if (!/^[A-Z]{2}$/.test(category.value.categoryCode)) {
-        alert('카테고리 코드는 대문자 2자리로 입력해주세요. (예: CF)')
-        return
+        return showError('카테고리 코드는 대문자 2자리로 입력해주세요. (예: CF)')
       }
 
       try {
@@ -285,14 +330,14 @@ const handleEditOrSave = async () => {
           categoryCode: category.value.categoryCode,
           topCategoryId: Number(selectedTopCategoryId.value)
         })
-        alert('카테고리 정보가 저장되었습니다.')
+        doneModal.value = { show: true, type: 'edit', isTop: false }
         await loadCategory()
         isEditing.value = false
       } catch (err) {
         if (err.response?.status === 409) {
-          alert('이미 존재하는 카테고리 코드입니다. 다른 코드를 입력해주세요.')
+          showError('이미 존재하는 카테고리 코드입니다. 다른 코드를 입력해주세요.')
         } else {
-          alert('저장 중 오류가 발생했습니다.')
+          showError('저장 중 오류가 발생했습니다.')
         }
         console.error(err)
       }
@@ -321,19 +366,8 @@ watch(page, () => {
 })
 
 // 삭제 처리 (임의 구현, 필요시 연결)
-const handleDelete = async () => {
-  console.log('handleDelete 호출됨')
-  if (confirm('정말 이 카테고리를 삭제하시겠습니까?')) {
-    try {
-      await deleteCategory(category.value.categoryId)
-      alert('카테고리가 삭제되었습니다.')
-      // 삭제 후 목록 페이지 등으로 이동 처리 필요
-    } catch (e) {
-      const errorMessage = e.response?.data?.message || '삭제 중 오류가 발생했습니다.'
-      alert(errorMessage)
-      console.error('삭제 실패:', e)
-    }
-  }
+const handleDelete = () => {
+  deleteTarget.value = { id: category.value.categoryId, isTop: false }
 }
 
 onMounted(() => {
