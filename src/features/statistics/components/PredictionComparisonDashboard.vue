@@ -1,12 +1,22 @@
 <script setup>
-import { ref, onMounted } from 'vue'
-// ✅ 실제 API 사용 시 아래 주석 해제
-// import { fetchPredictionComparison } from '../statistics/api.js'
+import { ref, onMounted, computed } from 'vue'
+import { fetchPredictionComparison, fetchAllFranchises } from '../api.js'
 import Chart from 'chart.js/auto'
 
 const predictionType = ref('sales')
 const franchiseId = ref('')
 const chartInstance = ref(null)
+const chartData = ref([])
+const franchiseList = ref([])
+const searchKeyword = ref('')
+
+// "발주 수량"일 때는 본사 고정 + 입력 막기
+const isHeadquartersOnly = computed(() => predictionType.value === 'purchase_quantity')
+
+const filteredFranchiseList = computed(() => {
+  if (!searchKeyword.value.trim()) return franchiseList.value
+  return franchiseList.value.filter(f => f.name.includes(searchKeyword.value.trim()))
+})
 
 function typeButtonClass(type) {
   return `filter-button${predictionType.value === type ? ' active' : ''}`
@@ -14,22 +24,34 @@ function typeButtonClass(type) {
 
 function setPredictionType(type) {
   predictionType.value = type
+
+  // 발주 수량은 본사 고정, 가맹점 선택 불가
+  if (type === 'purchase_quantity') {
+    franchiseId.value = ''
+    searchKeyword.value = ''
+  }
+
   loadData()
 }
 
 async function loadData() {
-  // ✅ 실제 API 연동 시 아래 더미 삭제하고 fetchPredictionComparison 사용
-  // const data = await fetchPredictionComparison(predictionType.value, franchiseId.value)
-  const data = getDummyData(predictionType.value) // 🔧 더미 데이터 (CORS 해결 전용)
+  const data = await fetchPredictionComparison(predictionType.value, franchiseId.value)
+  chartData.value = data
   updateChart(data)
 }
 
 function updateChart(data) {
   if (!data || !data.length) return
 
-  const labels = data.map(d => `${new Date(d.date).getMonth() + 1}/${new Date(d.date).getDate()}`)
-  const actual = data.map(d => d.actualValue)
-  const predicted = data.map(d => d.predictedValue)
+  data.sort((a, b) => new Date(a.date) - new Date(b.date))
+
+  const labels = data.map(d => {
+    const date = new Date(d.date)
+    return `${date.getMonth() + 1}/${date.getDate()}`
+  })
+
+  const values = data.map(d => d.value)
+  const types = data.map(d => d.type)
 
   if (chartInstance.value) chartInstance.value.destroy()
 
@@ -38,61 +60,51 @@ function updateChart(data) {
     type: 'line',
     data: {
       labels,
-      datasets: [
-        {
-          label: '실적',
-          data: actual,
-          borderColor: 'rgba(59,130,246,1)',
-          backgroundColor: 'rgba(59,130,246,0.2)',
-          tension: 0.3
+      datasets: [{
+        label: '실적/예측',
+        data: values,
+        borderColor: ctx => types[ctx.dataIndex] === 'ACTUAL'
+            ? 'rgba(59,130,246,1)' : 'rgba(99,102,241,1)',
+        backgroundColor: 'rgba(0,0,0,0)',
+        segment: {
+          borderColor: ctx => {
+            const i = ctx.p0DataIndex
+            return types[i] === 'ACTUAL'
+                ? 'rgba(59,130,246,1)'
+                : 'rgba(99,102,241,1)'
+          }
         },
-        {
-          label: '예측',
-          data: predicted,
-          borderColor: 'rgba(79,70,229,1)',
-          backgroundColor: 'rgba(79,70,229,0.2)',
-          tension: 0.3
-        }
-      ]
+        tension: 0.3
+      }]
     },
     options: {
       responsive: true,
       maintainAspectRatio: false,
       scales: {
-        y: {
-          beginAtZero: true
+        y: { beginAtZero: true }
+      },
+      plugins: {
+        legend: {
+          labels: {
+            generateLabels: () => [
+              { text: '실적', strokeStyle: 'rgba(59,130,246,1)', fillStyle: 'rgba(59,130,246,1)', lineWidth: 2 },
+              { text: '예측', strokeStyle: 'rgba(99,102,241,1)', fillStyle: 'rgba(99,102,241,1)', lineWidth: 2 }
+            ]
+          }
         }
       }
     }
   })
 }
 
-// 🔧 CORS 해결 전용 더미 데이터 생성 함수 (삭제 예정)
-function getDummyData(type) {
-  const today = new Date()
-  const dates = Array.from({ length: 14 }, (_, i) => {
-    const d = new Date(today)
-    d.setDate(d.getDate() - 6 + i)
-    return d.toISOString().split('T')[0]
-  })
-
-  return dates.map((date, i) => {
-    const base = type === 'sales' ? 5000000 : 500
-    const fluct = type === 'sales' ? 500000 : 50
-    return {
-      date,
-      actualValue: base + (Math.random() * fluct >> 0),
-      predictedValue: base + (Math.random() * fluct >> 0)
-    }
-  })
-}
-
-onMounted(loadData)
+onMounted(async () => {
+  franchiseList.value = await fetchAllFranchises()
+  await loadData()
+})
 </script>
 
 <template>
   <div class="dashboard-wrapper">
-    <!-- 필터 영역 -->
     <div class="filter-box">
       <div class="filter-grid">
         <!-- 예측 유형 -->
@@ -105,15 +117,29 @@ onMounted(loadData)
           </div>
         </div>
 
+        <!-- 가맹점 선택 -->
         <div class="filter-item franchise">
           <label class="filter-label">가맹점</label>
-          <select v-model="franchiseId" class="form-control">
-            <option value="">본사 전체</option>
-            <option value="1">가맹점 #1</option>
-            <option value="2">가맹점 #2</option>
+          <select v-model="franchiseId" class="form-control" :disabled="isHeadquartersOnly">
+            <option value="">전체 가맹점</option>
+            <option v-for="item in filteredFranchiseList" :key="item.id" :value="item.id">
+              {{ item.name }}
+            </option>
           </select>
         </div>
 
+        <!-- 가맹점 검색 -->
+        <div class="filter-item franchise">
+          <label class="filter-label">가맹점 검색</label>
+          <input
+              v-model="searchKeyword"
+              class="form-control"
+              placeholder="이름으로 검색"
+              :disabled="isHeadquartersOnly"
+          />
+        </div>
+
+        <!-- 조회 버튼 -->
         <div class="filter-item button">
           <label class="filter-label invisible">조회</label>
           <button class="filter-button active full-width" @click="loadData">조회</button>
@@ -121,7 +147,7 @@ onMounted(loadData)
       </div>
     </div>
 
-    <!-- 차트 -->
+    <!-- 차트 영역 -->
     <div class="chart-card">
       <div class="chart-header">
         <span>실적 vs 예측 비교</span>

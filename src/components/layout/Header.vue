@@ -87,7 +87,7 @@ const routeMap = {
     '가맹점/거래처/창고': '/franchise/list',
     '주문/반품/배송': '/order/list',
     '품의/발주/입고': '/requisition/list',
-    '폐기': '/disposal/franchise/list'
+    '폐기': '/disposal/list'
 }
 
 const isMypageRoute = computed(() => route.path.startsWith('/mypage'))
