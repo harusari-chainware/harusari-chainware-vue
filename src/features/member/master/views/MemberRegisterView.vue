@@ -76,7 +76,13 @@ const form = ref({
     zipcode: '',
     addressRoad: '',
     addressDetail: '',
-    agreementFile: null // 가맹점/거래처용
+    agreementFile: null, // 가맹점/거래처용
+    vendorName: '',
+    vendorType: '',
+    vendorTaxId: '',
+    vendorMemo: '',
+    vendorStartDate: '',
+    vendorEndDate: ''
 });
 
 const fields = [
@@ -182,8 +188,8 @@ function validateForm() {
 async function submitForm() {
     if (!validateForm()) return;
 
-    const phoneWithoutHyphen = form.value.phone.replace(/\D/g, '');
-    const formattedAuthority = form.value.authority.replace('-', '_').toUpperCase();
+    const phoneWithoutHyphen = (form.value.phone || '').replace(/\D/g, '');
+    const formattedAuthority = (form.value.authority || '').replace('-', '_').toUpperCase();
 
     const memberCreateRequest = {
         email: form.value.email,
@@ -235,7 +241,7 @@ async function submitForm() {
                 memberCreateRequest,
                 vendorCreateRequest: {
                     vendorName: form.value.vendorName,
-                    vendorContact: form.value.vendorContact.replace(/\D/g, ''),
+                    vendorType: form.value.vendorType,
                     vendorTaxId: form.value.vendorTaxId.replace(/\D/g, ''),
                     vendorMemo: form.value.vendorMemo,
                     vendorStartDate: form.value.vendorStartDate,
