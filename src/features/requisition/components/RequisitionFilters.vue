@@ -1,11 +1,12 @@
 <script setup>
-import { reactive } from 'vue'
+import {reactive, ref} from 'vue'
 import { useRouter } from 'vue-router'
 import FilterText from '@/components/common/filters/FilterText.vue'
 import FilterSelect from '@/components/common/filters/FilterSelect.vue'
 import FilterDateRange from '@/components/common/filters/FilterDateRange.vue'
 import FilterSearchModal from '@/components/common/filters/FilterSearchModal.vue'
 import FilterButtons from '@/components/common/filters/FilterButtons.vue'
+import VendorSearchModal from "@/components/common/fields/VendorSearchModal.vue";
 
 const router = useRouter()
 
@@ -59,10 +60,19 @@ const resetFilters = () => {
   router.push({ name: 'RequisitionListView', query: {} })
 }
 
+const isVendorModalVisible = ref(false)
+
 // 모달 열기
 const openVendorSearchModal = () => {
-  alert('거래처 검색 모달 열기 (예시)')
+  isVendorModalVisible.value = true
 }
+// 거래처 선택 핸들러
+const handleVendorSelect = (vendor) => {
+  filters.vendorName = vendor.vendorName
+  filters.selectedVendorName = vendor.vendorName
+  isVendorModalVisible.value = false
+}
+
 </script>
 
 <template>
@@ -85,11 +95,13 @@ const openVendorSearchModal = () => {
         :options="requisitionStatusOptions"
     />
 
+<!--
     <FilterText
         label="거래처명"
         v-model="filters.vendorName"
         placeholder="거래처 이름 입력"
     />
+-->
 
     <FilterDateRange
         label="품의 등록일"
@@ -105,6 +117,12 @@ const openVendorSearchModal = () => {
     <FilterButtons
         @reset="resetFilters"
         @apply="applyFilters"
+    />
+
+    <VendorSearchModal
+        :visible="isVendorModalVisible"
+        @update:visible="val => isVendorModalVisible = val"
+        @select="handleVendorSelect"
     />
   </div>
 </template>

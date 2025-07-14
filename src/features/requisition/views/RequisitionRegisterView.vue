@@ -1,220 +1,143 @@
-<!--
-<script setup>
-import { ref } from 'vue'
-import RegisterLayout from '@/components/layout/RegisterLayout.vue'
-import RequisitionRegisterLeft from '../components/Register/RequisitionRegisterLeft.vue'
-import RequisitionRegisterOrderInfo from '../components/Register/RequisitionRegisterOrderInfo.vue'
-import RequisitionRegisterRightPanel from '../components/Register/RequisitionRegisterRightPanel.vue'
-import RequisitionRegisterDetail from '../components/Register/RequisitionRegisterDetail.vue'
-import RequisitionRegisterFooter from '../components/Register/RequisitionRegisterFooter.vue'
-import {useAuthStore} from "@/features/auth/useAuthStore.js";
-
-const authStore = useAuthStore()
-const authority = authStore.authority
-// const email = authStore.email
-
-
-// 요청자 정보 (userStore의 email을 이용해 백엔드에서 조회 예정)
-const requester = ref({
-  name: '',
-  position: '',
-  phone: '',
-  email: authStore.email || ''
-})
-
-// 결재자 정보
-const approver = ref({
-  memberId: null,
-  name: '',
-  position: '',
-  phone: ''
-})
-
-// 품의 기본 정보
-const orderInfo = ref({
-  vendorId: null,
-  vendorName: '',
-  warehouseId: null,
-  warehouseName: '',
-  dueDate: ''
-})
-
-// 거래처 제품 목록 (선택된 vendor 기준)
-const vendorProducts = ref([])
-
-// 선택된 품의 상세 항목
-const requisitionItems = ref([])
-
-// 상품 추가
-const addProduct = (product) => {
-  requisitionItems.value.push(product)
-}
-
-// 상품 삭제
-const removeProduct = (index) => {
-  requisitionItems.value.splice(index, 1)
-}
-
-// 저장 버튼 클릭 시
-const handleSubmit = () => {
-  const payload = {
-    vendorId: orderInfo.value.vendorId,
-    warehouseId: orderInfo.value.warehouseId,
-    approvedMemberId: approver.value.memberId,
-    dueDate: orderInfo.value.dueDate,
-    items: requisitionItems.value.map(item => ({
-      contractId: item.contractId,
-      productId: item.productId,
-      quantity: item.quantity,
-      unitPrice: item.unitPrice
-    }))
-  }
-
-  console.log('품의 등록 payload:', payload)
-  // TODO: API 호출
-}
-</script>
-
 <template>
-  <RegisterLayout>
-    <div class="register-container">
-      &lt;!&ndash; 왼쪽 섹션 &ndash;&gt;
+  <RegisterLayout title="주문 등록" description="납기일을 지정하고 각 제품에 대해 주문하세요.">
+    <template #actions>
+      <!-- 상단에 액션 버튼이 필요하다면 여기 정의-->
+<!--      <StatusButton type="primary" @click="submit">등록</StatusButton>-->
+<!--      <StatusButton type="reset" @click="cancel">취소</StatusButton>-->
+    </template>
+
+    <template #left>
       <RequisitionRegisterLeft
-          :requester="requester"
-          :approver="approver"
-          @selectApprover="(data) => approver.value = data"
+          v-model:approver="form.approver"
+          v-model:vendor="form.vendor"
+          v-model:warehouse="form.warehouse"
+          v-model:deliveryDate="form.deliveryDate"
+          v-model:orderCategory="form.orderCategory"
+          v-model:memo="form.memo"
+          v-model:address="form.address"
+          v-model:attachments="form.attachments"
+          :store="form.store"
+          :orderType="form.orderType"
+          @searchVendor="(keyword) => openSearch('vendor', keyword)"
+          @searchApprover="() => openSearch('approver')"
+          @searchWarehouse="(keyword) => openSearch('warehouse', keyword)"
       />
+    </template>
 
-      &lt;!&ndash; 중앙 섹션 &ndash;&gt;
-      <div class="order-info-section">
-        <RequisitionRegisterOrderInfo
-            v-model:orderInfo="orderInfo"
-        />
-        <RequisitionRegisterDetail
-            :items="requisitionItems"
-            @removeItem="removeProduct"
-        />
-      </div>
-
-      &lt;!&ndash; 오른쪽 섹션 &ndash;&gt;
+    <template #right v-if="showRightPanel">
       <RequisitionRegisterRightPanel
-          :vendorId="orderInfo.vendorId"
-          :vendorProducts="vendorProducts"
-          @addProduct="addProduct"
+          :type="searchType"
+          :keyword="searchKeyword"
+          :multi="searchType === 'product'"
+          @select="handleSelect"
+          @close="showRightPanel = false"
       />
-    </div>
+    </template>
 
-    &lt;!&ndash; 하단 저장/취소 &ndash;&gt;
-    <RequisitionRegisterFooter @submit="handleSubmit" />
+    <template #detail>
+      <RequisitionRegisterDetail
+          :items="form.items"
+          @remove="handleRemove"
+          @update-item="handleUpdateItem"
+          @add-product="handleAddProduct"
+      />
+    </template>
+
+    <template #summary>
+      <RegisterSummaryBox
+          :total-items="totalItems"
+          :total-quantity="totalQuantity"
+          :total-amount="totalAmount"
+      />
+    </template>
+
+    <template #footer>
+      <RequisitionRegisterFooter />
+    </template>
   </RegisterLayout>
 </template>
--->
+
 <script setup>
-import { ref } from 'vue'
 import RegisterLayout from '@/components/layout/RegisterLayout.vue'
-import RequisitionRegisterLeft from '../components/Register/RequisitionRegisterLeft.vue'
-import RequisitionRegisterOrderInfo from '../components/Register/RequisitionRegisterOrderInfo.vue'
-import RequisitionRegisterRightPanel from '../components/Register/RequisitionRegisterRightPanel.vue'
-import RequisitionRegisterDetail from '../components/Register/RequisitionRegisterDetail.vue'
-import RequisitionRegisterFooter from '../components/Register/RequisitionRegisterFooter.vue'
-import { useAuthStore } from '@/features/auth/useAuthStore.js'
+import RegisterSummaryBox from '@/components/layout/registerview/RegisterSummaryBox.vue'
+import { dummyOrderRegister } from '@/constants/dummy/orderRegister'
+import { computed, reactive, ref } from 'vue'
+import StatusButton from "@/components/common/StatusButton.vue"
+import RequisitionRegisterFooter from "@/features/requisition/components/Register/RequisitionRegisterFooter.vue";
+import RequisitionRegisterDetail from "@/features/requisition/components/Register/RequisitionRegisterDetail.vue";
+import RequisitionRegisterRightPanel
+  from "@/features/requisition/components/Register/RequisitionRegisterRightPanel.vue";
+import RequisitionRegisterLeft from "@/features/requisition/components/Register/RequisitionRegisterLeft.vue";
 
-const authStore = useAuthStore()
-const authority = authStore.authority
-
-// 요청자 정보 (userStore의 email을 이용해 백엔드에서 조회 예정)
-const requester = ref({
-  name: '',
-  position: '',
-  phone: '',
-  email: authStore.email || ''
+const form = reactive({
+  ...dummyOrderRegister,
+  items: []
 })
 
-// 결재자 정보 (SENIOR_MANAGER만 검색 가능)
-const approver = ref({
-  memberId: null,
-  name: '',
-  position: '',
-  phone: ''
-})
+const showRightPanel = ref(false)
+const searchType = ref(null)
+const searchKeyword = ref('') // ✅ 검색어 저장용
 
-// 품의 기본 정보 (거래처, 창고, 납기일)
-const orderInfo = ref({
-  vendorId: null,
-  vendorName: '',
-  warehouseId: null,
-  warehouseName: '',
-  dueDate: ''
-})
 
-// 거래처 상품 목록 (GET /api/contracts?vendorId=...)
-const vendorProducts = ref([])
-
-// 품의 상세 항목 리스트
-const requisitionItems = ref([])
-
-// 상품 추가 핸들러
-const addProduct = (product) => {
-  requisitionItems.value.push(product)
+function openSearch(type, keyword = '') {
+  console.log('[openSearch called]', type, keyword)
+  searchType.value = type
+  searchKeyword.value = keyword
+  showRightPanel.value = true
 }
 
-// 상품 삭제 핸들러
-const removeProduct = (index) => {
-  requisitionItems.value.splice(index, 1)
-}
-
-// 저장 버튼 클릭 시 호출
-const handleSubmit = () => {
-  const payload = {
-    vendorId: orderInfo.value.vendorId,
-    warehouseId: orderInfo.value.warehouseId,
-    approvedMemberId: approver.value.memberId,
-    dueDate: orderInfo.value.dueDate,
-    items: requisitionItems.value.map(item => ({
-      contractId: item.contractId,
-      productId: item.productId,
-      quantity: item.quantity,
-      unitPrice: item.unitPrice
-    }))
+function handleSelect(payload) {
+  if (Array.isArray(payload)) {
+    if (searchType.value === 'product') {
+      // 중복 제거 + 기존 항목 유지
+      const existingIds = new Set(form.items.map(i => i.id))
+      const newItems = payload.filter(p => !existingIds.has(p.id))
+      const enriched = newItems.map(p => ({ ...p, quantity: 1 }))
+      form.items.push(...enriched)
+      showRightPanel.value = false
+    }
+  } else {
+    switch (searchType.value) {
+      case 'vendor':
+        Object.assign(form.vendor, payload)
+        break
+      case 'approver':
+        Object.assign(form.approver, payload)
+        break
+      case 'warehouse':
+        Object.assign(form.warehouse, payload)
+        break
+    }
+    showRightPanel.value = false
   }
+}
 
-  console.log('품의 등록 payload:', payload)
-  // TODO: 실제 API 호출 연동 예정
+function handleRemove(itemToRemove) {
+  const idx = form.items.findIndex(item => item.id === itemToRemove.id)
+  if (idx !== -1) form.items.splice(idx, 1)
+}
+
+function handleUpdateItem(index, field, value) {
+  form.items[index][field] = value
+}
+
+function handleAddProduct() {
+  openSearch('product')
+}
+
+const totalItems = computed(() => form.items.length)
+const totalQuantity = computed(() =>
+    form.items.reduce((sum, item) => sum + item.quantity, 0)
+)
+const totalAmount = computed(() =>
+    form.items.reduce((sum, item) => sum + item.unitPrice * item.quantity, 0)
+)
+
+function submit() {
+  alert('제출됨: ' + JSON.stringify(form))
+}
+
+function cancel() {
+  alert('취소됨')
 }
 </script>
-
-<template>
-  <RegisterLayout>
-    <div class="register-container">
-      <!-- 왼쪽: 요청자 / 결재자 정보 -->
-      <RequisitionRegisterLeft
-          :requester="requester"
-          :approver="approver"
-          @selectApprover="(data) => approver.value = data"
-      />
-
-      <!-- 중앙: 거래처/창고/납기일 + 품의 상세 -->
-      <div class="order-info-section">
-        <RequisitionRegisterOrderInfo
-            v-model:orderInfo="orderInfo"
-        />
-        <RequisitionRegisterDetail
-            :items="requisitionItems"
-            @removeItem="removeProduct"
-        />
-      </div>
-
-      <!-- 오른쪽: 거래처 제품 선택 -->
-      <RequisitionRegisterRightPanel
-          :vendorId="orderInfo.vendorId"
-          :vendorProducts="vendorProducts"
-          @addProduct="addProduct"
-      />
-    </div>
-
-    <!-- 하단: 저장/취소 버튼 -->
-    <RequisitionRegisterFooter
-        @submit="handleSubmit"
-    />
-  </RegisterLayout>
-</template>

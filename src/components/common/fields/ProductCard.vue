@@ -28,6 +28,7 @@ const handleClick = () => {
   </div>
 </template>
 
+
 <style scoped>
 .product-card {
   border: 1px solid #ddd;

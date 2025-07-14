@@ -14,5 +14,6 @@ export const requisitionRoutes = [
         path: '/requisitions/register',
         name: 'RequisitionRegisterView',
         component: () => import('@/features/requisition/views/RequisitionRegisterView.vue'),
+        props: true
     },
 ];

@@ -1,64 +1,116 @@
-<!-- components/requisition/register/RequisitionRegisterLeft.vue -->
-<script setup>
-import { ref, onMounted, watch } from 'vue'
-import { getMembers } from '@/features/member/api.js'
-import MemberSearchModal from '@/components/common/fields/MemberSearchModal.vue'
-import {useAuthStore} from "@/features/auth/useAuthStore.js";
-
-const props = defineProps({
-  approver: Object
-})
-const emit = defineEmits(['update:approver'])
-
-const authStore = useAuthStore()
-const authority = authStore.authority
-const email = authStore.email
-
-const drafterInfo = ref({
-  name: '',
-  position: '',
-  phone: '',
-  email: ''
-})
-
-// 요청자 정보 불러오기
-onMounted(async () => {
-  try {
-    const res = await getMembers(email)
-    drafterInfo.value = res.data
-  } catch (e) {
-    console.error('요청자 정보 조회 실패', e)
-  }
-})
-
-// 결재자 선택 모달
-const showApproverModal = ref(false)
-
-</script>
-
 <template>
-  <div class="register-left">
-    <section class="box">
-      <h3>요청자 정보</h3>
-      <p><strong>이름:</strong> {{ drafterInfo.name }}</p>
-      <p><strong>직책:</strong> {{ drafterInfo.position }}</p>
-      <p><strong>전화번호:</strong> {{ drafterInfo.phone }}</p>
-      <p><strong>이메일:</strong> {{ drafterInfo.email }}</p>
-    </section>
+  <div class="left-section">
+    <RequisitionRegisterDrafterInfo :drafter="drafter" />
 
-    <section class="box">
-      <h3>결재자 정보</h3>
-      <p><strong>이름:</strong> {{ props.approver?.name || '-' }}</p>
-      <p><strong>직책:</strong> {{ props.approver?.position || '-' }}</p>
-      <p><strong>전화번호:</strong> {{ props.approver?.phone || '-' }}</p>
-      <button class="btn" @click="showApproverModal = true">결재자 선택</button>
-    </section>
+    <RequisitionRegisterApproverInfo
+        :approver="approver"
+        @update:approver="val => emit('update:approver', val)"
+        @searchApprover="openApproverSearch"
+    />
 
-    <MemberSearchModal
-        v-if="showApproverModal"
-        authority="SENIOR_MANAGER"
-        @select="getMembers"
-        @close="showApproverModal = false"
+    <RequisitionRegisterOrderInfo
+        :vendor="vendor"
+        :warehouse="warehouse"
+        :deliveryDate="deliveryDate"
+        :orderCategory="orderCategory"
+        :memo="memo"
+        :address="address"
+        :attachments="attachments"
+        @update:vendor="val => emit('update:vendor', val)"
+        @update:warehouse="val => emit('update:warehouse', val)"
+        @update:deliveryDate="val => emit('update:deliveryDate', val)"
+        @update:orderCategory="val => emit('update:orderCategory', val)"
+        @update:memo="val => emit('update:memo', val)"
+        @update:address="val => emit('update:address', val)"
+        @update:attachments="val => emit('update:attachments', val)"
+        @searchVendor="openVendorSearch"
+        @searchWarehouse="openWarehouseSearch"
     />
   </div>
 </template>
+
+<script setup>
+import { ref, onMounted } from 'vue'
+import { getMembers } from '@/features/member/api.js'
+import RequisitionRegisterOrderInfo from '@/features/requisition/components/Register/RequisitionRegisterOrderInfo.vue'
+import RequisitionRegisterApproverInfo from '@/features/requisition/components/Register/RequisitionRegisterApproverInfo.vue'
+import RequisitionRegisterDrafterInfo from '@/features/requisition/components/Register/RequisitionRegisterDrafterInfo.vue'
+import { useAuthStore } from '@/features/auth/useAuthStore.js'
+
+const props = defineProps({
+  orderType: String,
+  approver: Object,
+  vendor: Object,
+  warehouse: Object,
+  deliveryDate: String,
+  orderCategory: String,
+  memo: String,
+  address: String,
+  attachments: Array
+})
+
+const emit = defineEmits([
+  'update:approver',
+  'update:vendor',
+  'update:warehouse',
+  'update:deliveryDate',
+  'update:orderCategory',
+  'update:memo',
+  'update:address',
+  'update:attachments',
+  'searchApprover',
+  'searchVendor',
+  'searchWarehouse'
+])
+
+const drafter = ref({})
+const authStore = useAuthStore()
+
+onMounted(async () => {
+  try {
+    const email = authStore.email
+    const { data } = await getMembers({ email })
+    const result = data?.data?.contents?.[0]
+    if (result) {
+      drafter.value = {
+        memberId: result.memberId,
+        name: result.name,
+        email: result.email,
+        phoneNumber: result.phoneNumber,
+        position: result.position
+      }
+    }
+  } catch (error) {
+    console.error('[기안자 정보 조회 실패]', error)
+  }
+})
+
+function openApproverSearch() {
+  emit('searchApprover')
+}
+
+function openVendorSearch() {
+  const keyword = props.vendor?.vendorName || ''
+  emit('searchVendor', keyword) // keyword 포함 emit
+}
+
+function openWarehouseSearch() {
+  const keyword = props.warehouse?.warehouseName || ''
+  emit('searchWarehouse', keyword)
+}
+</script>
+
+<style scoped>
+.left-section {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.section-title {
+  font-size: var(--font-page-title-large);
+  color: var(--color-primary);
+  border-left: 4px solid var(--color-primary);
+  padding-left: 0.75rem;
+}
+</style>

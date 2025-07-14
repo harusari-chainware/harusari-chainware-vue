@@ -1,98 +1,51 @@
 <template>
-  <div class="search-table-wrapper">
-    <GenericTable :items="tableConfig.data" :columns="tableConfig.columns">
-      <!-- status 커스텀 렌더링 -->
-      <template v-if="tableConfig.customSlots.includes('status')" #cell-status="{ value }">
-        <StatusBadge :status="value" />
-      </template>
-
-      <!-- 선택 버튼 -->
-      <template #cell-actions="{ item }">
-        <GenericSearchButton
-            type="selected"
-            :class="{ selected: isSelected(item) }"
-            @click="(event) => handleClickWithEvent(event, item)"
+  <div class="table-container">
+    <table>
+      <thead>
+      <tr>
+        <th
+            v-for="col in columns"
+            :key="col.key"
+            :style="{ textAlign: col.align || 'left' }"
         >
-          {{ isSelected(item) ? '선택됨' : '선택' }}
-        </GenericSearchButton>
-      </template>
-    </GenericTable>
-
-    <!-- 다중 선택 시 제출 버튼 노출 -->
-    <div v-if="props.multi" class="submit-area">
-      <StatusButton type="primary" @click="submitSelected">제출</StatusButton>
-    </div>
+          {{ col.label }}
+        </th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr v-for="(item, index) in items" :key="item.id || index">
+        <td
+            v-for="col in columns"
+            :key="col.key"
+            :style="{ textAlign: col.align || 'left' }"
+        >
+          <slot
+              :name="`cell-${col.key}`"
+              :item="item"
+              :value="item[col.key]"
+              :index="index"
+          >
+            {{ col.format ? col.format(item[col.key], item, index) : item[col.key] }}
+          </slot>
+        </td>
+      </tr>
+      </tbody>
+    </table>
   </div>
 </template>
 
 <script setup>
-import { computed, ref, watch } from 'vue'
-import GenericTable from '@/components/common/GenericTable.vue'
-import StatusBadge from '@/components/common/StatusBadge.vue'
-import StatusButton from "@/components/common/StatusButton.vue";
-import { searchTableConfigs } from '@/constants/dummy/orderSearchTableConfig.js'
-import GenericSearchButton from "@/components/common/GenericSearchButton.vue";
-
-const props = defineProps({
-  type: String,
-  multi: {
-    type: Boolean,
-    default: false
-  },
-  selected: {
+defineProps({
+  items: {
     type: Array,
-    default: () => []
-  }
+    required: true,
+  },
+  columns: {
+    type: Array,
+    required: true,
+    // 불러서 사용할 때 각 column: { key, label, format?, align? }
+  },
 })
-
-const emit = defineEmits(['update:selected', 'select'])
-
-const tableConfig = computed(() => searchTableConfigs[props.type] || {})
-const selectedItems = ref([...props.selected])
-
-watch(() => props.selected, val => {
-  selectedItems.value = [...val]
-})
-
-function isSelected(item) {
-  return selectedItems.value.some(i => i.id === item.id)
-}
-
-const submitSelected = () => {
-  emit('select', [...selectedItems.value])
-}
-
-function handleClickWithEvent(event, item) {
-  if (!item || typeof item !== 'object') {
-    return
-  }
-  event.stopPropagation()
-  event.preventDefault()
-
-  if (props.multi) {
-    const exists = selectedItems.value.some(i => i.id === item.id)
-    if (exists) {
-      selectedItems.value = selectedItems.value.filter(i => i.id !== item.id)
-    } else {
-      selectedItems.value = [...selectedItems.value, item]
-    }
-
-    emit('update:selected', [...selectedItems.value])
-  } else {
-    emit('select', item)
-  }
-}
 </script>
 
-<style scoped>
-.search-table-wrapper {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.submit-area {
-  display: flex;
-  justify-content: flex-end;
-}
-</style>
+<style scoped src="@/assets/css/_table.css"></style>

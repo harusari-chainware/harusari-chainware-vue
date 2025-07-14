@@ -1,19 +1,16 @@
-<!-- components/requisition/register/RequisitionRegisterFooter.vue -->
-<script setup>
-const emit = defineEmits(['submit', 'cancel'])
-
-const handleSubmit = () => {
-  emit('submit')
-}
-
-const handleCancel = () => {
-  emit('cancel')
-}
-</script>
-
 <template>
-  <div class="footer-wrapper">
-    <button class="btn cancel" @click="handleCancel">취소</button>
-    <button class="btn primary" @click="handleSubmit">등록</button>
-  </div>
+  <RegisterFooter>
+    <template #actions>
+      <StatusButton type="primary" @click="submit">등록</StatusButton>
+      <StatusButton type="reset" @click="cancel">취소</StatusButton>
+    </template>
+  </RegisterFooter>
 </template>
+
+<script setup>
+import RegisterFooter from '@/components/layout/registerview/RegisterFooter.vue'
+import StatusButton from "@/components/common/StatusButton.vue";
+
+const submit = () => alert('등록 완료')
+const cancel = () => alert('취소')
+</script>

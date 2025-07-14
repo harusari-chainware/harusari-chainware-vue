@@ -8,3 +8,7 @@ export function firstDummyAPI(memberId) {
 export function secondDummyAPI(memberId) {
     return api.get(`/secondDummy/${memberId}`);
 }
+
+export const fetchVendors = (params) => {
+    return api.get('/vendors', { params })
+}
