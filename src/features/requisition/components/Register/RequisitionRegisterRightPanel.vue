@@ -24,6 +24,14 @@ const emit = defineEmits(['select', 'close'])
 const searchText = ref('')
 const searchResults = ref([])
 
+watch(
+  () => props.keyword,
+  (val) => {
+    if (val) searchText.value = val
+  },
+  { immediate: true }
+)
+
 watch(searchText, async (val) => {
   if (!val) return
 
@@ -42,7 +50,7 @@ watch(searchText, async (val) => {
 -->
 <template>
   <RegisterRightPanel :title="panelTitle" @close="emit('close')">
-    <GenericSearchWrapper
+    <RequisitionSearchWrapper
         :type="props.type"
         v-model:search="searchText"
         :results="searchResults"
@@ -57,8 +65,8 @@ import { ref, computed, watch, onMounted } from 'vue'
 import { fetchVendors } from '@/features/vendor/api.js'
 import { fetchWarehouses } from '@/features/warehouse/api.js'
 import { getContractProductsByVendor } from '@/features/contract/contractApi.js'
-import GenericSearchWrapper from '@/components/common/GenericSearchWrapper.vue'
 import RegisterRightPanel from '@/components/layout/registerview/RegisterRightPanel.vue'
+import RequisitionSearchWrapper from "@/features/requisition/components/Register/RequisitionSearchWrapper.vue";
 
 const props = defineProps({
   type: { type: String, required: true },
@@ -69,6 +77,14 @@ const emit = defineEmits(['select', 'close'])
 
 const searchText = ref(props.keyword || ' ')  // ✅ 공백 넣어서 watch 트리거 유도
 const searchResults = ref([])
+
+watch(
+    () => props.keyword,
+    (val) => {
+      if (val) searchText.value = val
+    },
+    { immediate: true }
+)
 
 const panelTitle = computed(() => {
   switch (props.type) {
@@ -84,10 +100,21 @@ const panelTitle = computed(() => {
 })
 
 // ✅ props.keyword가 바뀌면 searchText 반영
-watch(() => props.keyword, (val) => {
-  searchText.value = val || ' '  // 기본 검색어
-})
+watch(() => props.keyword, async (val) => {
+  if (!val) return
+  console.log('[DEBUG] keyword changed:', val)  // ← 무조건 추가해봐
 
+  if (props.type === 'vendor') {
+    const { data } = await fetchVendors({ vendorName: val })
+    searchResults.value = data.contents
+  } else if (props.type === 'warehouse') {
+    const { data } = await fetchWarehouses({ warehouseName: val })
+    searchResults.value = data.contents
+  } else if (props.type === 'product') {
+    const { data } = await getContractProductsByVendor({ vendorName: val })
+    searchResults.value = data.content
+  }
+})
 // ✅ mounted 시점에 검색 실행
 onMounted(() => {
   if (!searchText.value) {

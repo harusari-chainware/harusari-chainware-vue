@@ -9,57 +9,31 @@
           @search="handleSearchVendor"
       />
 
-      <SearchFieldWithButton
+      <AutoCompleteField
           label="창고명"
           v-model="warehouseKeyword"
-          placeholder="검색할 창고명을 입력하세요"
-          :readonly="false"
-          @search="handleSearchWarehouse"
+          :fetchFn="fetchWarehouses"
+          @select="(w) => emit('update:warehouse', w)"
       />
 
-      <SelectField
-          label="주문 타입"
-          :model-value="orderCategory"
-          :options="orderCategoryOptions"
-          @update:model-value="val => emit('update:orderCategory', val)"
-      />
-
-      <AddressSearchField
-          label="주소"
-          :model-value="address"
-          @update:model-value="val => emit('update:address', val)"
-      />
     </div>
   </RegisterInfoGroup>
 </template>
 
 <script setup>
-import {computed, ref} from "vue"
-
-import RegisterInfoGroup from "@/components/layout/registerview/RegisterInfoGroup.vue"
-import SearchFieldWithButton from "@/components/common/fields/SearchFieldWithButton.vue"
-import DatePickerField from "@/components/common/fields/DatePickerField.vue"
-import SelectField from "@/components/common/fields/SelectField.vue"
-import AddressSearchField from "@/components/common/fields/AddressSearchField.vue"
-
-function handleSearchVendor() {
-  emit('searchVendor')  // 상위 컴포넌트에서 RightPanel 열도록 유도
-}
-
-function handleSearchWarehouse() {
-  emit('searchWarehouse')
-}
-
-const vendorKeyword = ref('')
-const warehouseKeyword = ref('')
-
+import { ref } from 'vue'
+import RegisterInfoGroup from '@/components/layout/registerview/RegisterInfoGroup.vue'
+import SearchFieldWithButton from '@/components/common/fields/SearchFieldWithButton.vue'
+import { fetchVendors } from '@/features/vendor/api.js'
+import {fetchWarehouses} from "@/features/warehouse/api.js";
+import AutoCompleteField from "@/features/requisition/components/Register/AutoCompleteField.vue";
 
 const props = defineProps({
   vendor: Object,
   warehouse: Object,
   deliveryDate: String,
   orderCategory: String,
-  address: String
+  address: String,
 })
 
 const emit = defineEmits([
@@ -68,13 +42,40 @@ const emit = defineEmits([
   'update:deliveryDate',
   'update:orderCategory',
   'update:address',
-  'searchVendor',
-  'searchWarehouse'
 ])
+
+const vendorKeyword = ref('')
+const warehouseKeyword = ref('')
+
+async function handleSearchVendor() {
+  if (!vendorKeyword.value) {
+    alert('검색어를 입력해주세요.')
+    return
+  }
+
+  try {
+    const res = await fetchVendors({ vendorName: vendorKeyword.value })
+    console.log('📦 거래처 검색 결과:', res)
+
+    const list = res.data?.data?.contents || []
+    if (list.length > 0) {
+      emit('update:vendor', list[0]) // ✅ 상위에서 바인딩된 form.vendor에 직접 반영
+    } else {
+      alert('검색된 거래처가 없습니다.')
+    }
+  } catch (e) {
+    console.error('❌ 거래처 검색 실패:', e)
+    alert('거래처 검색 중 오류가 발생했습니다.')
+  }
+}
+
+function handleSearchWarehouse() {
+  emit('searchWarehouse', warehouseKeyword.value)
+}
 
 const orderCategoryOptions = [
   { label: '공급업체', value: '공급업체' },
   { label: '물류', value: '물류' },
-  { label: '기타', value: '기타' }
+  { label: '기타', value: '기타' },
 ]
 </script>

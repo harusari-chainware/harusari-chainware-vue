@@ -10,6 +10,6 @@ export function getRequisitionById(requisitionId) {
     return api.get(`/requisitions/${requisitionId}`);
 }
 
-export function createRequisition(requisitionId) {
-    return api.post(`/requisitions`);
+export function createRequisition(payload) {
+    return api.post(`/requisitions`, payload)
 }
