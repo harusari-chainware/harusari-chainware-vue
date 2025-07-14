@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, nextTick, watch } from 'vue'
+import { ref, onMounted, nextTick } from 'vue'
 import { fetchTotalSales, fetchSalesPattern, fetchAllFranchises } from '../api.js'
 import { Chart, registerables } from 'chart.js'
 import FilterDate from "@/components/common/filters/FilterDate.vue"
@@ -24,6 +24,7 @@ const peakDayAmount = ref(0)
 
 const pattern = ref('HOURLY')
 const salesPatternChart = ref(null)
+const shouldRenderChart = ref(true)
 
 const salesChartSubtitle = ref('시간대별 매출 추이')
 const subtitleMap = {
@@ -31,6 +32,19 @@ const subtitleMap = {
   WEEKLY: '요일별 매출 추이',
   MONTHLY: '일자별 매출 추이'
 }
+
+function getYesterday() {
+  const d = new Date()
+  d.setDate(d.getDate() - 1)
+  return d.toISOString().slice(0, 10)
+}
+
+const formatCurrency = (val) =>
+    new Intl.NumberFormat('ko-KR', {
+      style: 'currency',
+      currency: 'KRW',
+      maximumFractionDigits: 0
+    }).format(val)
 
 function handleSearchKeyword() {
   const keyword = searchKeyword.value?.trim()
@@ -42,13 +56,6 @@ function handleSearchKeyword() {
   const match = franchiseList.value.find(i => i.name.includes(keyword))
   franchiseId.value = match ? match.id : ''
 }
-
-const formatCurrency = (val) =>
-    new Intl.NumberFormat('ko-KR', {
-      style: 'currency',
-      currency: 'KRW',
-      maximumFractionDigits: 0
-    }).format(val)
 
 async function loadSalesData() {
   try {
@@ -74,52 +81,29 @@ async function loadSalesData() {
 
 async function drawSalesPatternChart() {
   try {
-    await nextTick()
-
     const [hourlyData, weeklyData, dynamicData] = await Promise.all([
-      fetchSalesPattern({
-        period: 'HOURLY',
-        franchiseId: franchiseId.value || null,
-        targetDate: targetDate.value || null
-      }),
-      fetchSalesPattern({
-        period: 'WEEKLY',
-        franchiseId: franchiseId.value || null,
-        targetDate: targetDate.value || null
-      }),
-      fetchSalesPattern({
-        period: pattern.value,
-        franchiseId: franchiseId.value || null,
-        targetDate: targetDate.value || null
-      })
+      fetchSalesPattern({ period: 'HOURLY', franchiseId: franchiseId.value || null, targetDate: targetDate.value }),
+      fetchSalesPattern({ period: 'WEEKLY', franchiseId: franchiseId.value || null, targetDate: targetDate.value }),
+      fetchSalesPattern({ period: pattern.value, franchiseId: franchiseId.value || null, targetDate: targetDate.value })
     ])
 
     updatePeakHour(hourlyData)
     updatePeakDay(weeklyData)
 
-    const labels = dynamicData.map(i => {
-      if (pattern.value === 'MONTHLY') return i.date?.slice(5)
-      if (pattern.value === 'WEEKLY') return i.weekday
-      if (pattern.value === 'HOURLY') return `${i.hour}시`
-      return ''
-    })
+    await nextTick()
 
-    const values = dynamicData.map(i => i.totalAmount)
-
-    const isValid =
-        Array.isArray(labels) &&
-        Array.isArray(values) &&
-        labels.length === values.length &&
-        values.every(v => typeof v === 'number' && !isNaN(v))
-
-    if (!isValid) {
-      console.warn('⚠️ 유효하지 않은 데이터 → 차트 렌더링 생략:', dynamicData)
-      return
-    }
-
-    const ctx = document.getElementById('salesPatternChart')?.getContext('2d')
+    const canvas = document.getElementById('salesPatternChart')
+    if (!canvas) return
+    const ctx = canvas.getContext('2d')
     if (!ctx) return
     if (salesPatternChart.value) salesPatternChart.value.destroy()
+
+    const labels = dynamicData.map(i =>
+        pattern.value === 'MONTHLY' ? i.date?.slice(5) :
+            pattern.value === 'WEEKLY' ? i.weekday :
+                `${i.hour}시`
+    )
+    const values = dynamicData.map(i => i.totalAmount)
 
     salesPatternChart.value = new Chart(ctx, {
       type: pattern.value === 'WEEKLY' ? 'bar' : 'line',
@@ -140,14 +124,13 @@ async function drawSalesPatternChart() {
         maintainAspectRatio: true,
         aspectRatio: 2.5,
         plugins: {
-          legend: { display: false },
-          tooltip: { enabled: true }
+          legend: { display: false }
         },
         scales: {
           y: {
             beginAtZero: true,
             ticks: {
-              callback: val => (val >= 1000 ? `${(val / 1000).toFixed(0)}K` : val)
+              callback: val => val >= 1000 ? `${(val / 1000).toFixed(0)}K` : val
             }
           }
         }
@@ -160,29 +143,23 @@ async function drawSalesPatternChart() {
 
 function updatePeakHour(data) {
   const maxItem = data.find(i => i.max)
-  if (maxItem) {
-    peakHour.value = `${maxItem.hour}-${(maxItem.hour + 1) % 24}시`
-    peakHourAmount.value = maxItem.totalAmount
-  } else {
-    peakHour.value = ''
-    peakHourAmount.value = 0
-  }
+  peakHour.value = maxItem ? `${maxItem.hour}-${(maxItem.hour + 1) % 24}시` : ''
+  peakHourAmount.value = maxItem ? maxItem.totalAmount : 0
 }
 
 function updatePeakDay(data) {
   const maxItem = data.find(i => i.max)
-  if (maxItem) {
-    peakDay.value = `${maxItem.weekday}요일`
-    peakDayAmount.value = maxItem.totalAmount
-  } else {
-    peakDay.value = ''
-    peakDayAmount.value = 0
-  }
+  peakDay.value = maxItem ? `${maxItem.weekday}요일` : ''
+  peakDayAmount.value = maxItem ? maxItem.totalAmount : 0
 }
 
-function onPatternTabClick(p) {
+async function onPatternTabClick(p) {
   pattern.value = p
   salesChartSubtitle.value = subtitleMap[p]
+  shouldRenderChart.value = false
+  await nextTick()
+  shouldRenderChart.value = true
+  await nextTick()
   drawSalesPatternChart()
 }
 
@@ -190,14 +167,8 @@ async function resetForm() {
   franchiseId.value = ''
   period.value = 'DAILY'
   targetDate.value = getYesterday()
-  onPatternTabClick('HOURLY')
   await loadSalesData()
-}
-
-function getYesterday() {
-  const d = new Date()
-  d.setDate(d.getDate() - 1)
-  return d.toISOString().slice(0, 10)
+  await onPatternTabClick('HOURLY')
 }
 
 onMounted(async () => {
@@ -293,12 +264,13 @@ onMounted(async () => {
           </div>
         </div>
         <div class="chart-container">
-          <canvas id="salesPatternChart" width="700" height="300"></canvas>
+          <canvas v-if="shouldRenderChart" id="salesPatternChart" width="700" height="300"></canvas>
         </div>
       </div>
     </div>
   </div>
 </template>
+
 
 <style scoped>
 .dashboard-container {

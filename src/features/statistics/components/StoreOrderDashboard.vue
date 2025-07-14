@@ -23,10 +23,11 @@ const topProductShare = ref('-')
 const franchiseChart = ref(null)
 const productChart = ref(null)
 const trendChart = ref(null)
+const shouldRenderChart = ref(true)
+let isFetching = false
 
-const franchiseChartView = ref('quantity') // 'quantity' or 'count'
-const productChartView = ref('quantity')   // 'quantity' or 'ratio'
-const trendChartView = ref('quantity')     // 'quantity' or 'count'
+const franchiseChartView = ref('quantity')
+const trendChartView = ref('quantity')
 
 const chartKeyMap = {
   quantity: 'totalQuantity',
@@ -41,23 +42,29 @@ function getYesterday() {
 }
 
 function delayedFranchiseViewChange(view) {
+  if (isFetching) return
   franchiseChartView.value = view
-  setTimeout(() => loadData(), 1000)
+  setTimeout(() => loadData(), 300)
 }
 
 function delayedTrendViewChange(view) {
+  if (isFetching) return
   trendChartView.value = view
-  setTimeout(() => loadData(), 1000)
+  setTimeout(() => loadData(), 300)
 }
 
 function handleSearchKeyword() {
   const match = franchises.value.find(i => i.name.includes(searchKeyword.value))
-  if (match) franchiseId.value = match.id
-  else franchiseId.value = ''
+  franchiseId.value = match ? match.id : ''
 }
 
 async function loadData() {
+  if (isFetching) return
+  isFetching = true
   try {
+    shouldRenderChart.value = false
+    await nextTick() // canvas DOM 제거 대기
+
     const [franchiseRes, productRes] = await Promise.all([
       fetchStoreOrderStats({ period: period.value, franchiseId: franchiseId.value || null, targetDate: targetDate.value }),
       fetchStoreOrderStats({ period: period.value, franchiseId: franchiseId.value || null, targetDate: targetDate.value, includeProduct: true })
@@ -97,20 +104,29 @@ async function loadData() {
       topProductShare.value = '-'
     }
 
-    await nextTick()
-    drawFranchiseChart(stats.franchiseStats)
-    drawProductChart(stats.productStats)
-    drawTrendChart(stats.trends)
+    shouldRenderChart.value = true
+    await nextTick() // canvas DOM 재생성 대기
+
+    await drawFranchiseChart(stats.franchiseStats)
+    await drawProductChart(stats.productStats)
+    await drawTrendChart(stats.trends)
   } catch (err) {
     console.error('❌ loadData() error:', err)
+  } finally {
+    isFetching = false
   }
 }
 
-function drawFranchiseChart(data) {
-  if (!Array.isArray(data)) return
-  const ctx = document.getElementById('franchiseOrderChart')?.getContext('2d')
+async function drawFranchiseChart(data) {
+  if (franchiseChart.value) {
+    franchiseChart.value.destroy()
+    franchiseChart.value = null
+  }
+
+  const canvas = document.getElementById('franchiseOrderChart')
+  if (!canvas) return
+  const ctx = canvas.getContext('2d')
   if (!ctx) return
-  if (franchiseChart.value) franchiseChart.value.destroy()
 
   const key = chartKeyMap[franchiseChartView.value]
   let labels = []
@@ -156,10 +172,16 @@ function drawFranchiseChart(data) {
   })
 }
 
-function drawProductChart(data) {
-  const ctx = document.getElementById('productOrderChart')?.getContext('2d')
-  if (!ctx || !Array.isArray(data) || data.length === 0) return
-  if (productChart.value) productChart.value.destroy()
+async function drawProductChart(data) {
+  if (productChart.value) {
+    productChart.value.destroy()
+    productChart.value = null
+  }
+
+  const canvas = document.getElementById('productOrderChart')
+  if (!canvas || !Array.isArray(data) || data.length === 0) return
+  const ctx = canvas.getContext('2d')
+  if (!ctx) return
 
   const grouped = {}
   for (const stat of data) {
@@ -207,19 +229,21 @@ function formatTrendLabel(dateStr) {
   const month = date.getMonth() + 1
   const week = Math.ceil((date.getDate() - date.getDay() + 1) / 7)
 
-  if (period.value === 'WEEKLY') {
-    return `${month}월 ${week}주차`
-  } else if (period.value === 'MONTHLY') {
-    return `${month}월`
-  } else {
-    return dateStr.slice(5)
-  }
+  if (period.value === 'WEEKLY') return `${month}월 ${week}주차`
+  if (period.value === 'MONTHLY') return `${month}월`
+  return dateStr.slice(5)
 }
 
-function drawTrendChart(data) {
-  const ctx = document.getElementById('orderTrendChart')?.getContext('2d')
-  if (!ctx || !Array.isArray(data)) return
-  if (trendChart.value) trendChart.value.destroy()
+async function drawTrendChart(data) {
+  if (trendChart.value) {
+    trendChart.value.destroy()
+    trendChart.value = null
+  }
+
+  const canvas = document.getElementById('orderTrendChart')
+  if (!canvas || !Array.isArray(data)) return
+  const ctx = canvas.getContext('2d')
+  if (!ctx) return
 
   const key = chartKeyMap[trendChartView.value]
 
@@ -314,29 +338,22 @@ onMounted(async () => {
       </div>
     </div>
 
-    <!-- 차트 -->
+    <!-- 차트 영역 -->
     <div class="chart-section">
       <div class="chart-card">
         <div class="chart-header">
           가맹점별 주문량
           <div class="tab-buttons">
-            <button
-                :class="{ active: franchiseChartView === 'quantity' }"
-                @click="delayedFranchiseViewChange('quantity')">수량</button>
-
-            <button
-                :class="{ active: franchiseChartView === 'count' }"
-                @click="delayedFranchiseViewChange('count')">건수</button>
+            <button :class="{ active: franchiseChartView === 'quantity' }" @click="delayedFranchiseViewChange('quantity')">수량</button>
+            <button :class="{ active: franchiseChartView === 'count' }" @click="delayedFranchiseViewChange('count')">건수</button>
           </div>
         </div>
-        <canvas id="franchiseOrderChart"></canvas>
+        <canvas v-if="shouldRenderChart" id="franchiseOrderChart"></canvas>
       </div>
 
       <div class="chart-card">
-        <div class="chart-header">
-          상품별 주문량
-        </div>
-        <canvas id="productOrderChart"></canvas>
+        <div class="chart-header">상품별 주문량</div>
+        <canvas v-if="shouldRenderChart" id="productOrderChart"></canvas>
       </div>
     </div>
 
@@ -344,17 +361,11 @@ onMounted(async () => {
       <div class="chart-header">
         주문 추이
         <div class="tab-buttons">
-          <button
-              :class="{ active: trendChartView === 'quantity' }"
-              @click="delayedTrendViewChange('quantity')">수량</button>
-
-          <button
-              :class="{ active: trendChartView === 'count' }"
-              @click="delayedTrendViewChange('count')">건수</button>
-
+          <button :class="{ active: trendChartView === 'quantity' }" @click="delayedTrendViewChange('quantity')">수량</button>
+          <button :class="{ active: trendChartView === 'count' }" @click="delayedTrendViewChange('count')">건수</button>
         </div>
       </div>
-      <canvas id="orderTrendChart"></canvas>
+      <canvas v-if="shouldRenderChart" id="orderTrendChart"></canvas>
     </div>
   </div>
 </template>
