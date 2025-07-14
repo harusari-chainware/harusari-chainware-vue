@@ -14,8 +14,9 @@ export const orderRoutes = [
         component: OrderRegisterView
     },
     {
-        path: '/order/detail',
+        path: '/order/:orderId',
         name: 'OrderDetailView',
-        component: OrderDetailView
+        component: OrderDetailView,
+        props: true
     },
 ];
