@@ -11,15 +11,10 @@
       />
     </template>
 
-    <!-- 상단 우측 버튼 -->
-    <template #top-actions-right>
-      <CreateButton @click="goToCreatePage">거래처 추가</CreateButton>
-    </template>
-
     <!-- 거래처 테이블 & 페이징 -->
     <template #table>
       <VendorTable
-          :vendors="pagedVendors"
+          :vendors="vendors"
           :page="page"
           :pageSize="PAGE_SIZE"
           @detail="goDetail"
@@ -34,10 +29,9 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, watch, onMounted } from 'vue'
+import { ref, reactive, watch, onMounted } from 'vue'
 import ListLayout from '@/components/layout/ListLayout.vue'
 import Pagination from '@/components/common/Pagination.vue'
-import CreateButton from "@/components/common/top-actions/CreateButton.vue";
 import VendorTable from '../components/VendorTable.vue'
 import VendorFilters from '../components/VendorFilters.vue'
 import { fetchVendors } from '@/features/vendor/api.js'
@@ -45,14 +39,16 @@ import { useRouter } from 'vue-router'
 
 const router = useRouter()
 
-// --- 필터/상태 ---
-// 실제 백엔드 파라미터명과 맞추세요
+// --- 필터 상태 (백엔드 DTO와 일치하게 초기화) ---
 const filters = reactive({
   vendorName: '',
+  zipcode: '',
   addressRoad: '',
+  addressDetail: '',
   vendorType: '',
   vendorStatus: '',
-  vendorDate: '',
+  vendorStartDate: '',
+  vendorEndDate: '',
 })
 
 const vendors = ref([])
@@ -60,70 +56,86 @@ const totalCount = ref(0)
 const page = ref(1)
 const PAGE_SIZE = 10
 
-const pagedVendors = computed(() => vendors.value)
+watch(page, loadVendors)
 
-// page 값이 변할 때 자동으로 재조회 (Pagination에 반응)
-watch(page, () => {
-  loadVendors()
-})
-
-// 검색/리셋 할 때 항상 1페이지부터
 const handleSearch = (newFilters) => {
-  Object.assign(filters, newFilters)
+  console.log('[handleSearch] newFilters:', newFilters)
+
+  // filters.vendorName = newFilters.vendorName || ''
+  // filters.vendorType = newFilters.vendorType || ''
+  // filters.vendorStatus = newFilters.vendorStatus || ''
+  // filters.vendorStartDate = newFilters.vendorDate?.start || ''
+  // filters.vendorEndDate = newFilters.vendorDate?.end || ''
+  //
+  // console.log('[handleSearch] 최종 filters 상태:', filters)
+  //
+  // // 주소 필드를 하나로 명확하게 통일
+  // filters.addressRoad = newFilters.vendorAddress || ''
+  //
+  // page.value = 1
+  // loadVendors()
+  filters.vendorName = newFilters.vendorName || ''
+  filters.vendorType = newFilters.vendorType || ''
+  filters.vendorStatus = newFilters.vendorStatus || ''
+  filters.vendorStartDate = newFilters.vendorStartDate || ''
+  filters.vendorEndDate = newFilters.vendorEndDate || ''
+
+  console.log('[handleSearch] 최종 filters 상태:', filters)
+
+  filters.zipcode = newFilters.zipcode || ''
+  filters.addressRoad = newFilters.addressRoad || ''
+  filters.addressDetail = newFilters.addressDetail || ''
+
   page.value = 1
   loadVendors()
 }
+
 const handleReset = () => {
-  Object.keys(filters).forEach(k => filters[k] = '')
+  Object.assign(filters, {
+    vendorName: '',
+    zipcode: '',
+    addressRoad: '',
+    addressDetail: '',
+    vendorType: '',
+    vendorStatus: '',
+    vendorStartDate: '',
+    vendorEndDate: '',
+  })
   page.value = 1
   loadVendors()
 }
 
-const loadVendors = async () => {
+async function loadVendors() {
   const params = {
-    ...filters,
-    page: page.value,
-    size: PAGE_SIZE
+    page: page.value - 1,
+    size: PAGE_SIZE,
+    sort: 'vendorName,desc',
+    ...filters
   }
-  Object.keys(params).forEach(k => {
-    if (params[k] === '' || params[k] == null) delete params[k]
+
+  // 빈 값 제거
+  Object.keys(params).forEach(key => {
+    if (!params[key]) delete params[key]
   })
-  console.log('API params:', params)
+
+  console.log('[loadVendors] 최종 API 파라미터:', params)
+
   const res = await fetchVendors(params)
-  const d = res.data.data
-  vendors.value = d.contents ?? []
-  totalCount.value = d.totalElements ?? 0
+  const data = res.data.data
+
+  console.log('[loadVendors] API 응답:', data)
+
+  vendors.value = data.contents || []
+  totalCount.value = data.totalElements || 0
 }
 
-// const loadVendors = async () => {
-//   const params = {
-//     ...filters,
-//     page: page.value,
-//     size: PAGE_SIZE
-//   }
-//   // 빈 값 파라미터 제거
-//   Object.keys(params).forEach(k => {
-//     if (params[k] === '' || params[k] == null) delete params[k]
-//   })
-//   const res = await fetchVendors(params)
-//   const d = res.data.data
-//   // 다양한 응답 형태에 대응
-//   vendors.value = d.contents ?? []
-//   totalCount.value = d.totalElements ?? 0
-// }
-
-// 상세 페이지 이동
 const goDetail = (item) => {
   router.push(`/vendor/${item.vendorId}`)
 }
 
-// 추가(등록) 페이지 이동
 const goToCreatePage = () => {
   router.push('/vendor/register')
 }
 
-// 최초 로딩 (page, filter가 바뀌어도 중복 호출되지 않음)
-onMounted(() => {
-  loadVendors()
-})
+onMounted(loadVendors)
 </script>

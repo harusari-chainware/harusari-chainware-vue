@@ -14,7 +14,7 @@
         <label class="filter-label">주소</label>
         <input
             class="filter-input"
-            v-model="filters.address"
+            v-model="filters.vendorAddress"
             placeholder="주소(우편번호/도로명/상세주소) 입력"
             type="text"
         />
@@ -29,9 +29,15 @@
           v-model="filters.vendorStatus"
           :options="vendorStatusOptions"
       />
+      <div class="filter-input-wrap">
+        <FilterDateRange
+            label="계약일"
+            v-model="filters.vendorDate"
+            placeholder="날짜 범위 선택"
+        />
+      </div>
     </div>
     <div class="filter-row filter-row-buttons">
-      <div></div><div></div><div></div><div></div>
       <div class="filter-buttons">
         <FilterButtons @reset="resetFilters" @apply="applyFilters" />
       </div>
@@ -43,30 +49,53 @@
 import { reactive } from 'vue'
 import FilterSelect from '@/components/common/filters/FilterSelect.vue'
 import FilterButtons from '@/components/common/filters/FilterButtons.vue'
+import FilterDateRange from "@/components/common/filters/FilterDateRange.vue";
 
 // 필터 state (백엔드 DTO와 동일하게!)
 const filters = reactive({
   vendorName: '',
-  address: '',   // 한 칸에 전부 검색
+  vendorAddress: '',   // 한 칸에 전부 검색
   vendorType: '',
   vendorStatus: '',
-  vendorDate: ''
+  vendorDate: { start: '', end: '' }
 })
 const emit = defineEmits(['apply', 'reset'])
 
 function applyFilters() {
   const params = {
     ...filters,
-    zipcode: filters.address,
-    addressRoad: filters.address,
-    addressDetail: filters.address,
+    vendorName: filters.vendorName,
+    zipcode: filters.vendorAddress,
+    addressRoad: filters.vendorAddress,
+    addressDetail: filters.vendorAddress,
+    vendorType: filters.vendorType,
+    vendorStatus: filters.vendorStatus,
+    vendorStartDate: filters.vendorDate.start,
+    vendorEndDate: filters.vendorDate.end,
   }
-  delete params.address
+  // 👇 불필요한 파라미터 삭제
+  delete params.vendorDate
+
+  // 빈 값 파라미터 삭제
+  Object.keys(params).forEach(key => {
+    if (
+        params[key] === '' ||
+        params[key] == null ||
+        (typeof params[key] === 'object' && params[key] !== null && Object.values(params[key]).every(v => v === ''))
+    ) {
+      delete params[key]
+    }
+  })
+
+  console.log('[applyFilters] emit params:', params) // <= params 확인용 로그!
   emit('apply', params)
 }
 
 function resetFilters() {
-  Object.keys(filters).forEach(k => filters[k] = '')
+  Object.keys(filters).forEach(k => {
+    if (k === 'vendorDate') filters[k] = { start: '', end: '' }
+    else filters[k] = ''
+  })
   emit('reset')
 }
 
@@ -129,11 +158,14 @@ const vendorStatusOptions = [
   color: var(--color-gray-900, #222);
   width: 100%;
 }
+.filter-row-buttons {
+  display: flex;
+  justify-content: flex-end;  /* 오른쪽 정렬 */
+  width: 100%;
+}
 .filter-buttons {
-  margin-left: auto;
   display: flex;
   gap: 12px;
   align-items: center;
-  justify-content: flex-end;
 }
 </style>
