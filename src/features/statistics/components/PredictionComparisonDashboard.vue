@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import {ref, onMounted, computed, nextTick} from 'vue'
 import { fetchPredictionComparison, fetchAllFranchises } from '../api.js'
 import Chart from 'chart.js/auto'
 
@@ -9,6 +9,8 @@ const chartInstance = ref(null)
 const chartData = ref([])
 const franchiseList = ref([])
 const searchKeyword = ref('')
+const shouldRenderChart = ref(true)
+
 
 // "발주 수량"일 때는 본사 고정 + 입력 막기
 const isHeadquartersOnly = computed(() => predictionType.value === 'purchase_quantity')
@@ -37,11 +39,32 @@ function setPredictionType(type) {
 async function loadData() {
   const data = await fetchPredictionComparison(predictionType.value, franchiseId.value)
   chartData.value = data
-  updateChart(data)
+  await updateChart(data)
 }
 
-function updateChart(data) {
-  if (!data || !data.length) return
+async function updateChart(data) {
+  shouldRenderChart.value = false
+  await nextTick()
+
+  shouldRenderChart.value = true
+  await nextTick()
+
+  const canvas = document.getElementById('predictionChart')
+  if (!canvas) {
+    console.warn('⚠️ canvas not found')
+    return
+  }
+
+  const ctx = canvas.getContext('2d')
+  if (!ctx) {
+    console.warn('⚠️ context not available')
+    return
+  }
+
+  if (chartInstance.value) {
+    chartInstance.value.destroy()
+    chartInstance.value = null
+  }
 
   data.sort((a, b) => new Date(a.date) - new Date(b.date))
 
@@ -53,9 +76,6 @@ function updateChart(data) {
   const values = data.map(d => d.value)
   const types = data.map(d => d.type)
 
-  if (chartInstance.value) chartInstance.value.destroy()
-
-  const ctx = document.getElementById('predictionChart').getContext('2d')
   chartInstance.value = new Chart(ctx, {
     type: 'line',
     data: {
@@ -80,9 +100,7 @@ function updateChart(data) {
     options: {
       responsive: true,
       maintainAspectRatio: false,
-      scales: {
-        y: { beginAtZero: true }
-      },
+      scales: { y: { beginAtZero: true } },
       plugins: {
         legend: {
           labels: {
@@ -157,7 +175,7 @@ onMounted(async () => {
           <span class="legend-dot gray"></span><span>오늘</span>
         </div>
       </div>
-      <canvas id="predictionChart" class="chart-canvas"></canvas>
+      <canvas v-if="shouldRenderChart" id="predictionChart" class="chart-canvas"></canvas>
     </div>
   </div>
 </template>

@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, nextTick } from 'vue'
 import Chart from 'chart.js/auto'
 import { fetchAccuracySummary, fetchAllFranchises } from '@/features/statistics/api.js'
 import FilterDate from "@/components/common/filters/FilterDate.vue"
@@ -11,6 +11,7 @@ const targetDate = ref(new Date(Date.now() - 86400000).toISOString().split('T')[
 const predictionType = ref('sales')
 const chartRef = ref(null)
 const franchiseList = ref([])
+const shouldRenderChart = ref(true)
 
 const labelMap = {
   sales: '매출',
@@ -52,57 +53,78 @@ function calcTrend(current, previous) {
   return `${symbol}${ratio.toFixed(2)}%`
 }
 
+let isFetching = false
+
 async function fetchAccuracy() {
-  const [thisWeek, lastWeek] = await Promise.all([
-    fetchAccuracySummary({
-      predictionType: predictionType.value,
-      periodType: periodType.value,
-      targetDate: targetDate.value,
-      franchiseId: franchiseId.value || null
-    }),
-    fetchAccuracySummary({
-      predictionType: predictionType.value,
-      periodType: periodType.value,
-      targetDate: new Date(new Date(targetDate.value).getTime() - 7 * 86400000).toISOString().split('T')[0],
-      franchiseId: franchiseId.value || null
-    })
-  ])
+  if (isFetching) return
+  isFetching = true
+  try {
+    shouldRenderChart.value = false // 🔁 canvas 제거
+    await nextTick()               // DOM에서 제거 완료 대기
 
-  const avg = arr => (arr.reduce((a, b) => a + b, 0) / arr.length).toFixed(2)
+    const [thisWeek, lastWeek] = await Promise.all([
+      fetchAccuracySummary({
+        predictionType: predictionType.value,
+        periodType: periodType.value,
+        targetDate: targetDate.value,
+        franchiseId: franchiseId.value || null
+      }),
+      fetchAccuracySummary({
+        predictionType: predictionType.value,
+        periodType: periodType.value,
+        targetDate: new Date(new Date(targetDate.value).getTime() - 7 * 86400000).toISOString().split('T')[0],
+        franchiseId: franchiseId.value || null
+      })
+    ])
 
-  const thisStats = {
-    mae: parseFloat(avg(thisWeek.map(d => d.mae))),
-    rmse: parseFloat(avg(thisWeek.map(d => d.rmse))),
-    mape: parseFloat(avg(thisWeek.map(d => d.mape ?? 0)))
+    const avg = arr => (arr.reduce((a, b) => a + b, 0) / arr.length).toFixed(2)
+
+    const thisStats = {
+      mae: parseFloat(avg(thisWeek.map(d => d.mae))),
+      rmse: parseFloat(avg(thisWeek.map(d => d.rmse))),
+      mape: parseFloat(avg(thisWeek.map(d => d.mape ?? 0)))
+    }
+
+    const lastStats = {
+      mae: parseFloat(avg(lastWeek.map(d => d.mae))),
+      rmse: parseFloat(avg(lastWeek.map(d => d.rmse))),
+      mape: parseFloat(avg(lastWeek.map(d => d.mape ?? 0)))
+    }
+
+    accuracy.value = {
+      comparisonChart: {
+        labels: thisWeek.map(d => new Date(d.targetDate).toISOString().slice(5, 10)),
+        actual: thisWeek.map(d => d.actualTotal),
+        predicted: thisWeek.map(d => d.predictedTotal)
+      },
+      mae: thisStats.mae,
+      rmse: thisStats.rmse,
+      mape: thisStats.mape,
+      maeTrend: calcTrend(thisStats.mae, lastStats.mae),
+      rmseTrend: calcTrend(thisStats.rmse, lastStats.rmse),
+      mapeTrend: calcTrend(thisStats.mape, lastStats.mape)
+    }
+
+    await nextTick()
+    shouldRenderChart.value = true // 🔁 다시 렌더
+    await nextTick()
+
+    drawChart(accuracy.value.comparisonChart)
+  } finally {
+    isFetching = false
   }
-
-  const lastStats = {
-    mae: parseFloat(avg(lastWeek.map(d => d.mae))),
-    rmse: parseFloat(avg(lastWeek.map(d => d.rmse))),
-    mape: parseFloat(avg(lastWeek.map(d => d.mape ?? 0)))
-  }
-
-  accuracy.value = {
-    comparisonChart: {
-      labels: thisWeek.map(d => new Date(d.targetDate).toISOString().slice(5, 10)),
-      actual: thisWeek.map(d => d.actualTotal),
-      predicted: thisWeek.map(d => d.predictedTotal)
-    },
-    mae: thisStats.mae,
-    rmse: thisStats.rmse,
-    mape: thisStats.mape,
-    maeTrend: calcTrend(thisStats.mae, lastStats.mae),
-    rmseTrend: calcTrend(thisStats.rmse, lastStats.rmse),
-    mapeTrend: calcTrend(thisStats.mape, lastStats.mape)
-  }
-
-  drawChart(accuracy.value.comparisonChart)
 }
 
 function drawChart(chartData) {
-  const ctx = document.getElementById('dummyAccuracyChart')?.getContext('2d')
+  const canvas = document.getElementById('dummyAccuracyChart')
+  if (!canvas) return
+  const ctx = canvas.getContext('2d')
   if (!ctx) return
-  if (chartRef.value) chartRef.value.destroy()
+
+  if (chartRef.value) {
+    chartRef.value.destroy()
+    chartRef.value = null
+  }
 
   chartRef.value = new Chart(ctx, {
     type: 'line',
@@ -195,7 +217,7 @@ onMounted(async () => {
           </div>
         </div>
         <div class="chart-body">
-          <canvas id="dummyAccuracyChart" height="280"></canvas>
+          <canvas v-if="shouldRenderChart" id="dummyAccuracyChart" height="280"></canvas>
         </div>
       </div>
 

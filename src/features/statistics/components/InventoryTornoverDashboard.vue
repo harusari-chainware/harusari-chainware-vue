@@ -17,11 +17,12 @@ const franchises = ref([])
 const warehouses = ref([])
 const searchKeyword = ref('')
 const isLoading = ref(false)
+const shouldRenderChart = ref(true)
 
 const trendChartRef = ref(null)
 const productChartRef = ref(null)
-const productDataRaw = ref([])  // 원본 데이터 저장
-const productTab = ref('top')   // 'top' or 'bottom'
+const productDataRaw = ref([])
+const productTab = ref('top')
 
 function getYesterday() {
   const d = new Date()
@@ -64,6 +65,8 @@ function handleSearchKeyword() {
 async function handleSearch() {
   try {
     isLoading.value = true
+    shouldRenderChart.value = false
+    await nextTick()
 
     const trendParams = {
       period: period.value,
@@ -100,11 +103,16 @@ async function handleSearch() {
       ]
     }
 
-    drawChart('turnoverTrendChart', trendData, 'line', false, trendChartRef)
+    await nextTick()
+    shouldRenderChart.value = true
+    await nextTick()
 
-    // 원본 제품 데이터 저장 후 현재 탭에 맞는 차트 렌더링
+    setTimeout(() => {
+      drawChart('turnoverTrendChart', trendData, 'line', false, trendChartRef)
+    }, 0)
+
     productDataRaw.value = productRes
-    drawProductChart()
+    setTimeout(() => drawProductChart(), 0)
   } catch (err) {
     console.error('❌ 재고 회전율 데이터 로드 실패:', err)
   } finally {
@@ -115,11 +123,15 @@ async function handleSearch() {
 function delayedSearch(newPeriod) {
   isLoading.value = true
   period.value = newPeriod
-  setTimeout(() => handleSearch(), 1000)
+  handleSearch()
 }
 
-function changeProductTab(tab) {
+async function changeProductTab(tab) {
   productTab.value = tab
+  shouldRenderChart.value = false
+  await nextTick()                // v-if 로 canvas DOM 제거 대기
+  shouldRenderChart.value = true
+  await nextTick()                // 다시 생성된 DOM 반영 대기
   drawProductChart()
 }
 
@@ -143,46 +155,55 @@ function drawProductChart() {
     ]
   }
 
-  drawChart('productTurnoverChart', productChartData, 'bar', true, productChartRef)
+  setTimeout(() => {
+    drawChart('productTurnoverChart', productChartData, 'bar', true, productChartRef)
+  }, 0)
 }
 
 function drawChart(id, data, type = 'line', horizontal = false, refObj) {
-  nextTick(() => {
-    const ctx = document.getElementById(id)?.getContext('2d')
-    if (!ctx) return
-    if (refObj.value && typeof refObj.value.destroy === 'function') refObj.value.destroy()
+  const canvas = document.getElementById(id)
+  if (!canvas) {
+    console.warn(`⚠️ Canvas element not found: #${id}`)
+    return
+  }
+  const ctx = canvas.getContext('2d')
+  if (!ctx) {
+    console.warn(`⚠️ Canvas context not available for: #${id}`)
+    return
+  }
 
-    const valueAxis = horizontal ? 'x' : 'y'
-    const categoryAxis = horizontal ? 'y' : 'x'
+  if (refObj.value && typeof refObj.value.destroy === 'function') refObj.value.destroy()
 
-    refObj.value = new Chart(ctx, {
-      type,
-      data,
-      options: {
-        indexAxis: horizontal ? 'y' : 'x',
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: { display: true },
-          tooltip: {
-            callbacks: {
-              label: ctx => `${ctx.dataset.label}: ${ctx.parsed[horizontal ? 'x' : 'y']}회`
-            }
-          }
-        },
-        scales: {
-          [valueAxis]: {
-            beginAtZero: true,
-            ticks: { callback: v => `${v}회` },
-            grid: { color: '#f3f4f6' }
-          },
-          [categoryAxis]: {
-            ticks: { autoSkip: false },
-            grid: { color: '#f9fafb' }
+  const valueAxis = horizontal ? 'x' : 'y'
+  const categoryAxis = horizontal ? 'y' : 'x'
+
+  refObj.value = new Chart(ctx, {
+    type,
+    data,
+    options: {
+      indexAxis: horizontal ? 'y' : 'x',
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: true },
+        tooltip: {
+          callbacks: {
+            label: ctx => `${ctx.dataset.label}: ${ctx.parsed[horizontal ? 'x' : 'y']}회`
           }
         }
+      },
+      scales: {
+        [valueAxis]: {
+          beginAtZero: true,
+          ticks: { callback: v => `${v}회` },
+          grid: { color: '#f3f4f6' }
+        },
+        [categoryAxis]: {
+          ticks: { autoSkip: false },
+          grid: { color: '#f9fafb' }
+        }
       }
-    })
+    }
   })
 }
 
@@ -278,7 +299,7 @@ watch(locationType, () => {
           </div>
 
         </div>
-        <canvas id="turnoverTrendChart"></canvas>
+        <canvas v-if="shouldRenderChart" id="turnoverTrendChart"></canvas>
       </div>
       <div class="chart-card col-4">
         <div class="chart-header">
@@ -288,7 +309,7 @@ watch(locationType, () => {
             <button :class="{ active: productTab === 'bottom' }" @click="() => changeProductTab('bottom')">하위 10개</button>
           </div>
         </div>
-        <canvas id="productTurnoverChart"></canvas>
+        <canvas v-if="shouldRenderChart" id="productTurnoverChart"></canvas>
       </div>
     </div>
   </div>

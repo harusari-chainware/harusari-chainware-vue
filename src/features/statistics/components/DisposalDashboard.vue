@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted, watch, nextTick } from 'vue'
 import Chart from 'chart.js/auto'
 import FilterDate from '@/components/common/filters/FilterDate.vue'
 import {
@@ -17,6 +17,7 @@ const warehouses = ref([])
 const franchises = ref([])
 const searchKeyword = ref('')
 const isLoading = ref(false)
+const shouldRenderChart = ref(true)
 
 const trendChartRef = ref(null)
 const productChartRef = ref(null)
@@ -56,6 +57,8 @@ function handleSearchKeyword() {
 async function handleSearch() {
   try {
     isLoading.value = true
+    shouldRenderChart.value = false
+    await nextTick()
 
     const trendParams = {
       period: period.value,
@@ -121,7 +124,13 @@ async function handleSearch() {
           ]
         }
 
-    drawChart('disposalTrendChart', trendData, 'line', false, trendChartRef)
+    await nextTick()
+    shouldRenderChart.value = true
+    await nextTick()
+
+    setTimeout(() => {
+      drawChart('disposalTrendChart', trendData, 'line', false, trendChartRef)
+    }, 0)
 
     const productRes = await fetchDisposalRate(productParams)
 
@@ -149,7 +158,9 @@ async function handleSearch() {
       ]
     }
 
-    drawChart('disposalProductChart', productChartData, 'bar', true, productChartRef)
+    setTimeout(() => {
+      drawChart('disposalProductChart', productChartData, 'bar', true, productChartRef)
+    }, 0)
   } catch (err) {
     console.error('❌ 폐기율 데이터 로드 실패:', err)
   } finally {
@@ -164,8 +175,17 @@ function delayedSearch(newPeriod) {
 }
 
 function drawChart(id, data, type = 'line', horizontal = false, refObj) {
-  const ctx = document.getElementById(id)?.getContext('2d')
-  if (!ctx) return
+  const canvas = document.getElementById(id)
+  if (!canvas) {
+    console.warn(`⚠️ Canvas element not found: #${id}`)
+    return
+  }
+  const ctx = canvas.getContext('2d')
+  if (!ctx) {
+    console.warn(`⚠️ Canvas context not available for: #${id}`)
+    return
+  }
+
   if (refObj.value && typeof refObj.value.destroy === 'function') refObj.value.destroy()
 
   const valueAxis = horizontal ? 'x' : 'y'
@@ -266,11 +286,11 @@ watch(locationType, () => {
             <button :class="{ active: period === 'MONTHLY' }" @click="() => delayedSearch('MONTHLY')">월간</button>
           </div>
         </div>
-        <canvas id="disposalTrendChart"></canvas>
+        <canvas v-if="shouldRenderChart" id="disposalTrendChart"></canvas>
       </div>
       <div class="chart-card col-4">
         <h3>상품별 폐기율</h3>
-        <canvas id="disposalProductChart"></canvas>
+        <canvas v-if="shouldRenderChart" id="disposalProductChart"></canvas>
       </div>
     </div>
   </div>
