@@ -1,8 +1,10 @@
 <template>
-    <header class="header">
-        <div class="logo-box">
-            <img :src="logo" alt="Chainware 로고" class="logo-img"/>
-        </div>
+  <header class="header">
+    <div class="logo-box">
+      <a href="/" @click.prevent="reloadPage">
+        <img :src="logo" alt="Chainware 로고" class="logo-img" />
+      </a>
+    </div>
 
         <nav class="top-menu">
             <!-- 추후 a 태그 안에 v-for="menu in accessibleMenus" 추가 -->
@@ -58,6 +60,10 @@ const props = defineProps({
     selected: String
 })
 
+const reloadPage = () => {
+  window.location.href = '/'
+}
+
 const menuList = [
     '대시보드',
     '회원',
@@ -86,8 +92,10 @@ const routeMap = {
     '제품': '/product/list',
     '가맹점/거래처/창고': '/franchise/list',
     '주문/반품/배송': '/order/list',
-    '품의/발주/입고': '/requisition/list',
-    '폐기': '/disposal/list'
+
+    '품의/발주/입고': '/requisitions/list',
+    '폐기': '/disposal/franchise/list'
+
 }
 
 const isMypageRoute = computed(() => route.path.startsWith('/mypage'))
