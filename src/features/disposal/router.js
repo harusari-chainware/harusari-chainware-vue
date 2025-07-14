@@ -1,25 +1,15 @@
-import DisposalDummyView from "@/features/disposal/views/DisposalDummyView.vue";
+import DisposalRegisterView from "@/features/disposal/views/DisposalRegisterView.vue";
+import AdminDisposalView from "@/features/disposal/views/AdminDisposalView.vue";
 
-/* 사용자가 보는 routes와 view를 연결 */
 export const disposalRoutes = [
     {
-        path: '/disposal/franchise/list',
-        name: 'DisposalDummy1View',
-        component: DisposalDummyView
+        path: '/disposal/list',
+        name: 'FranchiseDisposalListView',
+        component: AdminDisposalView
     },
     {
-        path: '/disposal/franchise/register',
-        name: 'DisposalDummy2View',
-        component: DisposalDummyView
-    },
-    {
-        path: '/disposal/warehouse/list',
-        name: 'DisposalDummy3View',
-        component: DisposalDummyView
-    },
-    {
-        path: '/disposal/warehouse/register',
-        name: 'DisposalDummy4View',
-        component: DisposalDummyView
-    },
+        path: '/disposal/register',
+        name: 'FranchiseDisposalRegisterView',
+        component: DisposalRegisterView
+    }
 ];

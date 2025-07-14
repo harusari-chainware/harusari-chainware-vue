@@ -110,21 +110,21 @@ export const sidebarMap = {
     ],
     "폐기": [
         {
-            title: "가맹점 폐기",
+            title: "폐기",
             icon: 'fas fa-trash-can',
             items: [
-                { name: "가맹점 폐기 조회", route: "/disposal/franchise/list", icon: "fas fa-magnifying-glass", roles: ["GENERAL_MANAGER", "SENIOR_MANAGER", "FRANCHISE_MANAGER"] },
-                { name: "가맹점 폐기 등록", route: "/disposal/franchise/register", icon: "fas fa-plus", roles: ["FRANCHISE_MANAGER"] }
+                { name: "폐기 조회", route: "/disposal/list", icon: "fas fa-magnifying-glass", roles: ["GENERAL_MANAGER", "SENIOR_MANAGER" /*, "FRANCHISE_MANAGER" */] },
+                { name: "폐기 등록", route: "/disposal/register", icon: "fas fa-plus", roles: ["FRANCHISE_MANAGER", "WAREHOUSE_MANAGER"] }
             ]
-        },
-        {
-            title: "창고 폐기",
-            icon: 'fas fa-dumpster',
-            items: [
-                { name: "창고 폐기 조회", route: "/disposal/warehouse/list", icon: "fas fa-magnifying-glass", roles: ["GENERAL_MANAGER", "SENIOR_MANAGER", "WAREHOUSE_MANAGER"] },
-                { name: "창고 폐기 등록", route: "/disposal/warehouse/register", icon: "fas fa-plus", roles: ["WAREHOUSE_MANAGER"] }
-            ]
-        }
+         } //,
+        // {
+        //     title: "창고 폐기",
+        //     icon: 'fas fa-dumpster',
+        //     items: [
+        //         { name: "창고 폐기 조회", route: "/disposal/warehouse/list", icon: "fas fa-magnifying-glass", roles: ["GENERAL_MANAGER", "SENIOR_MANAGER", "WAREHOUSE_MANAGER"] },
+        //         { name: "창고 폐기 등록", route: "/disposal/warehouse/register", icon: "fas fa-plus", roles: ["WAREHOUSE_MANAGER"] }
+        //     ]
+        // }
     ],
     "대시보드": [
         {

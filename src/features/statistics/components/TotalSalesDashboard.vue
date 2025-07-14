@@ -1,6 +1,6 @@
 <script setup>
 import { ref, onMounted, nextTick, watch } from 'vue'
-import { fetchTotalSales, fetchSalesPattern } from '../api.js'
+import { fetchTotalSales, fetchSalesPattern, fetchAllFranchises } from '../api.js'
 import { Chart, registerables } from 'chart.js'
 import FilterDate from "@/components/common/filters/FilterDate.vue"
 
@@ -10,8 +10,11 @@ const franchiseId = ref('')
 const period = ref('DAILY')
 const targetDate = ref(getYesterday())
 
+const franchiseList = ref([])
+const searchKeyword = ref('')
+
 const todaySales = ref(0)
-const yesterdaySales = ref(0) // ✅ 선언 추가
+const yesterdaySales = ref(0)
 const growthRate = ref(0)
 
 const peakHour = ref('')
@@ -27,6 +30,17 @@ const subtitleMap = {
   HOURLY: '시간대별 매출 추이',
   WEEKLY: '요일별 매출 추이',
   MONTHLY: '일자별 매출 추이'
+}
+
+function handleSearchKeyword() {
+  const keyword = searchKeyword.value?.trim()
+  if (!keyword) {
+    franchiseId.value = ''
+    return
+  }
+
+  const match = franchiseList.value.find(i => i.name.includes(keyword))
+  franchiseId.value = match ? match.id : ''
 }
 
 const formatCurrency = (val) =>
@@ -47,7 +61,6 @@ async function loadSalesData() {
     todaySales.value = data.totalSalesAmount ?? 0
     growthRate.value = isFinite(data.changeRate) ? data.changeRate : 0
 
-    // ✅ 어제 매출 추정 (역산)
     if (isFinite(data.changeRate) && data.changeRate !== -100) {
       const estimated = todaySales.value / (1 + data.changeRate / 100)
       yesterdaySales.value = Math.round(estimated)
@@ -63,14 +76,35 @@ async function drawSalesPatternChart() {
   try {
     await nextTick()
 
-    const raw = await fetchSalesPattern({
-      period: pattern.value,
-      franchiseId: franchiseId.value || null,
-      targetDate: targetDate.value || null
+    const [hourlyData, weeklyData, dynamicData] = await Promise.all([
+      fetchSalesPattern({
+        period: 'HOURLY',
+        franchiseId: franchiseId.value || null,
+        targetDate: targetDate.value || null
+      }),
+      fetchSalesPattern({
+        period: 'WEEKLY',
+        franchiseId: franchiseId.value || null,
+        targetDate: targetDate.value || null
+      }),
+      fetchSalesPattern({
+        period: pattern.value,
+        franchiseId: franchiseId.value || null,
+        targetDate: targetDate.value || null
+      })
+    ])
+
+    updatePeakHour(hourlyData)
+    updatePeakDay(weeklyData)
+
+    const labels = dynamicData.map(i => {
+      if (pattern.value === 'MONTHLY') return i.date?.slice(5)
+      if (pattern.value === 'WEEKLY') return i.weekday
+      if (pattern.value === 'HOURLY') return `${i.hour}시`
+      return ''
     })
 
-    const labels = raw.map(i => pattern.value === 'MONTHLY' ? i.date.slice(5) : i.date)
-    const values = raw.map(i => i.totalAmount)
+    const values = dynamicData.map(i => i.totalAmount)
 
     const isValid =
         Array.isArray(labels) &&
@@ -79,7 +113,7 @@ async function drawSalesPatternChart() {
         values.every(v => typeof v === 'number' && !isNaN(v))
 
     if (!isValid) {
-      console.warn('⚠️ 유효하지 않은 데이터 → 차트 렌더링 생략:', raw)
+      console.warn('⚠️ 유효하지 않은 데이터 → 차트 렌더링 생략:', dynamicData)
       return
     }
 
@@ -119,21 +153,30 @@ async function drawSalesPatternChart() {
         }
       }
     })
-
-    updatePeakValues(values)
   } catch (err) {
     console.error('매출 패턴 차트 렌더링 실패:', err)
   }
 }
 
-function updatePeakValues(values) {
-  const maxIdx = values.indexOf(Math.max(...values))
-  if (pattern.value === 'HOURLY') {
-    peakHour.value = `${maxIdx}-${(maxIdx + 1) % 24}시`
-    peakHourAmount.value = values[maxIdx]
-  } else if (pattern.value === 'WEEKLY') {
-    peakDay.value = ['월요일', '화요일', '수요일', '목요일', '금요일', '토요일', '일요일'][maxIdx]
-    peakDayAmount.value = values[maxIdx]
+function updatePeakHour(data) {
+  const maxItem = data.find(i => i.max)
+  if (maxItem) {
+    peakHour.value = `${maxItem.hour}-${(maxItem.hour + 1) % 24}시`
+    peakHourAmount.value = maxItem.totalAmount
+  } else {
+    peakHour.value = ''
+    peakHourAmount.value = 0
+  }
+}
+
+function updatePeakDay(data) {
+  const maxItem = data.find(i => i.max)
+  if (maxItem) {
+    peakDay.value = `${maxItem.weekday}요일`
+    peakDayAmount.value = maxItem.totalAmount
+  } else {
+    peakDay.value = ''
+    peakDayAmount.value = 0
   }
 }
 
@@ -158,13 +201,8 @@ function getYesterday() {
 }
 
 onMounted(async () => {
+  franchiseList.value = await fetchAllFranchises()
   await resetForm()
-  await nextTick()
-  await drawSalesPatternChart()
-})
-
-watch(pattern, () => {
-  drawSalesPatternChart()
 })
 </script>
 
@@ -174,20 +212,25 @@ watch(pattern, () => {
     <div class="filter-box">
       <div class="filter-grid">
         <div class="form-group">
-          <label>가맹점</label>
-          <select v-model="franchiseId">
-            <option value="">전체 가맹점</option>
-            <option value="1">강남점</option>
-            <option value="2">홍대점</option>
-          </select>
-        </div>
-        <div class="form-group">
           <label>조회 기간</label>
           <select v-model="period">
             <option value="DAILY">일간</option>
             <option value="WEEKLY">주간</option>
             <option value="MONTHLY">월간</option>
           </select>
+        </div>
+        <div class="form-group">
+          <label>가맹점</label>
+          <select v-model="franchiseId">
+            <option value="">전체 가맹점</option>
+            <option v-for="item in franchiseList" :key="item.id" :value="item.id">
+              {{ item.name }}
+            </option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>가맹점 검색</label>
+          <input v-model="searchKeyword" @input="handleSearchKeyword" placeholder="이름으로 검색" />
         </div>
         <div class="form-group">
           <FilterDate label="기준일" v-model="targetDate" />
@@ -250,7 +293,7 @@ watch(pattern, () => {
           </div>
         </div>
         <div class="chart-container">
-          <canvas id="salesPatternChart" width="800" height="300"></canvas>
+          <canvas id="salesPatternChart" width="700" height="300"></canvas>
         </div>
       </div>
     </div>
@@ -398,7 +441,7 @@ border-bottom: 2px solid #4f46e5;
 }
 
 .chart-container {
-height: 300px;
+height: 380px;
 width: 100%;
 }
 
@@ -409,8 +452,8 @@ gap: 24px;
 }
 canvas {
   display: block;
-  width: 100% !important;
-  height: 300px !important;
+  width: 95% !important;
+  height: 360px !important;
 }
 
 #weeklyDistributionChart {
