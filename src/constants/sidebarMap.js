@@ -153,8 +153,8 @@ export const sidebarMap = {
             title: "마이페이지",
             icon: 'fas fa-circle-user',
             items: [
-                { name: "회원 정보 조회", route: "/mypage/info", icon: "fas fa-id-card", roles: ["MASTER", "GENERAL_MANAGER", "SENIOR_MANAGER", "WAREHOUSE_MANAGER", "FRANCHISE_MANAGER", "VENDOR_MANAGER", "SYSTEM"] },
-                { name: "비밀번호 변경", route: "/mypage/password", icon: "fas fa-key", roles: ["MASTER", "GENERAL_MANAGER", "SENIOR_MANAGER", "WAREHOUSE_MANAGER", "FRANCHISE_MANAGER", "VENDOR_MANAGER", "SYSTEM"] }
+                { name: "회원 정보 조회", route: "/mypage/profile", icon: "fas fa-id-card", roles: ["MASTER", "GENERAL_MANAGER", "SENIOR_MANAGER", "WAREHOUSE_MANAGER", "FRANCHISE_MANAGER", "VENDOR_MANAGER", "SYSTEM"] },
+                { name: "비밀번호 변경", route: "/mypage/change-password", icon: "fas fa-key", roles: ["MASTER", "GENERAL_MANAGER", "SENIOR_MANAGER", "WAREHOUSE_MANAGER", "FRANCHISE_MANAGER", "VENDOR_MANAGER", "SYSTEM"] }
             ]
         }
     ]

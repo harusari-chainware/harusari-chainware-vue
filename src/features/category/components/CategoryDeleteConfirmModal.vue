@@ -2,7 +2,7 @@
   <div class="modal-backdrop">
     <div class="modal-box">
       <h2 class="modal-title">삭제 확인</h2>
-      <p>정말로 이 {{ isTop ? '상위 카테고리' : '카테고리' }}를 삭제하시겠습니까?</p>
+      <p> {{ isTop ? '상위 카테고리' : '카테고리' }}를 삭제하시겠습니까?</p>
 
       <div class="modal-actions">
         <button @click="emit('close')">취소</button>
@@ -10,11 +10,30 @@
       </div>
     </div>
   </div>
+
+  <!-- 등록/수정 완료 모달 -->
+  <CategoryDoneModal
+      v-if="doneModal.show"
+      :type="doneModal.type"
+      :is-top="doneModal.isTop"
+      @close="handleDoneClose"
+  />
+
+  <div>
+    <CategoryErrorModal
+        v-if="ErrorOpen"
+        :message="ErrorMsg"
+        @close="handleErrorClose"
+    />
+  </div>
+
 </template>
 
 <script setup>
-import { defineProps, defineEmits } from 'vue'
+import {defineProps, defineEmits, ref} from 'vue'
 import { deleteCategory, deleteTopCategory } from '@/features/category/api.js'
+import CategoryErrorModal from "@/features/category/components/CategoryErrorModal.vue";
+import CategoryDoneModal from "@/features/category/components/CategoryDoneModal.vue";
 
 const props = defineProps({
   targetId: Number,
@@ -23,6 +42,21 @@ const props = defineProps({
 
 const emit = defineEmits(['close', 'deleted'])
 
+const ErrorOpen = ref(false)
+const ErrorMsg = ref('')
+
+const handleErrorClose = () => {
+  ErrorOpen.value = false
+  emit('close')
+}
+
+// 등록/수정 완료 모달 상태
+const doneModal = ref({
+  show: false,
+  type: 'delete',    // 'register' | 'edit'
+  isTop: false
+})
+
 const handleDelete = async () => {
   try {
     if (props.isTop) {
@@ -30,13 +64,21 @@ const handleDelete = async () => {
     } else {
       await deleteCategory(props.targetId)
     }
-    emit('deleted')
-    emit('close')
-    alert('삭제 완료되었습니다.')
+    doneModal.value = { show: true, type: 'delete', isTop: props.isTop }
+    // emit('deleted')는 완료모달 닫을 때
   } catch (e) {
-    alert('삭제 실패했습니다.: ' + (e?.response?.data?.message ?? '서버 오류'))
-    emit('close')
+    ErrorMsg.value = (e?.response?.data?.message)
+        ? e.response.data.message
+        : '삭제 실패했습니다. 서버 오류'
+    ErrorOpen.value = true
   }
+}
+
+// 완료 모달에서 확인 누르면 닫기
+const handleDoneClose = () => {
+  doneModal.value.show = false
+  emit('deleted')
+  emit('close')
 }
 </script>
 
@@ -125,5 +167,4 @@ const handleDelete = async () => {
     padding: 8px 0;
   }
 }
-
 </style>
