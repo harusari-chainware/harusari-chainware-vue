@@ -38,6 +38,13 @@
       @cancelled="handleCancelComplete"
   />
 
+  <OrderApproveConfirmModal
+      v-if="showApproveModal"
+      :orderId="Number(orderId)"
+      @close="showApproveModal = false"
+      @approved="handleApproveComplete"
+  />
+
   <OrderRejectConfirmModal
       v-if="showRejectModal"
       :orderId="Number(orderId)"
@@ -53,6 +60,7 @@ import { useAuthStore } from '@/features/auth/useAuthStore.js'
 import DetailLayout from '@/components/layout/DetailLayout.vue'
 import StatusButton from '@/components/common/StatusButton.vue'
 import OrderCancelConfirmModal from '../components/modal/OrderCancelConfirmModal.vue'
+import OrderApproveConfirmModal from '../components/modal/OrderApproveConfirmModal.vue'
 import OrderRejectConfirmModal from '../components/modal/OrderRejectConfirmModal.vue'
 import OrderDetailBasic from '../components/OrderDetailBasic.vue'
 import OrderDetailDetail from '../components/OrderDetailDetail.vue'
@@ -63,6 +71,7 @@ const authStore = useAuthStore()
 const userRole = computed(() => authStore.authority)
 
 const showCancelModal = ref(false)
+const showApproveModal = ref(false)
 const showRejectModal = ref(false)
 
 const props = defineProps({
@@ -81,12 +90,11 @@ const orderData = reactive({
   products: []
 })
 
-onMounted(async () => {
+const loadOrderDetail = async () => {
   try {
     const res = await fetchOrderDetail(orderId)
     const detail = res.data.data
 
-    console.log('detail: ', detail)
     orderData.orderInfo = detail.orderInfo || {}
     orderData.franchiseOwnerInfo = detail.franchiseOwnerInfo || {}
     orderData.deliveryHistory = detail.deliveryHistory || []
@@ -95,7 +103,9 @@ onMounted(async () => {
   } catch (e) {
     console.error('상세 조회 오류:', e)
   }
-})
+}
+
+onMounted(loadOrderDetail)
 
 
 // 수정 버튼에 대한 처리
@@ -122,7 +132,8 @@ const openCancelModal = () => {
 }
 
 const handleCancelComplete = () => {
-  router.push('/order/list') // 취소 후 목록으로 이동
+  alert('주문이 취소되었습니다.')
+  loadOrderDetail()
 }
 
 // 승인 버튼에 대한 처리
@@ -130,6 +141,15 @@ const canApprove = computed(() =>
     ['GENERAL_MANAGER', 'SENIOR_MANAGER'].includes(userRole.value)
     && orderData.orderInfo?.orderStatus === 'REQUESTED'
 )
+
+const openApproveModal = () => {
+  showApproveModal.value = true;
+};
+
+const handleApproveComplete = () => {
+  alert('주문이 승인되었습니다.')
+  loadOrderDetail()
+};
 
 // 반려 버튼에 대한 처리
 const canReject = computed(() =>
@@ -142,7 +162,8 @@ const openRejectModal = () => {
 }
 
 const handleRejectComplete = () => {
-  router.push('/order/list') // 반려 후 목록으로 이동
+  alert('주문이 반려되었습니다.')
+  loadOrderDetail()
 }
 
 // 반품 버튼에 대한 처리
