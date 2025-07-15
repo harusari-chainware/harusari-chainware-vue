@@ -2,7 +2,7 @@
 <template>
   <div class="filter-buttons">
     <StatusButton type="reset" @click="$emit('reset')">초기화</StatusButton>
-    <StatusButton type="primary" @click="$emit('apply')">검색</StatusButton>
+    <StatusButton type="primary" @click="$emit('search')">검색</StatusButton>
   </div>
 </template>
 

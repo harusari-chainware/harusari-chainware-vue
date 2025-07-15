@@ -1,20 +1,18 @@
-
 <template>
   <InfoGroup title="기본 정보">
     <InfoItem>
       <template #label>주문 코드</template>
-      <template #value>{{ order.orderCode }}</template>
+      <template #value>{{ orderInfo.orderCode }}</template>
     </InfoItem>
     <InfoItem>
       <template #label>주문 상태</template>
       <template #value>
-        <StatusBadge :status="order.status" />
-        <span>두 개 정렬</span>
+        <StatusBadge :status="orderInfo.orderStatus || '-'" />
       </template>
     </InfoItem>
     <InfoItem>
       <template #label>관련 배송 코드</template>
-      <template #value>{{ order.deliveryCode }}</template>
+      <template #value>{{ orderInfo.deliveryCode || '-' }}</template>
     </InfoItem>
   </InfoGroup>
 </template>
@@ -25,9 +23,6 @@ import InfoItem from '@/components/layout/detailview/InfoItem.vue'
 import StatusBadge from '@/components/common/StatusBadge.vue'
 
 defineProps({
-  order: {
-    type: Object,
-    required: true
-  }
+  orderInfo: Object
 })
 </script>

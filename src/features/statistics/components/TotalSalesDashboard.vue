@@ -1,6 +1,6 @@
 <script setup>
-import { ref, onMounted, nextTick, watch } from 'vue'
-import { fetchTotalSales, fetchSalesPattern } from '../api.js'
+import { ref, onMounted, nextTick } from 'vue'
+import { fetchTotalSales, fetchSalesPattern, fetchAllFranchises } from '../api.js'
 import { Chart, registerables } from 'chart.js'
 import FilterDate from "@/components/common/filters/FilterDate.vue"
 
@@ -10,8 +10,11 @@ const franchiseId = ref('')
 const period = ref('DAILY')
 const targetDate = ref(getYesterday())
 
+const franchiseList = ref([])
+const searchKeyword = ref('')
+
 const todaySales = ref(0)
-const yesterdaySales = ref(0) // ✅ 선언 추가
+const yesterdaySales = ref(0)
 const growthRate = ref(0)
 
 const peakHour = ref('')
@@ -21,6 +24,7 @@ const peakDayAmount = ref(0)
 
 const pattern = ref('HOURLY')
 const salesPatternChart = ref(null)
+const shouldRenderChart = ref(true)
 
 const salesChartSubtitle = ref('시간대별 매출 추이')
 const subtitleMap = {
@@ -29,12 +33,29 @@ const subtitleMap = {
   MONTHLY: '일자별 매출 추이'
 }
 
+function getYesterday() {
+  const d = new Date()
+  d.setDate(d.getDate() - 1)
+  return d.toISOString().slice(0, 10)
+}
+
 const formatCurrency = (val) =>
     new Intl.NumberFormat('ko-KR', {
       style: 'currency',
       currency: 'KRW',
       maximumFractionDigits: 0
     }).format(val)
+
+function handleSearchKeyword() {
+  const keyword = searchKeyword.value?.trim()
+  if (!keyword) {
+    franchiseId.value = ''
+    return
+  }
+
+  const match = franchiseList.value.find(i => i.name.includes(keyword))
+  franchiseId.value = match ? match.id : ''
+}
 
 async function loadSalesData() {
   try {
@@ -47,7 +68,6 @@ async function loadSalesData() {
     todaySales.value = data.totalSalesAmount ?? 0
     growthRate.value = isFinite(data.changeRate) ? data.changeRate : 0
 
-    // ✅ 어제 매출 추정 (역산)
     if (isFinite(data.changeRate) && data.changeRate !== -100) {
       const estimated = todaySales.value / (1 + data.changeRate / 100)
       yesterdaySales.value = Math.round(estimated)
@@ -61,31 +81,29 @@ async function loadSalesData() {
 
 async function drawSalesPatternChart() {
   try {
+    const [hourlyData, weeklyData, dynamicData] = await Promise.all([
+      fetchSalesPattern({ period: 'HOURLY', franchiseId: franchiseId.value || null, targetDate: targetDate.value }),
+      fetchSalesPattern({ period: 'WEEKLY', franchiseId: franchiseId.value || null, targetDate: targetDate.value }),
+      fetchSalesPattern({ period: pattern.value, franchiseId: franchiseId.value || null, targetDate: targetDate.value })
+    ])
+
+    updatePeakHour(hourlyData)
+    updatePeakDay(weeklyData)
+
     await nextTick()
 
-    const raw = await fetchSalesPattern({
-      period: pattern.value,
-      franchiseId: franchiseId.value || null,
-      targetDate: targetDate.value || null
-    })
-
-    const labels = raw.map(i => pattern.value === 'MONTHLY' ? i.date.slice(5) : i.date)
-    const values = raw.map(i => i.totalAmount)
-
-    const isValid =
-        Array.isArray(labels) &&
-        Array.isArray(values) &&
-        labels.length === values.length &&
-        values.every(v => typeof v === 'number' && !isNaN(v))
-
-    if (!isValid) {
-      console.warn('⚠️ 유효하지 않은 데이터 → 차트 렌더링 생략:', raw)
-      return
-    }
-
-    const ctx = document.getElementById('salesPatternChart')?.getContext('2d')
+    const canvas = document.getElementById('salesPatternChart')
+    if (!canvas) return
+    const ctx = canvas.getContext('2d')
     if (!ctx) return
     if (salesPatternChart.value) salesPatternChart.value.destroy()
+
+    const labels = dynamicData.map(i =>
+        pattern.value === 'MONTHLY' ? i.date?.slice(5) :
+            pattern.value === 'WEEKLY' ? i.weekday :
+                `${i.hour}시`
+    )
+    const values = dynamicData.map(i => i.totalAmount)
 
     salesPatternChart.value = new Chart(ctx, {
       type: pattern.value === 'WEEKLY' ? 'bar' : 'line',
@@ -106,81 +124,83 @@ async function drawSalesPatternChart() {
         maintainAspectRatio: true,
         aspectRatio: 2.5,
         plugins: {
-          legend: { display: false },
-          tooltip: { enabled: true }
+          legend: { display: false }
         },
         scales: {
           y: {
             beginAtZero: true,
             ticks: {
-              callback: val => (val >= 1000 ? `${(val / 1000).toFixed(0)}K` : val)
+              callback: val => val >= 1000 ? `${(val / 1000).toFixed(0)}K` : val,
+              font: {
+                size: 15,
+                weight: 'bold'
+              }
+            }
+          },
+          x: {
+            ticks: {
+              font: {
+                size: 15,
+                weight: 'bold'
+              }
             }
           }
         }
       }
     })
-
-    updatePeakValues(values)
   } catch (err) {
     console.error('매출 패턴 차트 렌더링 실패:', err)
   }
 }
 
-function updatePeakValues(values) {
-  const maxIdx = values.indexOf(Math.max(...values))
-  if (pattern.value === 'HOURLY') {
-    peakHour.value = `${maxIdx}-${(maxIdx + 1) % 24}시`
-    peakHourAmount.value = values[maxIdx]
-  } else if (pattern.value === 'WEEKLY') {
-    peakDay.value = ['월요일', '화요일', '수요일', '목요일', '금요일', '토요일', '일요일'][maxIdx]
-    peakDayAmount.value = values[maxIdx]
-  }
+function updatePeakHour(data) {
+  const maxItem = data.find(i => i.max)
+  peakHour.value = maxItem ? `${maxItem.hour}-${(maxItem.hour + 1) % 24}시` : ''
+  peakHourAmount.value = maxItem ? maxItem.totalAmount : 0
 }
 
-function onPatternTabClick(p) {
+function updatePeakDay(data) {
+  const maxItem = data.find(i => i.max)
+  peakDay.value = maxItem ? `${maxItem.weekday}요일` : ''
+  peakDayAmount.value = maxItem ? maxItem.totalAmount : 0
+}
+
+async function onPatternTabClick(p) {
   pattern.value = p
   salesChartSubtitle.value = subtitleMap[p]
+  shouldRenderChart.value = false
+  await nextTick()
+  shouldRenderChart.value = true
+  await nextTick()
   drawSalesPatternChart()
+}
+
+async function handleSearchClick() {
+  await loadSalesData()
+  shouldRenderChart.value = false
+  await nextTick()
+  shouldRenderChart.value = true
+  await nextTick()
+  await drawSalesPatternChart()
 }
 
 async function resetForm() {
   franchiseId.value = ''
   period.value = 'DAILY'
   targetDate.value = getYesterday()
-  onPatternTabClick('HOURLY')
-  await loadSalesData()
-}
-
-function getYesterday() {
-  const d = new Date()
-  d.setDate(d.getDate() - 1)
-  return d.toISOString().slice(0, 10)
+  await handleSearchClick()
 }
 
 onMounted(async () => {
+  franchiseList.value = await fetchAllFranchises()
   await resetForm()
-  await nextTick()
-  await drawSalesPatternChart()
-})
-
-watch(pattern, () => {
-  drawSalesPatternChart()
 })
 </script>
 
 <template>
   <div class="dashboard-container">
-    <!-- 통계 조회 필터 -->
     <div class="filter-box">
       <div class="filter-grid">
-        <div class="form-group">
-          <label>가맹점</label>
-          <select v-model="franchiseId">
-            <option value="">전체 가맹점</option>
-            <option value="1">강남점</option>
-            <option value="2">홍대점</option>
-          </select>
-        </div>
         <div class="form-group">
           <label>조회 기간</label>
           <select v-model="period">
@@ -190,16 +210,28 @@ watch(pattern, () => {
           </select>
         </div>
         <div class="form-group">
+          <label>가맹점</label>
+          <select v-model="franchiseId">
+            <option value="">전체 가맹점</option>
+            <option v-for="item in franchiseList" :key="item.id" :value="item.id">
+              {{ item.name }}
+            </option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>가맹점 검색</label>
+          <input v-model="searchKeyword" @input="handleSearchKeyword" placeholder="이름으로 검색" />
+        </div>
+        <div class="form-group">
           <FilterDate label="기준일" v-model="targetDate" />
         </div>
         <div class="form-actions">
           <button @click="resetForm">초기화</button>
-          <button class="primary" @click="loadSalesData">조회</button>
+          <button class="primary" @click="handleSearchClick">조회</button>
         </div>
       </div>
     </div>
 
-    <!-- 통계 카드 -->
     <div class="card-grid">
       <div class="stat-card">
         <div class="stat-title">오늘 매출</div>
@@ -230,7 +262,6 @@ watch(pattern, () => {
       </div>
     </div>
 
-    <!-- 매출 추이 차트 -->
     <div class="chart-section">
       <div class="chart-card">
         <div class="chart-header">
@@ -250,7 +281,7 @@ watch(pattern, () => {
           </div>
         </div>
         <div class="chart-container">
-          <canvas id="salesPatternChart" width="800" height="300"></canvas>
+          <canvas v-if="shouldRenderChart" id="salesPatternChart" width="700" height="300"></canvas>
         </div>
       </div>
     </div>
@@ -398,7 +429,7 @@ border-bottom: 2px solid #4f46e5;
 }
 
 .chart-container {
-height: 300px;
+height: 380px;
 width: 100%;
 }
 
@@ -408,9 +439,9 @@ grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
 gap: 24px;
 }
 canvas {
-  display: block;
   width: 100% !important;
-  height: 300px !important;
+  height: 380px !important;
+  display: block;
 }
 
 #weeklyDistributionChart {

@@ -89,15 +89,15 @@ export const sidebarMap = {
             title: "품의",
             icon: 'fas fa-signature',
             items: [
-                { name: "품의 조회", route: "/requisition/list", icon: "fas fa-magnifying-glass", roles: ["GENERAL_MANAGER", "SENIOR_MANAGER"] },
-                { name: "품의 등록", route: "/requisition/register", icon: "fas fa-file-circle-plus", roles: ["GENERAL_MANAGER"] }
+                { name: "품의 조회", route: "/requisitions/list", icon: "fas fa-magnifying-glass", roles: ["GENERAL_MANAGER", "SENIOR_MANAGER"] },
+                { name: "품의 등록", route: "/requisitions/register", icon: "fas fa-file-circle-plus", roles: ["GENERAL_MANAGER"] }
             ]
         },
         {
             title: "발주",
             icon: 'fas fa-cart-shopping',
             items: [
-                { name: "발주 조회", route: "/purchase/list", icon: "fas fa-magnifying-glass", roles: ["GENERAL_MANAGER", "SENIOR_MANAGER", "VENDOR_MANAGER"] }
+                { name: "발주 조회", route: "/purchases/list", icon: "fas fa-magnifying-glass", roles: ["GENERAL_MANAGER", "SENIOR_MANAGER", "VENDOR_MANAGER"] }
             ]
         },
         {
@@ -110,21 +110,21 @@ export const sidebarMap = {
     ],
     "폐기": [
         {
-            title: "가맹점 폐기",
+            title: "폐기",
             icon: 'fas fa-trash-can',
             items: [
-                { name: "가맹점 폐기 조회", route: "/disposal/franchise/list", icon: "fas fa-magnifying-glass", roles: ["GENERAL_MANAGER", "SENIOR_MANAGER", "FRANCHISE_MANAGER"] },
-                { name: "가맹점 폐기 등록", route: "/disposal/franchise/register", icon: "fas fa-plus", roles: ["FRANCHISE_MANAGER"] }
+                { name: "폐기 조회", route: "/disposal/list", icon: "fas fa-magnifying-glass", roles: ["GENERAL_MANAGER", "SENIOR_MANAGER" /*, "FRANCHISE_MANAGER" */] },
+                { name: "폐기 등록", route: "/disposal/register", icon: "fas fa-plus", roles: ["FRANCHISE_MANAGER", "WAREHOUSE_MANAGER"] }
             ]
-        },
-        {
-            title: "창고 폐기",
-            icon: 'fas fa-dumpster',
-            items: [
-                { name: "창고 폐기 조회", route: "/disposal/warehouse/list", icon: "fas fa-magnifying-glass", roles: ["GENERAL_MANAGER", "SENIOR_MANAGER", "WAREHOUSE_MANAGER"] },
-                { name: "창고 폐기 등록", route: "/disposal/warehouse/register", icon: "fas fa-plus", roles: ["WAREHOUSE_MANAGER"] }
-            ]
-        }
+         } //,
+        // {
+        //     title: "창고 폐기",
+        //     icon: 'fas fa-dumpster',
+        //     items: [
+        //         { name: "창고 폐기 조회", route: "/disposal/warehouse/list", icon: "fas fa-magnifying-glass", roles: ["GENERAL_MANAGER", "SENIOR_MANAGER", "WAREHOUSE_MANAGER"] },
+        //         { name: "창고 폐기 등록", route: "/disposal/warehouse/register", icon: "fas fa-plus", roles: ["WAREHOUSE_MANAGER"] }
+        //     ]
+        // }
     ],
     "대시보드": [
         {
