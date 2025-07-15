@@ -13,3 +13,22 @@ export function getRequisitionById(requisitionId) {
 export function createRequisition(payload) {
     return api.post(`/requisitions`, payload)
 }
+
+export function submittedRequisition(requisitionId){
+    return api.put(`/requisitions/${requisitionId}/submit`)
+}
+
+export const rejectRequisition = (requisitionId, reason) => {
+    return api.put(`/requisitions/${requisitionId}/reject`, {
+        rejectReason: reason
+    })
+}
+
+export function approveRequisition(requisitionId){
+    return api.put(`/requisitions/${requisitionId}/approve`)
+}
+
+
+export const deleteRequisition = (requisitionId) => {
+    return api.delete(`/requisitions/${requisitionId}`)
+}

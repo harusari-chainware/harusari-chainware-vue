@@ -15,11 +15,11 @@
       <ul v-if="showDropdown && results.length" class="dropdown-list">
         <li
             v-for="item in results"
-            :key="item.warehouseId"
+            :key="item[idKey] ?? item.id"
             class="dropdown-item"
             @click="selectItem(item)"
         >
-          {{ item.warehouseName }}
+          {{ item[labelKey] ?? '알 수 없음' }}
         </li>
       </ul>
     </div>
@@ -37,7 +37,15 @@ const props = defineProps({
   id: String,
   fetchFn: {
     type: Function,
-    required: true // ex) fetchWarehouses
+    required: true
+  },
+  labelKey: {
+    type: String,
+    default: 'name'
+  },
+  idKey: {
+    type: String,
+    default: 'id'
   }
 })
 
@@ -57,12 +65,8 @@ watch(keyword, (val) => {
 
 const search = debounce(async () => {
   try {
-    const res = await props.fetchFn({ warehouseName: keyword.value })
-    console.log('✅ 창고 검색 API 응답:', res)
-
+    const res = await props.fetchFn({ [props.labelKey]: keyword.value })
     results.value = res.data?.data?.contents || []
-    console.log('📦 결과 리스트:', results.value)
-
     showDropdown.value = true
   } catch (e) {
     console.error('❌ 검색 실패:', e)
@@ -81,8 +85,8 @@ function onFocus() {
 
 function selectItem(item) {
   emit('select', item)
-  emit('update:modelValue', item.warehouseName)
-  keyword.value = item.warehouseName
+  emit('update:modelValue', item[props.labelKey])
+  keyword.value = item[props.labelKey]
   showDropdown.value = false
 }
 </script>
