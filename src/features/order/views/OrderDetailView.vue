@@ -78,12 +78,7 @@ onMounted(async () => {
 const handleEdit = () => {
   router.push({
     name: 'OrderRegisterView',
-    // state: {
-    //   mode: 'edit',
-    //   orderId: orderId,
-    //   orderInfo: orderData.orderInfo,
-    //   products: orderData.products
-    // }
+    query: { mode: 'edit', orderId }
   })
 }
 
