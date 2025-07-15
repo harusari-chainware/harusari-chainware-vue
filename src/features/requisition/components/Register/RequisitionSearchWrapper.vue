@@ -1,5 +1,5 @@
 <template>
-  <GenericSearchTable
+  <RequisitionSearchTable
       :type="type"
       :multi="multi"
       v-model:selected="selected"
@@ -8,7 +8,7 @@
 </template>
 
 <script setup>
-import GenericSearchTable from '@/components/common/GenericSearchTable.vue'
+import RequisitionSearchTable from './RequisitionSearchTable.vue'
 import {ref, watch} from 'vue'
 
 const props = defineProps({

@@ -76,7 +76,13 @@ const form = ref({
     zipcode: '',
     addressRoad: '',
     addressDetail: '',
-    agreementFile: null // 가맹점/거래처용
+    agreementFile: null, // 가맹점/거래처용
+    vendorName: '',
+    vendorType: '',
+    vendorTaxId: '',
+    vendorMemo: '',
+    vendorStartDate: '',
+    vendorEndDate: ''
 });
 
 const fields = [
@@ -182,8 +188,8 @@ function validateForm() {
 async function submitForm() {
     if (!validateForm()) return;
 
-    const phoneWithoutHyphen = form.value.phone.replace(/\D/g, '');
-    const formattedAuthority = form.value.authority.replace('-', '_').toUpperCase();
+    const phoneWithoutHyphen = (form.value.phone || '').replace(/\D/g, '');
+    const formattedAuthority = (form.value.authority || '').replace('-', '_').toUpperCase();
 
     const memberCreateRequest = {
         email: form.value.email,
@@ -199,26 +205,66 @@ async function submitForm() {
     try {
         let response;
 
-        // 본사 직원
         if (['master', 'general-manager', 'senior-manager'].includes(form.value.authority)) {
             response = await headquartersMemberRegister(memberCreateRequest);
         }
-        // 거래처/가맹점 담당자
-        else if (form.value.authority === 'vendor-manager' || form.value.authority === 'franchise-manager') {
-            const formDataWithFiles = new FormData();
-            Object.keys(memberCreateRequest).forEach((key) => {
-                formDataWithFiles.append(key, memberCreateRequest[key]);
-            });
+        else if (form.value.authority === 'franchise-manager') {
+            const memberWithFranchiseRequest = {
+                memberCreateRequest,
+                franchiseCreateRequest: {
+                    franchiseName: form.value.franchiseName,
+                    franchiseContact: form.value.franchiseContact.replace(/\D/g, ''),
+                    franchiseTaxId: form.value.franchiseTaxId.replace(/\D/g, ''),
+                    contractStartDate: form.value.contractStartDate,
+                    contractEndDate: form.value.contractEndDate,
+                    addressRequest: {
+                        zipcode: form.value.zipcode,
+                        addressRoad: form.value.addressRoad,
+                        addressDetail: form.value.addressDetail
+                    }
+                }
+            };
+
+            const formData = new FormData();
+            formData.append(
+                    'memberWithFranchiseRequest',
+                    new Blob([JSON.stringify(memberWithFranchiseRequest)], { type: 'application/json' })
+            );
             if (form.value.agreementFile) {
-                formDataWithFiles.append('agreementFile', form.value.agreementFile);
+                formData.append('agreementFile', form.value.agreementFile);
             }
-            if (form.value.authority === 'vendor-manager') {
-                response = await vendorMemberRegister(formDataWithFiles);
-            } else if (form.value.authority === 'franchise-manager') {
-                response = await franchiseMemberRegister(formDataWithFiles);
-            }
+
+            response = await franchiseMemberRegister(formData);
         }
-        // 창고 관리자
+        else if (form.value.authority === 'vendor-manager') {
+            const memberWithVendorRequest = {
+                memberCreateRequest,
+                vendorCreateRequest: {
+                    vendorName: form.value.vendorName,
+                    vendorType: form.value.vendorType,
+                    vendorTaxId: form.value.vendorTaxId.replace(/\D/g, ''),
+                    vendorMemo: form.value.vendorMemo,
+                    vendorStartDate: form.value.vendorStartDate,
+                    vendorEndDate: form.value.vendorEndDate,
+                    addressRequest: {
+                        zipcode: form.value.zipcode,
+                        addressRoad: form.value.addressRoad,
+                        addressDetail: form.value.addressDetail
+                    }
+                }
+            };
+
+            const formData = new FormData();
+            formData.append(
+                    'memberWithVendorRequest',
+                    new Blob([JSON.stringify(memberWithVendorRequest)], { type: 'application/json' })
+            );
+            if (form.value.agreementFile) {
+                formData.append('agreementFile', form.value.agreementFile);
+            }
+
+            response = await vendorMemberRegister(formData);
+        }
         else if (form.value.authority === 'warehouse-manager') {
             const warehouseCreateRequest = {
                 warehouseName: form.value.warehouseName,
@@ -228,11 +274,11 @@ async function submitForm() {
                     addressDetail: form.value.addressDetail
                 }
             };
-            const payload = {memberCreateRequest, warehouseCreateRequest};
+            const payload = { memberCreateRequest, warehouseCreateRequest };
             response = await warehouseMemberRegister(payload);
         }
 
-        console.log("회원 등록 성공", response);
+        console.log('회원 등록 성공', response);
         alert('회원 등록이 완료되었습니다.');
         await router.push('/member/list');
     } catch (error) {
