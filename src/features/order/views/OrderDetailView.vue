@@ -29,25 +29,39 @@
       <OrderDetailDetail :items="orderData.products || []" />
     </template>
   </DetailLayout>
+
+  <!-- 모달 -->
+  <OrderCancelConfirmModal
+      v-if="showCancelModal"
+      :orderId="Number(orderId)"
+      @close="showCancelModal = false"
+      @cancelled="handleCancelComplete"
+  />
 </template>
 
 <script setup>
-import {ref, onMounted, reactive, computed} from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { ref, onMounted, reactive, computed } from 'vue'
+import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/features/auth/useAuthStore.js'
 import DetailLayout from '@/components/layout/DetailLayout.vue'
 import StatusButton from '@/components/common/StatusButton.vue'
+import OrderCancelConfirmModal from '../components/modal/OrderCancelConfirmModal.vue'
 import OrderDetailBasic from '../components/OrderDetailBasic.vue'
 import OrderDetailDetail from '../components/OrderDetailDetail.vue'
 import { fetchOrderDetail } from '../api.js'
 
-const route = useRoute()
 const router = useRouter()
 const authStore = useAuthStore()
-const orderId = route.params.orderId
-
 const userRole = computed(() => authStore.authority)
-console.log('userRole: ', userRole.value)
+const showCancelModal = ref(false)
+
+const props = defineProps({
+  orderId: {
+    type: String,
+    required: true,
+  },
+})
+const orderId = props.orderId
 
 const orderData = reactive({
   orderInfo: {},
@@ -95,6 +109,10 @@ const canCancel = computed(() =>
 
 const openCancelModal = () => {
   showCancelModal.value = true
+}
+
+const handleCancelComplete = () => {
+  router.push('/order/list') // 취소 후 목록으로 이동
 }
 
 // 승인 버튼에 대한 처리
