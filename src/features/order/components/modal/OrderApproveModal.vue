@@ -130,7 +130,6 @@ const riskyProductColumns = [
 
 .modal-box p {
   font-size: 1rem;
-  //color: #065f46;
   margin-bottom: 16px;
 }
 

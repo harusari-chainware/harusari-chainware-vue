@@ -31,21 +31,21 @@
   </DetailLayout>
 
   <!-- 모달 -->
-  <OrderCancelConfirmModal
+  <OrderCancelModal
       v-if="showCancelModal"
       :orderId="Number(orderId)"
       @close="showCancelModal = false"
       @cancelled="handleCancelComplete"
   />
 
-  <OrderApproveConfirmModal
+  <OrderApproveModal
       v-if="showApproveModal"
       :orderId="Number(orderId)"
       @close="showApproveModal = false"
       @approved="handleApproveComplete"
   />
 
-  <OrderRejectConfirmModal
+  <OrderRejectModal
       v-if="showRejectModal"
       :orderId="Number(orderId)"
       @close="showRejectModal = false"
@@ -59,9 +59,9 @@ import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/features/auth/useAuthStore.js'
 import DetailLayout from '@/components/layout/DetailLayout.vue'
 import StatusButton from '@/components/common/StatusButton.vue'
-import OrderCancelConfirmModal from '../components/modal/OrderCancelConfirmModal.vue'
-import OrderApproveConfirmModal from '../components/modal/OrderApproveConfirmModal.vue'
-import OrderRejectConfirmModal from '../components/modal/OrderRejectConfirmModal.vue'
+import OrderCancelModal from '../components/modal/OrderCancelModal.vue'
+import OrderApproveModal from '../components/modal/OrderApproveModal.vue'
+import OrderRejectModal from '../components/modal/OrderRejectModal.vue'
 import OrderDetailBasic from '../components/OrderDetailBasic.vue'
 import OrderDetailDetail from '../components/OrderDetailDetail.vue'
 import { fetchOrderDetail } from '../api.js'

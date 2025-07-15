@@ -5,8 +5,8 @@
       <p>정말로 이 주문을 취소하시겠습니까?</p>
 
       <div class="modal-actions">
-        <button @click="$emit('close')">아니오</button>
-        <button @click="handleConfirmCancel">예</button>
+        <StatusButton type="default" @click="$emit('close')">아니오</StatusButton>
+        <StatusButton type="reject" @click="handleConfirmCancel">예</StatusButton>
       </div>
     </div>
   </div>
@@ -15,6 +15,7 @@
 <script setup>
 import { defineEmits, defineProps, ref } from 'vue'
 import { cancelOrder } from '@/features/order/api'
+import StatusButton from "@/components/common/StatusButton.vue";
 
 const props = defineProps({
   orderId: {

@@ -10,8 +10,8 @@
       ></textarea>
 
       <div class="modal-actions">
-        <button @click="$emit('close')">취소</button>
-        <button @click="handleReject">반려</button>
+        <StatusButton type="default" @click="$emit('close')">취소</StatusButton>
+        <StatusButton type="reject" @click="handleReject">반려</StatusButton>
       </div>
     </div>
   </div>
@@ -20,6 +20,7 @@
 <script setup>
 import { defineEmits, defineProps, ref } from 'vue'
 import { rejectOrder } from '@/features/order/api.js'
+import StatusButton from "@/components/common/StatusButton.vue";
 
 const props = defineProps({
   orderId: {
