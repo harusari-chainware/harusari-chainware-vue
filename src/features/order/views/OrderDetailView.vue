@@ -37,6 +37,13 @@
       @close="showCancelModal = false"
       @cancelled="handleCancelComplete"
   />
+
+  <OrderRejectConfirmModal
+      v-if="showRejectModal"
+      :orderId="Number(orderId)"
+      @close="showRejectModal = false"
+      @rejected="handleRejectComplete"
+  />
 </template>
 
 <script setup>
@@ -46,6 +53,7 @@ import { useAuthStore } from '@/features/auth/useAuthStore.js'
 import DetailLayout from '@/components/layout/DetailLayout.vue'
 import StatusButton from '@/components/common/StatusButton.vue'
 import OrderCancelConfirmModal from '../components/modal/OrderCancelConfirmModal.vue'
+import OrderRejectConfirmModal from '../components/modal/OrderRejectConfirmModal.vue'
 import OrderDetailBasic from '../components/OrderDetailBasic.vue'
 import OrderDetailDetail from '../components/OrderDetailDetail.vue'
 import { fetchOrderDetail } from '../api.js'
@@ -53,7 +61,9 @@ import { fetchOrderDetail } from '../api.js'
 const router = useRouter()
 const authStore = useAuthStore()
 const userRole = computed(() => authStore.authority)
+
 const showCancelModal = ref(false)
+const showRejectModal = ref(false)
 
 const props = defineProps({
   orderId: {
@@ -126,6 +136,14 @@ const canReject = computed(() =>
     ['GENERAL_MANAGER', 'SENIOR_MANAGER'].includes(userRole.value)
     && orderData.orderInfo?.orderStatus === 'REQUESTED'
 )
+
+const openRejectModal = () => {
+  showRejectModal.value = true
+}
+
+const handleRejectComplete = () => {
+  router.push('/order/list') // 반려 후 목록으로 이동
+}
 
 // 반품 버튼에 대한 처리
 const canReturn = computed(() => {
