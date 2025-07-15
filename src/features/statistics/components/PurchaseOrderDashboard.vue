@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, nextTick } from 'vue'
+import { ref, watch, onMounted, nextTick } from 'vue'
 import {
   fetchPurchaseOrderStats as fetchVendorStatistics,
   fetchPurchaseOrderTrend as fetchOrderTrend,
@@ -25,12 +25,18 @@ const vendorCanvas = ref(null)
 const productCanvas = ref(null)
 const trendCanvas = ref(null)
 
+const shouldRenderChart = ref(true)
+
 const vendorChartView = ref('amount')
 const trendChartView = ref('amount')
 
 const vendors = ref([])
 const vendorList = ref([])
 const vendorSearchKeyword = ref('')
+
+const latestStats = ref([])
+const latestProductStats = ref([])
+const latestTrendStats = ref([])
 
 function getYesterday() {
   const yesterday = new Date()
@@ -75,9 +81,8 @@ async function loadStatistics() {
   totalOrderCount.value = vendorStats.reduce((sum, v) => sum + v.totalCount, 0)
   totalOrderAmount.value = vendorStats.reduce((sum, v) => sum + v.totalAmount, 0)
 
-  await nextTick()
-  drawVendorChart(stats)
-  drawProductChart(productStats)
+  latestStats.value = stats
+  latestProductStats.value = productStats
 }
 
 async function loadTrend() {
@@ -87,9 +92,24 @@ async function loadTrend() {
     targetDate: targetDate.value || null
   })
 
-  await nextTick()
-  drawTrendChart(trend)
+  latestTrendStats.value = trend
 }
+
+async function onSearch() {
+  shouldRenderChart.value = false
+  await nextTick()
+  await loadStatistics()
+  await loadTrend()
+  shouldRenderChart.value = true
+}
+
+watch(shouldRenderChart, async (visible) => {
+  if (!visible) return
+  await nextTick()
+  drawVendorChart(latestStats.value)
+  drawProductChart(latestProductStats.value)
+  drawTrendChart(latestTrendStats.value)
+})
 
 function drawVendorChart(data) {
   if (!vendorCanvas.value) return
@@ -101,10 +121,9 @@ function drawVendorChart(data) {
   let values = []
 
   if (vendorId.value) {
-    // ✅ 거래처 지정 시: 날짜별 집계
     const dateMap = new Map()
     for (const item of data) {
-      const dateKey = item.date?.slice(5).replace('-', '/') // '07-08' → '07/08'
+      const dateKey = item.date?.slice(5).replace('-', '/')
       if (!dateMap.has(dateKey)) {
         dateMap.set(dateKey, { totalAmount: 0, totalCount: 0 })
       }
@@ -116,9 +135,7 @@ function drawVendorChart(data) {
     values = vendorChartView.value === 'amount'
         ? [...dateMap.values()].map(v => v.totalAmount)
         : [...dateMap.values()].map(v => v.totalCount)
-
   } else {
-    // 전체 거래처 기준
     const vendorMap = new Map()
     for (const item of data) {
       const name = item.vendorName
@@ -182,14 +199,10 @@ function drawProductChart(data) {
       datasets: [{
         data: values,
         backgroundColor: [
-          'rgba(96, 165, 250, 0.8)',
-          'rgba(34, 197, 94, 0.8)',
-          'rgba(251, 191, 36, 0.8)',
-          'rgba(244, 114, 182, 0.8)',
-          'rgba(139, 92, 246, 0.8)',
-          'rgba(79, 70, 229, 0.8)',
-          'rgba(16, 185, 129, 0.8)',
-          'rgba(236, 72, 153, 0.8)',
+          'rgba(96, 165, 250, 0.8)', 'rgba(34, 197, 94, 0.8)',
+          'rgba(251, 191, 36, 0.8)', 'rgba(244, 114, 182, 0.8)',
+          'rgba(139, 92, 246, 0.8)', 'rgba(79, 70, 229, 0.8)',
+          'rgba(16, 185, 129, 0.8)', 'rgba(236, 72, 153, 0.8)'
         ],
         borderColor: '#fff',
         borderWidth: 2
@@ -199,13 +212,7 @@ function drawProductChart(data) {
       responsive: true,
       maintainAspectRatio: false,
       plugins: {
-        legend: {
-          position: 'right',
-          labels: {
-            boxWidth: 12,
-            padding: 12
-          }
-        },
+        legend: { position: 'right', labels: { boxWidth: 12, padding: 12 } },
         tooltip: {
           callbacks: {
             label: function (ctx) {
@@ -271,11 +278,6 @@ function drawTrendChart(data) {
   })
 }
 
-async function onSearch() {
-  await loadStatistics()
-  await loadTrend()
-}
-
 onMounted(async () => {
   vendors.value = await fetchAllVendors()
   vendorList.value = vendors.value
@@ -336,7 +338,7 @@ onMounted(async () => {
 
     <!-- 차트 영역 -->
     <div class="chart-section">
-      <!-- 거래처별 -->
+      <!-- 거래처별 발주량 -->
       <div class="chart-card">
         <div class="chart-header">
           <span>거래처별 발주량</span>
@@ -345,15 +347,13 @@ onMounted(async () => {
             <button :class="{ active: vendorChartView === 'count' }" @click="vendorChartView = 'count'; onSearch()">건수</button>
           </div>
         </div>
-        <canvas ref="vendorCanvas" height="240"></canvas>
+        <canvas v-if="shouldRenderChart" ref="vendorCanvas" height="240"></canvas>
       </div>
 
-      <!-- 상품별 -->
+      <!-- 상품별 발주량 -->
       <div class="chart-card">
-        <div class="chart-header">
-          <span>상품별 발주량</span>
-        </div>
-        <canvas ref="productCanvas" height="240"></canvas>
+        <div class="chart-header"><span>상품별 발주량</span></div>
+        <canvas v-if="shouldRenderChart" ref="productCanvas" height="240"></canvas>
       </div>
     </div>
 
@@ -366,7 +366,7 @@ onMounted(async () => {
           <button :class="{ active: trendChartView === 'count' }" @click="trendChartView = 'count'; onSearch()">건수</button>
         </div>
       </div>
-      <canvas ref="trendCanvas" height="300"></canvas>
+      <canvas v-if="shouldRenderChart" ref="trendCanvas" height="300"></canvas>
     </div>
   </div>
 </template>

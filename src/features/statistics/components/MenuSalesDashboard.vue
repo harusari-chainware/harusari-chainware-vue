@@ -20,6 +20,8 @@ const searchKeyword = ref('')
 const salesChart = ref(null)
 const revenueChart = ref(null)
 
+const shouldRenderChart = ref(true)
+
 function handleSearchKeyword() {
   const match = franchises.value.find(i => i.name.includes(searchKeyword.value))
   franchiseId.value = match ? match.id : ''
@@ -46,9 +48,12 @@ async function loadData() {
   updateCharts(menuData)
 }
 
-function updateCharts(data) {
-  if (salesChart.value) salesChart.value.destroy()
-  if (revenueChart.value) revenueChart.value.destroy()
+async function updateCharts(data) {
+  shouldRenderChart.value = false
+  await nextTick() // canvas 제거 대기
+
+  shouldRenderChart.value = true
+  await nextTick() // canvas 재생성 대기
 
   const labels = data.map(d => d.menuName)
   const quantities = data.map(d => d.totalQuantity)
@@ -57,11 +62,16 @@ function updateCharts(data) {
   const ctx1 = document.getElementById('salesChart')
   const ctx2 = document.getElementById('revenueChart')
 
+  if (!ctx1 || !ctx2) return
+
+  if (salesChart.value) salesChart.value.destroy()
+  if (revenueChart.value) revenueChart.value.destroy()
+
   salesChart.value = new Chart(ctx1, {
     type: 'bar',
     data: {
       labels,
-      datasets: [{ label: '판매량', data: quantities, backgroundColor: '#4f46e5' }]
+      datasets: [{ label: '판매량', data: quantities, backgroundColor: '#8580ef' }]
     },
     options: {
       plugins: {
@@ -77,7 +87,7 @@ function updateCharts(data) {
     type: 'bar',
     data: {
       labels,
-      datasets: [{ label: '매출액', data: revenues, backgroundColor: '#10b981' }]
+      datasets: [{ label: '매출액', data: revenues, backgroundColor: '#6DACD3' }]
     },
     options: {
       plugins: {
@@ -156,11 +166,11 @@ onMounted(async () => {
     <div class="charts">
       <div class="chart-card">
         <h3>메뉴별 판매량</h3>
-        <canvas id="salesChart"></canvas>
+        <canvas v-if="shouldRenderChart" id="salesChart"></canvas>
       </div>
       <div class="chart-card">
         <h3>메뉴별 매출액</h3>
-        <canvas id="revenueChart"></canvas>
+        <canvas v-if="shouldRenderChart" id="revenueChart"></canvas>
       </div>
     </div>
   </div>

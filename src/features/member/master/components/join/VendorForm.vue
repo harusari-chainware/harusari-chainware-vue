@@ -2,13 +2,11 @@
     <div class="vendor-box">
         <h2>거래처 정보</h2>
 
-        <!-- 거래처 이름 -->
         <div class="form-group">
             <label for="vendorName">거래처 이름</label>
-            <input type="text" id="vendorName" v-model="form.vendorName" placeholder="거래처 이름 입력" />
+            <input type="text" id="vendorName" v-model="form.vendorName" placeholder="거래처 이름 입력"/>
         </div>
 
-        <!-- 거래처 유형 -->
         <div class="form-group">
             <label for="vendorType">거래처 유형</label>
             <select v-model="form.vendorType" id="vendorType">
@@ -20,96 +18,64 @@
             </select>
         </div>
 
-        <!-- 사업자 번호 -->
         <div class="form-group">
             <label for="vendorTaxId">사업자 번호</label>
-            <input type="text" id="vendorTaxId" v-model="form.vendorTaxId" placeholder="OOO-OO-OOOO" />
+            <input type="text" id="vendorTaxId" v-model="form.vendorTaxId" placeholder="OOO-OO-OOOO"/>
         </div>
 
-        <!-- 거래처 메모 -->
         <div class="form-group">
             <label for="vendorMemo">거래처 메모</label>
-            <input type="text" id="vendorMemo" v-model="form.vendorMemo" placeholder="메모 입력" />
+            <input type="text" id="vendorMemo" v-model="form.vendorMemo" placeholder="메모 입력"/>
         </div>
 
-        <!-- 거래처 상태 (항상 '활성' 상태로 설정) -->
-        <input type="hidden" v-model="form.vendorStatus" value="ACTIVE" />
+        <input type="hidden" v-model="form.vendorStatus"/>
 
-        <!-- 주소 -->
         <div class="form-group">
             <label for="zipcode">우편번호</label>
             <div class="zipcode-group">
-                <input type="text" id="zipcode" v-model="form.zipcode" placeholder="우편번호" readonly />
+                <input type="text" id="zipcode" v-model="form.zipcode" readonly/>
                 <button type="button" class="address-button" @click="execDaumPostcode">주소 검색</button>
             </div>
         </div>
 
         <div class="form-group">
             <label for="addressRoad">도로명 주소</label>
-            <input type="text" id="addressRoad" v-model="form.addressRoad" placeholder="도로명 주소 입력" readonly />
+            <input type="text" id="addressRoad" v-model="form.addressRoad" readonly/>
         </div>
 
         <div class="form-group">
             <label for="addressDetail">상세 주소</label>
-            <input type="text" id="addressDetail" v-model="form.addressDetail" placeholder="상세 주소 입력" />
+            <input type="text" id="addressDetail" v-model="form.addressDetail"/>
         </div>
 
-        <!-- 거래 시작일 -->
         <div class="form-group">
             <label for="vendorStartDate">계약 시작일</label>
-            <input type="date" id="vendorStartDate" v-model="form.vendorStartDate" />
+            <input type="date" id="vendorStartDate" v-model="form.vendorStartDate"/>
         </div>
 
-        <!-- 거래 종료일 -->
         <div class="form-group">
             <label for="vendorEndDate">계약 종료일</label>
-            <input type="date" id="vendorEndDate" v-model="form.vendorEndDate" />
+            <input type="date" id="vendorEndDate" v-model="form.vendorEndDate"/>
         </div>
 
         <div class="form-group">
             <label>계약서 업로드 (PDF)</label>
             <div class="file-upload-wrapper">
-                <label class="file-upload-label" for="agreementFile">
-                    {{ agreementFileName || '파일 선택 (PDF)' }}
-                </label>
-                <input
-                        type="file"
-                        id="agreementFile"
-                        accept="application/pdf"
-                        @change="handleFileChange"
-                        class="file-upload-input"
-                />
-                <button
-                        v-if="agreementFileName"
-                        type="button"
-                        class="remove-file-button"
-                        @click="removeFile"
-                >✕</button>
+                <label class="file-upload-label" for="agreementFile">{{ agreementFileName || '파일 선택 (PDF)' }}</label>
+                <input type="file" id="agreementFile" accept="application/pdf" @change="handleFileChange"
+                       class="file-upload-input"/>
+                <button v-if="agreementFileName" type="button" class="remove-file-button" @click="removeFile">✕</button>
             </div>
         </div>
     </div>
 </template>
 
 <script setup>
-import { ref, defineProps, defineEmits, nextTick, watch } from 'vue';
+import {ref, watch, nextTick} from 'vue';
 
-const props = defineProps({ form: Object });
+const props = defineProps({form: Object});
 const emits = defineEmits(['update:agreementFile']);
-
 const agreementFileName = ref('');
-
-const form = ref({
-    vendorName: '',
-    vendorType: '',
-    vendorTaxId: '',
-    vendorMemo: '',
-    vendorStatus: 'ACTIVE',
-    vendorStartDate: '',
-    vendorEndDate: '',
-    zipcode: '',
-    addressRoad: '',
-    addressDetail: ''
-});
 
 function handleFileChange(event) {
     const file = event.target.files[0];
@@ -125,6 +91,7 @@ function handleFileChange(event) {
         event.target.value = '';
         return;
     }
+
     agreementFileName.value = file.name;
     emits('update:agreementFile', file);
 }
@@ -137,40 +104,28 @@ function removeFile() {
 
 function execDaumPostcode() {
     if (!window.daum || !window.daum.Postcode) {
-        alert('주소 검색 서비스를 불러오지 못했습니다. 네트워크 상태를 확인하거나 새로고침해 주세요.');
+        alert('주소 검색 서비스가 불러와지지 않았습니다.');
         return;
     }
-
     new window.daum.Postcode({
-        oncomplete: function (data) {
-            form.value.zipcode = data.zonecode;
-            form.value.addressRoad = data.roadAddress || data.jibunAddress;
+        oncomplete: (data) => {
+            props.form.zipcode = data.zonecode;
+            props.form.addressRoad = data.roadAddress || data.jibunAddress;
             nextTick(() => document.getElementById('addressDetail')?.focus());
         }
     }).open();
 }
 
-function formatBusinessNumber(value) {
-    const cleaned = value.replace(/\D/g, '').slice(0, 10);
-    const length = cleaned.length;
-    if (length <= 3) {
-        return cleaned;
-    } else if (length <= 5) {
-        return `${cleaned.slice(0, 3)}-${cleaned.slice(3)}`;
-    } else {
-        return `${cleaned.slice(0, 3)}-${cleaned.slice(3, 5)}-${cleaned.slice(5)}`;
-    }
-}
-
-// Watch를 이용해 실시간 포맷 적용
 watch(
-        () => form.value.vendorTaxId,
+        () => props.form.vendorTaxId,
         (newValue) => {
             if (!newValue) return;
-            const formatted = formatBusinessNumber(newValue);
-            if (formatted !== newValue) {
-                form.value.vendorTaxId = formatted;
-            }
+            const cleaned = newValue.replace(/\D/g, '').slice(0, 10);
+            let formatted = '';
+            if (cleaned.length <= 3) formatted = cleaned;
+            else if (cleaned.length <= 5) formatted = `${cleaned.slice(0, 3)}-${cleaned.slice(3)}`;
+            else formatted = `${cleaned.slice(0, 3)}-${cleaned.slice(3, 5)}-${cleaned.slice(5)}`;
+            if (formatted !== newValue) props.form.vendorTaxId = formatted;
         }
 );
 </script>
