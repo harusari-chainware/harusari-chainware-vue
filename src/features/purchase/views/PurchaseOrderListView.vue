@@ -34,9 +34,9 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { getPurchaseOrders } from '@/features/purchase/PurchaseApi.js' // 실제 API
+import { getPurchaseOrders } from '@/features/purchase/PurchaseApi.js'
 import ListLayout from '@/components/layout/ListLayout.vue'
 import EmptyResult from "@/components/common/EmptyResult.vue"
 import Pagination from "@/components/common/Pagination.vue"
@@ -51,24 +51,33 @@ const route = useRoute()
 
 const purchase = ref([])
 const isLoading = ref(true)
+const totalCount = ref(0)
+
 const currentPage = ref(Number(route.query.page) || 1)
 const sortKey = ref(route.query.sortKey || 'createdAt')
 const sortOrder = ref(route.query.sortOrder || 'asc')
-const totalCount = ref(0)
 const itemsPerPage = 10
 
+// ✅ API 호출
 const fetchPurchaseOrders = async () => {
   isLoading.value = true
   try {
+    const query = route.query
     const params = {
-      page: currentPage.value - 1,
+      page: Number(query.page || 1) - 1,
       size: itemsPerPage,
-      sortKey: sortKey.value,
-      sortOrder: sortOrder.value
-      // TODO: filters도 함께 추가 가능
+      sortKey: query.sortKey || 'createdAt',
+      sortOrder: query.sortOrder || 'asc',
+      drafterName: query.drafterName || '',
+      vendorName: query.vendorName || '',
+      purchaseStatus: query.purchaseStatus || '',
+      dueStart: query.dueStart || '',
+      dueEnd: query.dueEnd || ''
     }
+
     const res = await getPurchaseOrders(params)
-    purchase.value = res.data.data
+    purchase.value = res.data.data || []
+    totalCount.value = res.data.totalCount || purchase.value.length
   } catch (err) {
     console.error('발주 목록 조회 실패', err)
   } finally {
@@ -76,14 +85,37 @@ const fetchPurchaseOrders = async () => {
   }
 }
 
-onMounted(fetchPurchaseOrders)
+// ✅ 쿼리 변경 시 API 재호출
+watch(() => route.query, () => {
+  currentPage.value = Number(route.query.page || 1)
+  sortKey.value = route.query.sortKey || 'createdAt'
+  sortOrder.value = route.query.sortOrder || 'asc'
+  fetchPurchaseOrders()
+}, { immediate: true })
 
-watch([sortKey, sortOrder, currentPage], fetchPurchaseOrders)
 
-const pagedPurchase = computed(() => {
-  const start = (currentPage.value - 1) * itemsPerPage
-  const end = start + itemsPerPage
-  return purchase.value.slice(start, end)
+// ✅ 정렬/페이지 변경 시 쿼리 갱신
+watch([sortKey, sortOrder], () => {
+  router.push({
+    name: 'PurchaseOrderListView',
+    query: {
+      ...route.query,
+      sortKey: sortKey.value,
+      sortOrder: sortOrder.value,
+      page: 1 // 정렬 변경 시 페이지 초기화
+    }
+  })
 })
 
+watch(currentPage, (val) => {
+  router.push({
+    name: 'PurchaseOrderListView',
+    query: {
+      ...route.query,
+      page: val
+    }
+  })
+})
+
+const pagedPurchase = computed(() => purchase.value)
 </script>

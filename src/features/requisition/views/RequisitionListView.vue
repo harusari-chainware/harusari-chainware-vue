@@ -46,11 +46,12 @@ import SortOrderSelect from '@/components/common/top-actions/SortOrderSelect.vue
 import SkeletonList from '@/components/common/SkeletonList.vue'
 import EmptyResult from '@/components/common/EmptyResult.vue'
 import Pagination from '@/components/common/Pagination.vue'
-import {useRoute} from "vue-router";
+import {useRoute, useRouter} from "vue-router";
 
 // 상태
 
 const route = useRoute()
+const router = useRouter()
 const requisitions = ref([])
 const isLoading = ref(true)
 const currentPage = ref(1)
@@ -66,28 +67,6 @@ const pagedRequisitions = computed(() => {
   return requisitions.value.slice(start, start + itemsPerPage)
 })
 
-// API 호출
-/*const fetchRequisitions = async () => {
-  isLoading.value = true
-  try {
-    const res = await getRequisitionList({
-      page: currentPage.value - 1,
-      size: itemsPerPage,
-      sortKey: sortKey.value,
-      sortOrder: sortOrder.value
-    })
-
-    // 구조에 맞게 변경
-    requisitions.value = Array.isArray(res.data.data) ? res.data.data : []
-    totalCount.value = requisitions.value.length
-  } catch (e) {
-    console.error('❌ 품의서 목록 조회 실패', e)
-    requisitions.value = []
-    totalCount.value = 0
-  } finally {
-    isLoading.value = false
-  }
-}*/
 const fetchRequisitions = async () => {
   isLoading.value = true
   try {
@@ -111,11 +90,16 @@ const fetchRequisitions = async () => {
 }
 
 
+// ✅ 새로고침 시 URL 쿼리가 남아있다면 제거
+onMounted(() => {
+  if (Object.keys(route.query).length > 0) {
+    // 쿼리 제거 후 리다이렉트 → 이후 watch가 fetchRequisitions 자동 실행
+    router.replace({ name: 'RequisitionListView', query: {} })
+  } else {
+    fetchRequisitions()
+  }
+})
 
-
-
-// 초기 요청 및 반응형 트리거
-onMounted(fetchRequisitions)
 watch(
     [() => currentPage.value, () => sortKey.value, () => sortOrder.value, () => route.query],
     fetchRequisitions,

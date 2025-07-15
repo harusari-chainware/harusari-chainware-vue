@@ -1,85 +1,76 @@
 <template>
   <RegisterInfoGroup title="주문 관련 정보">
     <div class="grid grid-2 gap-6">
-      <!-- 거래처 검색 필드 -->
-      <AutoCompleteField
-          id="vendor"
+
+      <!-- 거래처 선택 -->
+      <FilterSearchModal
           label="거래처"
-          placeholder="거래처명을 입력하세요"
-          v-model="vendorKeyword"
-          :fetchFn="fetchVendors"
-          labelKey="vendorName"
-          @select="onVendorSelect"
+          :displayText="vendor?.vendorName || '거래처를 선택하세요'"
+          @open="isVendorModalVisible = true"
       />
-<!--      :fetchFn="(params) => fetchVendors({ vendorName: params.vendorName })"-->
 
-      <!-- 창고 검색 필드 -->
-      <AutoCompleteField
+      <!-- 창고 선택 -->
+      <FilterSearchModal
           label="창고"
-          v-model="warehouseKeyword"
-          placeholder="창고명을 입력하세요"
-          :fetchFn="fetchWarehouses"
-          labelKey="warehouseName"
-          idKey="warehouseId"
-          @select="onSelectWarehouse"
+          :displayText="warehouse?.warehouseName || '창고를 선택하세요'"
+          @open="isWarehouseModalVisible = true"
       />
 
-      <!-- 납기일 선택 -->
-      <RegisterInfoGroup title="납기일">
-        <DatePickerField
-            label="납기일"
-            :model-value="deliveryDate"
-            @update:model-value="val => emit('update:deliveryDate', val)"
-        />
-      </RegisterInfoGroup>
+      <!-- 납기일 -->
+      <DatePickerField
+          label="납기일"
+          :model-value="deliveryDate"
+          @update:model-value="val => emit('update:deliveryDate', val)"
+      />
     </div>
+
+    <!-- 거래처 검색 모달 -->
+    <VendorSearchModal
+        :visible="isVendorModalVisible"
+        @update:visible="val => (isVendorModalVisible = val)"
+        @select="handleVendorSelect"
+    />
+
+    <!-- 창고 검색 모달 -->
+    <WarehouseSearchModal
+        :visible="isWarehouseModalVisible"
+        @update:visible="val => (isWarehouseModalVisible = val)"
+        @select="handleWarehouseSelect"
+    />
   </RegisterInfoGroup>
 </template>
 
 <script setup>
 import { ref } from 'vue'
 import RegisterInfoGroup from '@/components/layout/registerview/RegisterInfoGroup.vue'
-import AutoCompleteField from '@/features/requisition/components/Register/AutoCompleteField.vue'
+import FilterSearchModal from '@/components/common/filters/FilterSearchModal.vue'
 import DatePickerField from '@/components/common/fields/DatePickerField.vue'
-import { fetchVendors } from '@/features/vendor/api.js'
-import { fetchWarehouses } from '@/features/warehouse/api.js'
+import VendorSearchModal from "@/components/common/fields/VendorSearchModal.vue";
+import WarehouseSearchModal from "@/components/common/fields/WarehouseSearchModal.vue";
 
 const props = defineProps({
   vendor: Object,
   warehouse: Object,
   deliveryDate: String,
 })
+const emit = defineEmits(['update:vendor', 'update:warehouse', 'update:deliveryDate'])
 
-const emit = defineEmits([
-  'update:vendor',
-  'update:warehouse',
-  'update:deliveryDate',
-])
+const isVendorModalVisible = ref(false)
+const isWarehouseModalVisible = ref(false)
 
-const vendorKeyword = ref('')
-const warehouseName = ref('')
-const selectedWarehouse = ref(null)
-const vendor = ref(null)
-const warehouseKeyword = ref('')
+const vendor = ref(props.vendor || null)
+const warehouse = ref(props.warehouse || null)
 
-function onVendorSelect(item) {
-  vendor.value = {
-    vendorId: item.vendorId ?? item.id,
-    vendorName: item.vendorName ?? item.name,
-  }
-  vendorKeyword.value = vendor.value.vendorName
-  emit('update:vendor', vendor.value)
-  console.log('✅ 선택된 거래처:', vendor.value)
+function handleVendorSelect(item) {
+  vendor.value = item
+  emit('update:vendor', item)
+  isVendorModalVisible.value = false
 }
 
-function onSelectWarehouse(item) {
-  selectedWarehouse.value = {
-    warehouseId: item.warehouseId ?? item.id,
-    warehouseName: item.warehouseName ?? item.name,
-  }
-  warehouseKeyword.value = selectedWarehouse.value.warehouseName
-  emit('update:warehouse', selectedWarehouse.value)
-  console.log('✅ 선택된 창고:', selectedWarehouse.value)
+function handleWarehouseSelect(item) {
+  warehouse.value = item
+  emit('update:warehouse', item)
+  isWarehouseModalVisible.value = false
 }
 </script>
 
