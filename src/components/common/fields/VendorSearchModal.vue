@@ -36,7 +36,7 @@ const handleSelect = (vendor) => {
 </script>
 
 <template>
-  <div v-if="visible" class="modal-backdrop">
+  <div v-if="visible" class="modal-backdrop" @click.self="close">
     <div class="modal-box">
       <div class="modal-header">
         <h2>거래처 검색</h2>
