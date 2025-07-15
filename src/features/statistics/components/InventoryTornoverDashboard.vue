@@ -17,8 +17,6 @@ const franchises = ref([])
 const warehouses = ref([])
 const searchKeyword = ref('')
 const isLoading = ref(false)
-const shouldRenderChart = ref(true)
-
 const trendChartRef = ref(null)
 const productChartRef = ref(null)
 const productDataRaw = ref([])
@@ -65,9 +63,6 @@ function handleSearchKeyword() {
 async function handleSearch() {
   try {
     isLoading.value = true
-    shouldRenderChart.value = false
-    await nextTick()
-
     const trendParams = {
       period: period.value,
       targetDate: targetDate.value || undefined
@@ -76,7 +71,6 @@ async function handleSearch() {
       period: period.value,
       targetDate: targetDate.value || undefined
     }
-
     if (locationType.value === 'warehouse' && locationId.value) {
       trendParams.warehouseId = Number(locationId.value)
       productParams.warehouseId = Number(locationId.value)
@@ -84,10 +78,8 @@ async function handleSearch() {
       trendParams.franchiseId = Number(locationId.value)
       productParams.franchiseId = Number(locationId.value)
     }
-
     const trendRes = await fetchInventoryTurnoverTrend(trendParams)
     const productRes = await fetchInventoryTurnover(productParams)
-
     const trendData = {
       labels: formatXAxisLabels(trendRes.map(i => i.date), period.value),
       datasets: [
@@ -102,17 +94,9 @@ async function handleSearch() {
         }
       ]
     }
-
-    await nextTick()
-    shouldRenderChart.value = true
-    await nextTick()
-
-    setTimeout(() => {
-      drawChart('turnoverTrendChart', trendData, 'line', false, trendChartRef)
-    }, 0)
-
+    drawChart('turnoverTrendChart', trendData, 'line', false, trendChartRef)
     productDataRaw.value = productRes
-    setTimeout(() => drawProductChart(), 0)
+    drawProductChart()
   } catch (err) {
     console.error('❌ 재고 회전율 데이터 로드 실패:', err)
   } finally {
@@ -123,15 +107,11 @@ async function handleSearch() {
 function delayedSearch(newPeriod) {
   isLoading.value = true
   period.value = newPeriod
-  handleSearch()
+  setTimeout(() => handleSearch(), 1000)
 }
 
-async function changeProductTab(tab) {
+function changeProductTab(tab) {
   productTab.value = tab
-  shouldRenderChart.value = false
-  await nextTick()                // v-if 로 canvas DOM 제거 대기
-  shouldRenderChart.value = true
-  await nextTick()                // 다시 생성된 DOM 반영 대기
   drawProductChart()
 }
 
@@ -141,7 +121,6 @@ function drawProductChart() {
       productTab.value === 'top'
           ? source.sort((a, b) => b.turnoverRate - a.turnoverRate).slice(0, 10)
           : source.sort((a, b) => a.turnoverRate - b.turnoverRate).slice(0, 10)
-
   const productChartData = {
     labels: sorted.map(i => i.productName),
     datasets: [
@@ -154,56 +133,44 @@ function drawProductChart() {
       }
     ]
   }
-
-  setTimeout(() => {
-    drawChart('productTurnoverChart', productChartData, 'bar', true, productChartRef)
-  }, 0)
+  drawChart('productTurnoverChart', productChartData, 'bar', true, productChartRef)
 }
 
 function drawChart(id, data, type = 'line', horizontal = false, refObj) {
-  const canvas = document.getElementById(id)
-  if (!canvas) {
-    console.warn(`⚠️ Canvas element not found: #${id}`)
-    return
-  }
-  const ctx = canvas.getContext('2d')
-  if (!ctx) {
-    console.warn(`⚠️ Canvas context not available for: #${id}`)
-    return
-  }
-
-  if (refObj.value && typeof refObj.value.destroy === 'function') refObj.value.destroy()
-
-  const valueAxis = horizontal ? 'x' : 'y'
-  const categoryAxis = horizontal ? 'y' : 'x'
-
-  refObj.value = new Chart(ctx, {
-    type,
-    data,
-    options: {
-      indexAxis: horizontal ? 'y' : 'x',
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: { display: true },
-        tooltip: {
-          callbacks: {
-            label: ctx => `${ctx.dataset.label}: ${ctx.parsed[horizontal ? 'x' : 'y']}회`
+  nextTick(() => {
+    const ctx = document.getElementById(id)?.getContext('2d')
+    if (!ctx) return
+    if (refObj.value && typeof refObj.value.destroy === 'function') refObj.value.destroy()
+    const valueAxis = horizontal ? 'x' : 'y'
+    const categoryAxis = horizontal ? 'y' : 'x'
+    refObj.value = new Chart(ctx, {
+      type,
+      data,
+      options: {
+        indexAxis: horizontal ? 'y' : 'x',
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: true },
+          tooltip: {
+            callbacks: {
+              label: ctx => `${ctx.dataset.label}: ${ctx.parsed[horizontal ? 'x' : 'y']}회`
+            }
+          }
+        },
+        scales: {
+          [valueAxis]: {
+            beginAtZero: true,
+            ticks: { callback: v => `${v}회` },
+            grid: { color: '#f3f4f6' }
+          },
+          [categoryAxis]: {
+            ticks: { autoSkip: false },
+            grid: { color: '#f9fafb' }
           }
         }
-      },
-      scales: {
-        [valueAxis]: {
-          beginAtZero: true,
-          ticks: { callback: v => `${v}회` },
-          grid: { color: '#f3f4f6' }
-        },
-        [categoryAxis]: {
-          ticks: { autoSkip: false },
-          grid: { color: '#f9fafb' }
-        }
       }
-    }
+    })
   })
 }
 
@@ -242,7 +209,6 @@ watch(locationType, () => {
           <label>선택</label>
           <select v-model="locationId">
             <option disabled value="">선택하세요</option>
-            <!-- 본사 창고: 전체 선택 항목 포함 -->
             <option v-if="locationType === 'warehouse'" value="">전체 본사 창고</option>
             <option
                 v-for="item in locationType === 'warehouse' ? warehouses : franchises"
@@ -280,26 +246,19 @@ watch(locationType, () => {
                 v-if="locationType !== 'franchise'"
                 :class="{ active: period === 'DAILY' }"
                 @click="() => delayedSearch('DAILY')"
-            >
-              일간
-            </button>
+            >일간</button>
             <button
                 v-if="locationType !== 'franchise'"
                 :class="{ active: period === 'WEEKLY' }"
                 @click="() => delayedSearch('WEEKLY')"
-            >
-              주간
-            </button>
+            >주간</button>
             <button
                 :class="{ active: period === 'MONTHLY' }"
                 @click="() => delayedSearch('MONTHLY')"
-            >
-              월간
-            </button>
+            >월간</button>
           </div>
-
         </div>
-        <canvas v-if="shouldRenderChart" id="turnoverTrendChart"></canvas>
+        <canvas id="turnoverTrendChart"></canvas>
       </div>
       <div class="chart-card col-4">
         <div class="chart-header">
@@ -309,7 +268,7 @@ watch(locationType, () => {
             <button :class="{ active: productTab === 'bottom' }" @click="() => changeProductTab('bottom')">하위 10개</button>
           </div>
         </div>
-        <canvas v-if="shouldRenderChart" id="productTurnoverChart"></canvas>
+        <canvas id="productTurnoverChart"></canvas>
       </div>
     </div>
   </div>
