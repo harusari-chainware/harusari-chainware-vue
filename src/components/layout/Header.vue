@@ -94,7 +94,7 @@ const routeMap = {
     '주문/반품/배송': '/order/list',
 
     '품의/발주/입고': '/requisitions/list',
-    '폐기': '/disposal/franchise/list'
+    '폐기': '/disposal/list'
 
 }
 

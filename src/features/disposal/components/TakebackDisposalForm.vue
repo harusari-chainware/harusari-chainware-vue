@@ -238,9 +238,10 @@ const submitForm = async () => {
   font-weight: 500;
   border-radius: 6px;
   cursor: pointer;
+  border: none;
 }
 .btn-primary {
-  background-color: #4f46e5;
+  background-color: rgb(58, 174, 216);
   color: white;
 }
 .btn-secondary {

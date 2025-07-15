@@ -130,7 +130,19 @@ async function drawSalesPatternChart() {
           y: {
             beginAtZero: true,
             ticks: {
-              callback: val => val >= 1000 ? `${(val / 1000).toFixed(0)}K` : val
+              callback: val => val >= 1000 ? `${(val / 1000).toFixed(0)}K` : val,
+              font: {
+                size: 15,
+                weight: 'bold'
+              }
+            }
+          },
+          x: {
+            ticks: {
+              font: {
+                size: 15,
+                weight: 'bold'
+              }
             }
           }
         }
@@ -163,12 +175,20 @@ async function onPatternTabClick(p) {
   drawSalesPatternChart()
 }
 
+async function handleSearchClick() {
+  await loadSalesData()
+  shouldRenderChart.value = false
+  await nextTick()
+  shouldRenderChart.value = true
+  await nextTick()
+  await drawSalesPatternChart()
+}
+
 async function resetForm() {
   franchiseId.value = ''
   period.value = 'DAILY'
   targetDate.value = getYesterday()
-  await loadSalesData()
-  await onPatternTabClick('HOURLY')
+  await handleSearchClick()
 }
 
 onMounted(async () => {
@@ -179,7 +199,6 @@ onMounted(async () => {
 
 <template>
   <div class="dashboard-container">
-    <!-- 통계 조회 필터 -->
     <div class="filter-box">
       <div class="filter-grid">
         <div class="form-group">
@@ -208,12 +227,11 @@ onMounted(async () => {
         </div>
         <div class="form-actions">
           <button @click="resetForm">초기화</button>
-          <button class="primary" @click="loadSalesData">조회</button>
+          <button class="primary" @click="handleSearchClick">조회</button>
         </div>
       </div>
     </div>
 
-    <!-- 통계 카드 -->
     <div class="card-grid">
       <div class="stat-card">
         <div class="stat-title">오늘 매출</div>
@@ -244,7 +262,6 @@ onMounted(async () => {
       </div>
     </div>
 
-    <!-- 매출 추이 차트 -->
     <div class="chart-section">
       <div class="chart-card">
         <div class="chart-header">
@@ -270,7 +287,6 @@ onMounted(async () => {
     </div>
   </div>
 </template>
-
 
 <style scoped>
 .dashboard-container {
@@ -423,9 +439,9 @@ grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
 gap: 24px;
 }
 canvas {
+  width: 100% !important;
+  height: 380px !important;
   display: block;
-  width: 95% !important;
-  height: 360px !important;
 }
 
 #weeklyDistributionChart {
