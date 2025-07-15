@@ -71,7 +71,7 @@ async function updateCharts(data) {
     type: 'bar',
     data: {
       labels,
-      datasets: [{ label: '판매량', data: quantities, backgroundColor: '#4f46e5' }]
+      datasets: [{ label: '판매량', data: quantities, backgroundColor: '#8580ef' }]
     },
     options: {
       plugins: {
@@ -87,7 +87,7 @@ async function updateCharts(data) {
     type: 'bar',
     data: {
       labels,
-      datasets: [{ label: '매출액', data: revenues, backgroundColor: '#10b981' }]
+      datasets: [{ label: '매출액', data: revenues, backgroundColor: '#6DACD3' }]
     },
     options: {
       plugins: {

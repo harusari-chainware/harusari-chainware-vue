@@ -195,7 +195,7 @@ onMounted(async () => {
         <div class="filter-date-wrapper">
           <FilterDate v-model="targetDate" />
         </div>
-        <button @click="handleSearch">조회</button>
+        <button class="filter-label invisible" @click="handleSearch">조회</button>
       </div>
     </div>
 
@@ -267,6 +267,13 @@ onMounted(async () => {
   border-radius: 6px;
   border: 1px solid #ccc;
   box-sizing: border-box;
+}
+.filter-group button {
+  background-color: rgb(58, 174, 216);
+  color: white;
+  font-weight: 600;
+  width: 180px;
+  justify-content: center;
 }
 .filter-date-wrapper {
   display: flex;
@@ -414,3 +421,4 @@ canvas {
   display: block;
 }
 </style>
+
