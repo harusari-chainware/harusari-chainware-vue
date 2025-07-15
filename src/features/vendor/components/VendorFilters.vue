@@ -106,8 +106,8 @@ const vendorTypeOptions = [
   { label: 'AGENCY', value: 'AGENCY' }
 ]
 const vendorStatusOptions = [
-  { label: 'IN_PROGRESS', value: 'IN_PROGRESS' },
-  { label: 'TERMINATED', value: 'TERMINATED' }
+  { label: '계약 진행 중', value: 'IN_PROGRESS' },
+  { label: '계약 만료', value: 'TERMINATED' }
 ]
 
 </script>

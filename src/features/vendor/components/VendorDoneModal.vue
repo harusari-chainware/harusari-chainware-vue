@@ -34,9 +34,9 @@ const title = computed(() => {
 
 const message = computed(() => {
   switch (props.type) {
-    case 'register': return '제품 정보가 성공적으로 등록되었습니다.'
-    case 'edit':     return '제품 정보가 성공적으로 수정되었습니다.'
-    case 'delete':   return '제품 정보가 성공적으로 삭제되었습니다.'
+    case 'register': return '거래처 정보가 성공적으로 등록되었습니다.'
+    case 'edit':     return '거래처 정보가 성공적으로 수정되었습니다.'
+    case 'delete':   return '거래처 정보가 성공적으로 삭제되었습니다.'
     default:         return '완료되었습니다.'
   }
 })

@@ -2,7 +2,7 @@
   <div class="modal-backdrop">
     <div class="modal-box">
       <h2 class="modal-title">삭제 확인</h2>
-      <p>제품을 삭제하시겠습니까?</p>
+      <p>거래처 정보를 삭제하시겠습니까?</p>
       <div class="modal-actions">
         <button @click="emit('close')">취소</button>
         <button @click="handleDelete">삭제</button>

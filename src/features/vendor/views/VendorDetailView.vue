@@ -6,7 +6,6 @@
     <template #actions>
       <template v-if="!isEditing">
         <StatusButton type="primary" @click="startEdit">수정</StatusButton>
-        <StatusButton type="danger" @click="openDeleteModal">삭제</StatusButton>
       </template>
       <template v-else>
         <StatusButton type="primary" @click="handleSave">저장</StatusButton>
@@ -51,6 +50,8 @@
 
       <!-- 거래처 정보 -->
       <div class="section-title">거래처 정보</div>
+
+      <!-- 1행: 거래처명 | 사업자 등록 번호 | 계약서 첨부 -->
       <div class="info-grid">
         <div>
           <label>거래처명</label>
@@ -62,109 +63,77 @@
           <div v-if="!isEditing" class="readonly-field">{{ form.vendorTaxId || 'XXXXXXXXX' }}</div>
           <input v-else v-model="form.vendorTaxId" class="input" maxlength="10" />
         </div>
-
-
-
-
-        <!-- 주소 -->
         <div class="col-span-2">
+          <label>계약서 첨부</label>
+          <div
+              v-if="!isEditing"
+              class="readonly-field file-readonly clickable"
+              @click="downloadAgreement"
+          >
+            <span v-if="form.agreementOriginalFileName">🧾 {{ form.agreementOriginalFileName }}</span>
+            <span v-else style="color: #999;">첨부된 파일이 없습니다.</span>
+          </div>
 
-          <div>
-            <label>계약서 첨부</label>
+          <div v-else class="file-edit-wrap-horizontal">
+            <!-- 파일 선택 버튼 -->
+            <label class="upload-label" for="agreement-upload">🧾 계약서 파일 선택</label>
+            <input
+                id="agreement-upload"
+                type="file"
+                ref="agreementInputRef"
+                @change="onAgreementFileChange"
+                class="upload-input-hidden"
+            />
+
+            <!-- 선택된 파일 정보 -->
             <div
-                v-if="!isEditing"
-                class="readonly-field file-readonly clickable"
-                @click="downloadAgreement"
+                class="file-preview-inline"
+                v-if="agreementFileName || form.agreementOriginalFileName"
             >
-              <span v-if="form.agreementOriginalFileName">📎 {{ form.agreementOriginalFileName }}</span>
-              <span v-else style="color: #999;">첨부된 파일이 없습니다.</span>
-            </div>
-            <div v-else class="file-edit-wrap">
-              <label class="upload-label">
-                <input type="file" @change="onAgreementFileChange" class="upload-input" />
-              </label>
-              <div class="file-preview">
-                📎 {{ agreementFileName || form.agreementOriginalFileName }}
-                <div v-if="agreementFileSize" style="font-size: 0.85rem; color: #666;">
-                  ({{ agreementFileSize }})
-                </div>
-              </div>
+              <span>🧾 {{ agreementFileName || form.agreementOriginalFileName }}</span>
+              <span v-if="agreementFileSize" class="file-size">({{ agreementFileSize }})</span>
+              <button class="remove-btn" @click="removeAgreementFile">❌</button>
             </div>
           </div>
+
+        </div>
+      </div>
+
+      <!-- 2행: 계약 시작일 | 계약 종료일 | 주소 -->
+      <div class="info-grid">
+        <div>
+          <label>계약 시작일</label>
+          <div v-if="!isEditing" class="readonly-field">{{ formatDate(form.vendorStartDate) || 'yyyy.mm.dd' }}</div>
+          <FilterDate v-else v-model="form.vendorStartDate" placeholder="계약 시작일 선택" />
+        </div>
+        <div>
+          <label>계약 종료일</label>
+          <div v-if="!isEditing" class="readonly-field">{{ formatDate(form.vendorEndDate) || 'yyyy.mm.dd' }}</div>
+          <FilterDate v-else v-model="form.vendorEndDate" placeholder="계약 종료일 선택" />
+        </div>
+        <div class="col-span-2">
           <label>주소</label>
           <div v-if="!isEditing" class="readonly-field">
             {{ form.vendorAddress?.zipcode || '' }}
             <span style="margin-left: 2em;">
-            {{ form.vendorAddress?.addressRoad || '' }}
-            <template v-if="form.vendorAddress?.addressDetail">
-              , {{ form.vendorAddress.addressDetail }}
-
-            </template>
-              </span>
+              {{ form.vendorAddress?.addressRoad || '' }}
+              <template v-if="form.vendorAddress?.addressDetail">
+                , {{ form.vendorAddress.addressDetail }}
+              </template>
+            </span>
           </div>
           <div v-else class="address-edit-wrap">
             <div style="display:flex; gap:8px;">
-              <input
-                  v-model="form.vendorAddress.zipcode"
-                  class="input"
-                  placeholder="우편번호"
-                  style="flex:1;"
-              />
-              <input
-                  v-model="form.vendorAddress.addressRoad"
-                  class="input"
-                  placeholder="도로명 주소"
-                  style="flex:3;"
-              />
+              <input v-model="form.vendorAddress.zipcode" class="input" placeholder="우편번호" style="flex:1;" />
+              <input v-model="form.vendorAddress.addressRoad" class="input" placeholder="도로명 주소" style="flex:3;" />
             </div>
-            <input
-                v-model="form.vendorAddress.addressDetail"
-                class="input"
-                placeholder="상세 주소"
-                style="margin-top: 6px;"
-            />
+            <input v-model="form.vendorAddress.addressDetail" class="input" placeholder="상세 주소" style="margin-top: 6px;" />
           </div>
         </div>
+      </div>
 
-
-<!--        <div class="col-span-2">-->
-<!--          <label>주소</label>-->
-<!--&lt;!&ndash;          <div v-if="!isEditing" class="readonly-field">&ndash;&gt;-->
-<!--&lt;!&ndash;            {{ form.vendorAddress?.zipcode || '' }}<br>&ndash;&gt;-->
-<!--&lt;!&ndash;            {{ form.vendorAddress?.addressRoad || '' }} {{ form.vendorAddress?.addressDetail || '' }}&ndash;&gt;-->
-<!--&lt;!&ndash;          </div>&ndash;&gt;-->
-<!--          <div v-if="!isEditing" class="readonly-field">-->
-<!--            {{ form.vendorAddress?.zipcode || '' }}-->
-<!--            <span style="margin-left: 2em;">-->
-<!--    {{ form.vendorAddress?.addressRoad || '' }}<span v-if="form.vendorAddress?.addressDetail"> {{ form.vendorAddress.addressDetail }}</span>-->
-<!--  </span>-->
-<!--          </div>-->
-<!--          <div v-else style="display:flex; gap:6px;">-->
-<!--            <input v-model="form.vendorAddress.zipcode" class="input" placeholder="도로명주소" style="flex:2;" />-->
-<!--            <input v-model="form.vendorAddress.addressRoad" class="input" placeholder="도로명주소" style="flex:2;" />-->
-<!--            <input v-model="form.vendorAddress.addressDetail" class="input" placeholder="상세주소" style="flex:1;" />-->
-<!--          </div>-->
-<!--        </div>-->
-
-          <div>
-            <label>계약 시작일</label>
-            <div v-if="!isEditing" class="readonly-field">{{ formatDate(form.vendorStartDate) || 'yyyy.mm.dd' }}</div>
-            <FilterDate
-                v-else
-                v-model="form.vendorStartDate"
-                placeholder="계약 시작일 선택"
-            />
-          </div>
-          <div>
-            <label>계약 종료일</label>
-            <div v-if="!isEditing" class="readonly-field">{{ formatDate(form.vendorEndDate) || 'yyyy.mm.dd' }}</div>
-            <FilterDate
-                v-else
-                v-model="form.vendorEndDate"
-                placeholder="계약 종료일 선택"
-            />
-          </div>
-
+      <!-- 3행: 생성일시 | 수정일시 -->
+      <div class="info-grid">
         <div>
           <label>생성 일시</label>
           <div class="readonly-field">
@@ -188,6 +157,7 @@
       @close="doneModal.show = false"
   />
 
+  <!-- 에러 모달 -->
   <div>
     <VendorErrorModal
         v-if="ErrorOpen"
@@ -321,6 +291,16 @@ async function downloadAgreement() {
   }
 }
 
+const agreementFileDeleted = ref(false);
+
+const removeAgreementFile = () => {
+  agreementFile.value = null;
+  agreementFileName.value = '';
+  agreementFileSize.value = '';
+  form.agreementOriginalFileName = '';
+  agreementFileDeleted.value = true;
+};
+
 function startEdit() {
   isEditing.value = true
   copyVendorToForm(vendor.value)
@@ -370,7 +350,8 @@ async function handleSave() {
         zipcode: form.vendorAddress.zipcode || '',
         addressRoad: form.vendorAddress.addressRoad || '',
         addressDetail: form.vendorAddress.addressDetail || ''
-      }
+      },
+      agreementFileDeleted: agreementFileDeleted.value
     }
 
     await updateVendor(form.vendorId, requestPayload, agreementFile.value)
@@ -464,6 +445,59 @@ label {
 
 .file-readonly.clickable:hover {
   background-color: #d2e3ff;
+}
+
+.remove-btn {
+  background: transparent;
+  border: none;
+  color: #ff4d4f;
+  cursor: pointer;
+  font-size: 1rem;
+  margin-left: auto;
+}
+
+.file-edit-wrap-horizontal {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-top: 4px;
+}
+
+.upload-label {
+  display: inline-block;
+  background-color: #2c7be5;
+  color: white;
+  padding: 8px 14px;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.upload-label:hover {
+  background-color: #1b5dc9;
+}
+
+.upload-input-hidden {
+  display: none;
+}
+
+.file-preview-inline {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #f7f9fc;
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 1px solid #dde3eb;
+  font-size: 0.95rem;
+}
+
+.file-size {
+  font-size: 0.85rem;
+  color: #666;
 }
 
 </style>
