@@ -5,6 +5,10 @@
       <StatusBadge :status="value" />
     </template>
 
+    <template #cell-deliveryCode="{ value }">
+      {{ value? value: '-' }}
+    </template>
+
     <!-- 상세보기 버튼 커스터마이징 -->
     <template #cell-actions="{ item }">
       <RouterLink :to="{ name: 'OrderDetailView', params: { orderId: item.orderId } }" class="detail-link">
@@ -18,7 +22,7 @@
 import { defineProps } from 'vue'
 import GenericTable from '@/components/common/GenericTable.vue'
 import StatusBadge from '@/components/common/StatusBadge.vue'
-import { formatCurrency, formatDateTime, formatDate } from '@/utils/tableUtils'
+import {formatCurrency, formatDateTime, formatDate, formatAmount} from '@/utils/tableUtils'
 
 const props = defineProps({
   orders: {
@@ -31,7 +35,7 @@ const props = defineProps({
 const columns = [
   { key: 'orderCode', label: '주문코드', align: 'center' },
   { key: 'franchiseName', label: '가맹점명', align: 'left' },
-  { key: 'productCount', label: '총 제품 수', align: 'right' },
+  { key: 'productCount', label: '총 제품 수', align: 'right', format: formatAmount },
   { key: 'totalPrice', label: '총 금액', align: 'right', format: formatCurrency },
   { key: 'deliveryCode', label: '배송코드', align: 'center' },
   { key: 'createdAt', label: '등록일', align: 'center', format: formatDateTime },

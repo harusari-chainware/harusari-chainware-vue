@@ -28,7 +28,9 @@
           :type="searchType"
           :keyword="searchKeyword"
           :multi="searchType === 'product'"
+          :vendor-name="form.vendor?.vendorName"
           @select="handleSelect"
+          @selectProduct="handleSelectProducts"
           @close="showRightPanel = false"
       />
     </template>
@@ -118,6 +120,27 @@ function handleSelect(payload) {
     }
     showRightPanel.value = false
   }
+}
+
+
+function handleSelectProducts(products) {
+  const existingIds = new Set(form.items.map(i => i.productId))
+  const enriched = products
+      .filter(p => !existingIds.has(p.contractId))
+      .map(p => ({
+        id: p.contractId,               // or uuid if needed
+        contractId: p.contractId, // ✅ 이 줄 추가!
+        productId: p.contractId,
+        productName: p.productName,
+        quantity: p.minOrderQty,
+        unitPrice: p.contractPrice,
+        totalPrice: p.contractPrice,
+        basePrice: p.basePrice,
+        contractPrice: p.contractPrice,
+        minOrderQty: p.minOrderQty,
+        leadTime: p.leadTime
+      }))
+  form.items.push(...enriched)
 }
 
 function handleRemove(itemToRemove) {
