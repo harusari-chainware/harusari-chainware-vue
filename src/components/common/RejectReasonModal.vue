@@ -11,7 +11,7 @@
 
         <div class="modal-actions">
           <button @click="emit('update:modelValue', false)">취소</button>
-          <button @click="handleConfirm">반려</button>
+          <button @click="handleConfirm">확인</button>
         </div>
       </div>
     </div>
