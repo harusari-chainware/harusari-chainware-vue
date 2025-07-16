@@ -34,18 +34,18 @@
     </div>
     <div class="filter-row filter-row-buttons">
       <div class="filter-buttons">
-        <FilterButtons @reset="resetFilters" @apply="applyFilters" />
+        <ContractFilterButtons @reset="resetFilters" @apply="applyFilters" />
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import {onMounted, reactive, ref, watch} from 'vue'
+import {nextTick, onMounted, reactive, ref, watch} from 'vue'
 import FilterSelect from '@/components/common/filters/FilterSelect.vue'
-import FilterButtons from '@/components/common/filters/FilterButtons.vue'
 import {fetchAllListTopCategories, fetchAllTopCategories} from '@/features/category/api.js'
 import FilterDate from '@/components/common/filters/FilterDate.vue'
+import ContractFilterButtons from "@/features/contract/components/ContractFilterButtons.vue";
 
 const topCategories = ref([]) // 전체(상위+하위) 카테고리(카테고리 드롭다운에 사용)
 const topCategoryListOnly = ref([]) // 상위만 (상위 카테고리 드롭다운 전용)
@@ -128,8 +128,12 @@ const resetFilters = () => {
     contractStatus: '',
     vendorType: ''
   })
-  categoryOptions.value = [{ label: '전체', value: '' }]
-  emit('reset', {})
+  categoryOptionsName.value = [{ label: '전체', value: '' }]
+
+  // 필터 초기화 후 전체 목록 요청
+  nextTick(() => {
+    emit('apply', { ...filters })
+  })
 }
 
 </script>

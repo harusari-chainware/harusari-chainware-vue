@@ -136,9 +136,19 @@ const productStatusOptions = [
 ]
 
 // 필터 적용
+
 const applyFilters = () => {
-  console.log('[applyFilters] 필터 값:', filters)
-  emit('apply', { ...filters })
+  const payload = { ...filters }
+
+  if (filters.productStatus === 'ACTIVE') {
+    payload.productStatusFilter = 'ACTIVE_ONLY'
+  } else if (filters.productStatus === 'INACTIVE') {
+    payload.productStatusFilter = 'INACTIVE_ONLY'
+  } else {
+    payload.productStatusFilter = 'ACTIVE_ONLY'
+  }
+
+  emit('apply', payload)
 }
 
 // 초기화
@@ -161,25 +171,13 @@ const resetFilters = () => {
     topCategoryName: '',
     categoryName: '',
     storeType: '',
-    productStatus: '',
     productName: '',
-    createdAt: ''
+    createdAt: '',
+    productStatusFilter: 'ACTIVE_ONLY'
   })
 
 }
 
-// const resetFilters = () => {
-//   Object.assign(filters, {
-//     topCategoryName: '',
-//     categoryName: '',
-//     storeType: '',
-//     productStatus: '',
-//     productName: '',
-//     createdAt: ''
-//   })
-//   categoryOptions.value = [{ label: '전체', value: '' }]
-//   emit('reset', {})
-// }
 </script>
 
 <style scoped>

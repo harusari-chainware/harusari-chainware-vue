@@ -9,6 +9,7 @@
           v-if="mergedCategories.length > 0"
           :top-categories="topCategoryOptions"
           @apply="handleSearch"
+          @reset="handleReset"
       />
     </template>
 
@@ -40,7 +41,6 @@
     </template>
   </ListLayout>
 
-  <!-- 등록/수정 모달 -->
   <CategoryModal
       v-if="showModal"
       :is-top="editType === 'TOP'"
@@ -51,7 +51,6 @@
       @refresh="opts => refreshList(opts)"
   />
 
-  <!-- 등록/수정 완료 모달 -->
   <CategoryDoneModal
       v-if="doneModal.show"
       :type="doneModal.type"
@@ -59,13 +58,18 @@
       @close="doneModal.show = false"
   />
 
-  <!-- 삭제 확인 모달 -->
   <CategoryDeleteConfirmModal
       v-if="deleteTarget"
       :target-id="deleteTarget.id"
       :is-top="deleteTarget.isTop"
       @close="deleteTarget = null"
-      @deleted="refreshList"
+      @confirm="handleDelete"
+  />
+
+  <CategoryErrorModal
+      v-if="ErrorOpen"
+      :message="ErrorMsg"
+      @close="ErrorOpen = false"
   />
 
   <SelectCategoryTypeModal
@@ -79,68 +83,90 @@
 import { ref, computed, onMounted } from 'vue'
 import {
   fetchAllListTopCategories,
-  fetchCategories
+  fetchCategories,
+  deleteTopCategory,
+  deleteCategory
 } from '@/features/category/api.js'
 
 import ListLayout from '@/components/layout/ListLayout.vue'
-import EmptyResult from "@/components/common/EmptyResult.vue";
+import EmptyResult from '@/components/common/EmptyResult.vue'
 import Pagination from '@/components/common/Pagination.vue'
-import SkeletonList from "@/components/common/SkeletonList.vue";
+import SkeletonList from '@/components/common/SkeletonList.vue'
 import CreateButton from '@/components/common/top-actions/CreateButton.vue'
 import CategoryFilters from '../components/CategoryFilters.vue'
 import CategoryTable from '../components/CategoryTable.vue'
 import CategoryModal from '../components/CategoryModal.vue'
 import CategoryDeleteConfirmModal from '../components/CategoryDeleteConfirmModal.vue'
 import SelectCategoryTypeModal from '../components/SelectCategoryTypeModal.vue'
-import CategoryDoneModal from "@/features/category/components/CategoryDoneModal.vue";
+import CategoryDoneModal from '@/features/category/components/CategoryDoneModal.vue'
+import CategoryErrorModal from '@/features/category/components/CategoryErrorModal.vue'
 
-// 1. 원본 상태(항상 그대로 보관!)
-const mergedCategories = ref([])     // [{topCategoryId, topCategoryName, createdAt, modifiedAt, categories:[...]}]
+const mergedCategories = ref([])
 const isLoading = ref(true)
 const page = ref(1)
 const PAGE_SIZE = 5
-
-// 2. 필터(검색) 조건만 별도 상태로 관리
 const filterCondition = ref({})
 
-// 모달/액션 관련
 const showModal = ref(false)
 const showSelectModal = ref(false)
 const editType = ref('SUB')
 const editTarget = ref(null)
 const deleteTarget = ref(null)
 
-// 등록/수정 완료 모달 상태
 const doneModal = ref({
   show: false,
-  type: 'edit',    // 'register' | 'edit'
+  type: 'edit',
   isTop: false
 })
 
-// 3. 데이터 머지 & 상태 세팅 함수
+const ErrorOpen = ref(false)
+const ErrorMsg = ref('')
+const showError = (msg) => {
+  ErrorMsg.value = msg
+  ErrorOpen.value = true
+}
+
+const showErrorFromResponse = (e) => {
+  const code = e?.response?.data?.code;
+  const message = e?.response?.data?.message;
+
+  switch (code) {
+    case '20002':
+      showError('하위 카테고리가 있어 상위 카테고리를 삭제할 수 없습니다.');
+      break;
+    case '21002':
+      showError('카테고리에 연결된 제품이 있어 삭제할 수 없습니다.');
+      break;
+    case '20001':
+    case '21001':
+      showError('이미 존재하는 이름입니다.');
+      break;
+    default:
+      showError(message || '오류가 발생했습니다.');
+  }
+};
+
 const loadAndMergeCategories = async () => {
   isLoading.value = true
   try {
     const [resAllTop, resWithSub] = await Promise.all([
       fetchAllListTopCategories(),
       fetchCategories({ page: 1, size: 100 })
-    ]);
-    const allTop = resAllTop.data?.data ?? [];
-    const topWithSub = resWithSub.data?.data?.topCategories ?? [];
-    // 머지!
+    ])
+    const allTop = resAllTop.data?.data ?? []
+    const topWithSub = resWithSub.data?.data?.topCategories ?? []
     mergedCategories.value = allTop.map(top => {
-      const found = topWithSub.find(t => t.topCategoryId === top.topCategoryId);
+      const found = topWithSub.find(t => t.topCategoryId === top.topCategoryId)
       return {
         ...top,
         categories: found?.categories ?? []
       }
-    });
+    })
   } finally {
     isLoading.value = false
   }
 }
 
-// 4. 필터용 드롭다운 (항상 원본 기준)
 const topCategoryOptions = computed(() =>
     mergedCategories.value.map(item => ({
       label: item.topCategoryName,
@@ -149,31 +175,31 @@ const topCategoryOptions = computed(() =>
     }))
 )
 
-// 5. 화면에 보여줄 데이터는 filterCondition, 페이징까지 모두 computed!
 const filteredCategories = computed(() => {
-  let list = mergedCategories.value;
-  const filters = filterCondition.value;
+  let list = mergedCategories.value
+  const filters = filterCondition.value
   if (filters.topCategoryId) {
-    list = list.filter(t => t.topCategoryId === filters.topCategoryId);
+    list = list.filter(t => t.topCategoryId === filters.topCategoryId)
   }
   if (filters.categoryId) {
     list = list.map(t => ({
       ...t,
       categories: t.categories.filter(c => c.categoryId === filters.categoryId)
-    })).filter(t => t.categories.length > 0);
+    })).filter(t => t.categories.length > 0)
   }
-  return list;
-});
-const totalTopCount = computed(() => filteredCategories.value.length);
+  return list
+})
+
+const totalTopCount = computed(() => filteredCategories.value.length)
 
 const pagedTopCategories = computed(() => {
-  const startIdx = (page.value - 1) * PAGE_SIZE;
-  return filteredCategories.value.slice(startIdx, startIdx + PAGE_SIZE);
-});
+  const startIdx = (page.value - 1) * PAGE_SIZE
+  return filteredCategories.value.slice(startIdx, startIdx + PAGE_SIZE)
+})
 
 const pagedTableRows = computed(() =>
     pagedTopCategories.value.flatMap((top, idx) => {
-      const rows = [];
+      const rows = []
       rows.push({
         no: (page.value - 1) * PAGE_SIZE + idx + 1,
         isSummary: true,
@@ -183,44 +209,47 @@ const pagedTableRows = computed(() =>
         createdAt: top.createdAt,
         modifiedAt: top.modifiedAt,
         categoryId: null,
-        categoryName: '-',
-      });
+        categoryName: '-'
+      })
       if (top.categories.length > 0) {
-        rows.push(
-            ...top.categories.map(cat => ({
-              no: '',
-              isSummary: false,
-              topCategoryId: top.topCategoryId,
-              topCategoryName: top.topCategoryName,
-              categoryId: cat.categoryId,
-              categoryName: cat.categoryName,
-              categoryCode: cat.categoryCode,
-              productCount: cat.productCount,
-              createdAt: cat.createdAt,
-              modifiedAt: cat.modifiedAt
-            }))
-        );
+        rows.push(...top.categories.map(cat => ({
+          no: '',
+          isSummary: false,
+          topCategoryId: top.topCategoryId,
+          topCategoryName: top.topCategoryName,
+          categoryId: cat.categoryId,
+          categoryName: cat.categoryName,
+          categoryCode: cat.categoryCode,
+          productCount: cat.productCount,
+          createdAt: cat.createdAt,
+          modifiedAt: cat.modifiedAt
+        })))
       }
-      return rows;
+      return rows
     })
-);
+)
 
-// 6. 검색(필터)시, 조건만 변경! (데이터 불변)
 const handleSearch = (filters) => {
-  const normalized = { ...filters };
-  if (normalized.topCategoryId) normalized.topCategoryId = Number(normalized.topCategoryId);
-  if (normalized.categoryId) normalized.categoryId = Number(normalized.categoryId);
-  filterCondition.value = normalized;
-  page.value = 1;
+  const normalized = { ...filters }
+  if (normalized.topCategoryId) normalized.topCategoryId = Number(normalized.topCategoryId)
+  if (normalized.categoryId) normalized.categoryId = Number(normalized.categoryId)
+  filterCondition.value = normalized
+  page.value = 1
 }
-const handlePageChange = newPage => { page.value = newPage; }
 
-// ✔ 등록/수정 완료 모달 옵션 적용된 refreshList
+const handleReset = () => {
+  filterCondition.value = {}
+  page.value = 1
+}
+
+const handlePageChange = (newPage) => {
+  page.value = newPage
+}
+
 const refreshList = async (opts = {}) => {
-  await loadAndMergeCategories();
-  page.value = 1;
-  filterCondition.value = {};
-  // 등록/수정 완료시 옵션을 받아서 모달 오픈!
+  await loadAndMergeCategories()
+  page.value = 1
+  filterCondition.value = {}
   if (opts && opts.showDone) {
     doneModal.value = {
       show: true,
@@ -230,31 +259,59 @@ const refreshList = async (opts = {}) => {
   }
 }
 
-// 모달 등은 동일하게 유지
 const openCreateModal = () => {
   showSelectModal.value = true
   editType.value = 'SUB'
   editTarget.value = null
 }
+
 const handleTypeSelected = (type) => {
   editType.value = type
   editTarget.value = null
   showSelectModal.value = false
   showModal.value = true
 }
+
 const openEditModal = (item, type = 'SUB') => {
   showModal.value = true
   editType.value = type
   editTarget.value = item
 }
+
 const closeModal = () => {
   showModal.value = false
   editTarget.value = null
 }
+
 const openDeleteModal = (item) => {
   deleteTarget.value = {
     id: item.categoryId || item.topCategoryId,
     isTop: !!item.topCategoryId && !item.categoryId
+  }
+}
+
+const handleDelete = async () => {
+    if (!deleteTarget.value) return
+
+    const { id, isTop } = deleteTarget.value
+
+  try {
+    if (isTop) {
+      await deleteTopCategory(id)
+    } else {
+      await deleteCategory(id)
+    }
+
+    deleteTarget.value = null
+    doneModal.value = {
+      show: true,
+      type: 'delete',
+      isTop
+    }
+    await refreshList()
+  } catch (e) {
+    deleteTarget.value = null
+    showErrorFromResponse(e, isTop)
   }
 }
 
