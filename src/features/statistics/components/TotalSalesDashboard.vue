@@ -59,24 +59,47 @@ function handleSearchKeyword() {
 
 async function loadSalesData() {
   try {
-    const data = await fetchTotalSales({
+    const { totalSalesAmount, changeRate } = await fetchTotalSales({
       period: period.value,
       franchiseId: franchiseId.value || null,
       targetDate: targetDate.value || null
     })
 
-    todaySales.value = data.totalSalesAmount ?? 0
-    growthRate.value = isFinite(data.changeRate) ? data.changeRate : 0
+    todaySales.value = totalSalesAmount ?? 0
+    growthRate.value = isFinite(changeRate) ? changeRate : 0
 
-    if (isFinite(data.changeRate) && data.changeRate !== -100) {
-      const estimated = todaySales.value / (1 + data.changeRate / 100)
-      yesterdaySales.value = Math.round(estimated)
+    // 📌 어제 vs 오늘 계산은 DAILY에만 사용
+    if (period.value === 'DAILY') {
+      if (isFinite(changeRate) && changeRate !== -100) {
+        const estimated = todaySales.value / (1 + changeRate / 100)
+        yesterdaySales.value = Math.round(estimated)
+      } else {
+        yesterdaySales.value = 0
+      }
     } else {
-      yesterdaySales.value = 0
+      // 📌 주간/월간은 전 주/전 달 매출 직접 요청
+      const prevData = await fetchTotalSales({
+        period: period.value,
+        franchiseId: franchiseId.value || null,
+        targetDate: getPreviousPeriodDate()
+      })
+      yesterdaySales.value = prevData.totalSalesAmount ?? 0
     }
   } catch (err) {
     console.error('총 매출 통계 조회 실패:', err)
   }
+}
+
+function getPreviousPeriodDate() {
+  const base = new Date(targetDate.value)
+  if (period.value === 'WEEKLY') {
+    base.setDate(base.getDate() - 7)
+  } else if (period.value === 'MONTHLY') {
+    base.setMonth(base.getMonth() - 1)
+  } else {
+    base.setDate(base.getDate() - 1)
+  }
+  return base.toISOString().slice(0, 10)
 }
 
 async function drawSalesPatternChart() {
@@ -172,7 +195,7 @@ async function onPatternTabClick(p) {
   await nextTick()
   shouldRenderChart.value = true
   await nextTick()
-  drawSalesPatternChart()
+  await drawSalesPatternChart()
 }
 
 async function handleSearchClick() {
@@ -234,27 +257,41 @@ onMounted(async () => {
 
     <div class="card-grid">
       <div class="stat-card">
-        <div class="stat-title">오늘 매출</div>
+        <div class="stat-title">
+          {{ period === 'DAILY' ? '오늘 매출' : period === 'WEEKLY' ? '이번 주 매출' : '이번 달 매출' }}
+        </div>
         <div class="stat-value">{{ formatCurrency(todaySales) }}</div>
-        <div class="stat-description">오늘 기준</div>
+        <div class="stat-description">
+          {{ period === 'DAILY' ? '오늘 기준' : period === 'WEEKLY' ? '이번 주 기준' : '이번 달 기준' }}
+        </div>
       </div>
+
       <div class="stat-card">
-        <div class="stat-title">어제 매출</div>
+        <div class="stat-title">
+          {{ period === 'DAILY' ? '어제 매출' : period === 'WEEKLY' ? '지난 주 매출' : '지난 달 매출' }}
+        </div>
         <div class="stat-value">{{ formatCurrency(yesterdaySales) }}</div>
-        <div class="stat-description">어제 기준</div>
+        <div class="stat-description">
+          {{ period === 'DAILY' ? '어제 기준' : period === 'WEEKLY' ? '지난 주 기준' : '지난 달 기준' }}
+        </div>
       </div>
+
       <div class="stat-card">
         <div class="stat-title">전일 대비 증감률</div>
         <div class="stat-value" :class="growthRate >= 0 ? 'positive' : 'negative'">
           {{ growthRate.toFixed(1) }}%
         </div>
-        <div class="stat-description">전일 대비</div>
+        <div class="stat-description">
+          {{ period === 'DAILY' ? '전일 대비' : period === 'WEEKLY' ? '전 주 대비' : '전 달 대비' }}
+        </div>
       </div>
+
       <div class="stat-card">
         <div class="stat-title">최고 매출 시간대</div>
         <div class="stat-value">{{ peakHour }}</div>
         <div class="stat-description">{{ formatCurrency(peakHourAmount) }}</div>
       </div>
+
       <div class="stat-card">
         <div class="stat-title">최고 매출 요일</div>
         <div class="stat-value">{{ peakDay }}</div>
