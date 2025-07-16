@@ -181,14 +181,6 @@ const handleSubmit = async () => {
       subRegistered = true;
     }
 
-    // if  (topRegistered) {
-    //   doneModal.value = {show: true, type: 'register', isTop: true};
-    // } else if (subRegistered) {
-    //   doneModal.value = {show: true, type: 'register', isTop: false};
-    // }
-    // goBack()은 완료 모달 닫힐 때 실행
-
-
     if (topRegistered || subRegistered) {
       doneModal.value = {
         show: true,
