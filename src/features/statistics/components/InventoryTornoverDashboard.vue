@@ -167,10 +167,22 @@ function drawProductChart() {
   }
 
   const source = [...productDataRaw.value]
+
+  // ✅ 유효한 데이터만 필터링
+  const validData = source.filter(i =>
+      typeof i.turnoverRate === 'number' && !isNaN(i.turnoverRate)
+  )
+
+  // ✅ 정렬 및 상위/하위 10개 추출
   const sorted =
       productTab.value === 'top'
-          ? source.sort((a, b) => b.turnoverRate - a.turnoverRate).slice(0, 10)
-          : source.sort((a, b) => a.turnoverRate - b.turnoverRate).slice(0, 10)
+          ? validData.sort((a, b) => b.turnoverRate - a.turnoverRate).slice(0, 10)
+          : validData.sort((a, b) => a.turnoverRate - b.turnoverRate).slice(0, 10)
+
+  // ✅ 디버깅용 콘솔 로그
+  console.log('📦 productDataRaw:', productDataRaw.value)
+  console.log('✅ validData:', validData)
+  console.log('🎯 sorted:', sorted)
 
   const data = {
     labels: sorted.map(i => i.productName),
@@ -180,7 +192,8 @@ function drawProductChart() {
         data: sorted.map(i => i.turnoverRate),
         backgroundColor: 'rgba(99, 102, 241, 0.5)',
         borderColor: 'rgba(99, 102, 241, 1)',
-        borderWidth: 1
+        borderWidth: 1,
+        barThickness: 30  // ✅ 막대 너비 강제 설정
       }
     ]
   }
@@ -188,7 +201,7 @@ function drawProductChart() {
   productChartRef.value = new Chart(ctx, {
     type: 'bar',
     data,
-    options: chartOptions('x', 'y')
+    options: chartOptions('x', 'y')  // x = value axis, y = category axis
   })
 }
 
