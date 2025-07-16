@@ -6,10 +6,10 @@
         style="padding: 0;"
     >
       <template #cell-startedAt="{ value }">
-        {{ value || '-' }}
+        {{ formatDateTime(value) || '-' }}
       </template>
       <template #cell-deliveredAt="{ value }">
-        {{ value || '-' }}
+        {{ formatDateTime(value) || '-' }}
       </template>
       <template #cell-deliveryStatus="{ value }">
         <StatusBadge :status="value" />
@@ -22,6 +22,7 @@
 import InfoGroup from '@/components/layout/detailview/InfoGroup.vue'
 import DetailTable from '@/components/layout/detailview/DetailTable.vue'
 import StatusBadge from "@/components/common/StatusBadge.vue";
+import {formatDateTime} from "@/utils/tableUtils.js";
 
 defineProps({
   history: Array

@@ -48,14 +48,14 @@
 
 <script setup>
 import { reactive, ref, onMounted, computed, watch} from 'vue'
-import { fetchMyFranchise, registerOrder } from '@/features/order/api'
+import { fetchMyFranchise, fetchOrderDetail, registerOrder, updateOrder } from '@/features/order/api'
 import RegisterLayout from '@/components/layout/RegisterLayout.vue'
 import OrderRegisterLeft from '../components/OrderRegisterLeft.vue'
 import OrderRegisterRightPanel from '../components/OrderRegisterRightPanel.vue'
 import OrderRegisterDetail from '../components/OrderRegisterDetail.vue'
 import RegisterSummaryBox from '@/components/layout/registerview/RegisterSummaryBox.vue'
 import OrderRegisterFooter from '../components/OrderRegisterFooter.vue'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 
 const router = useRouter()
 const form = reactive({
@@ -64,14 +64,31 @@ const form = reactive({
   items: []
 })
 
-// 가맹점 정보 조회
+const route = useRoute()
+const isEditMode = route.query.mode === 'edit'
+const orderId = route.query.orderId
+
+// 초기값 세팅 : 신규 등록 및 주문 수정
 onMounted(async () => {
-  try {
-    const res = await fetchMyFranchise()
-    console.log('[가맹점 정보 응답]', res)
-    form.store = res.data.data
-  } catch (e) {
-    console.error('가맹점 정보 조회 실패:', e)
+  // 가맹점 정보는 항상 조회
+  const res = await fetchMyFranchise()
+  form.store = res.data.data
+
+  // 수정 모드라면 기존 값 덮어쓰기
+  if (isEditMode && orderId) {
+    const res = await fetchOrderDetail(orderId)
+    console.log("onMount로 넘어온 데이터: ", res)
+    const detail = res.data.data
+    form.deliveryDate = detail.orderInfo.deliveryDueDate
+    form.items = detail.products.map(p => ({
+      productId: p.productId,
+      productCode: p.productCode,
+      productName: p.productName,
+      unit: `${p.unitQuantity}${p.unitSpec}`,
+      storeType: p.storageType,
+      unitPrice: p.amount,
+      quantity: p.quantity
+    }))
   }
 })
 
@@ -136,12 +153,21 @@ async function submit() {
       quantity: i.quantity
     }))
   }
+
   try {
-    await registerOrder(request)
-    alert('주문이 등록되었습니다.')
-    await router.push('/order/list')
+    let res;
+    if (isEditMode) {
+      res = await updateOrder(orderId, request)
+      alert('주문이 수정되었습니다.')
+    } else {
+      res = await registerOrder(request)
+      alert('주문이 등록되었습니다.')
+    }
+
+    const newOrderId = res.data.data.orderId;
+    await router.push(`/order/${newOrderId}`);
   } catch (e) {
-    alert('등록 실패: ' + (e.response?.data?.message || e.message))
+    alert(`${isEditMode ? '수정' : '등록'} 실패: ` + (e.response?.data?.message || e.message))
   }
 }
 
