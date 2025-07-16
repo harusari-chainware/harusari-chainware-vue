@@ -180,12 +180,30 @@ const handleSubmit = async () => {
       await createCategory(subForm.value);
       subRegistered = true;
     }
-    if  (topRegistered) {
-      doneModal.value = {show: true, type: 'register', isTop: true};
-    } else if (subRegistered) {
-      doneModal.value = {show: true, type: 'register', isTop: false};
-    }
+
+    // if  (topRegistered) {
+    //   doneModal.value = {show: true, type: 'register', isTop: true};
+    // } else if (subRegistered) {
+    //   doneModal.value = {show: true, type: 'register', isTop: false};
+    // }
     // goBack()은 완료 모달 닫힐 때 실행
+
+
+    if (topRegistered || subRegistered) {
+      doneModal.value = {
+        show: true,
+        type: 'register',
+        isTop: topRegistered && !subRegistered
+      }
+
+      // ✅ 입력값 초기화
+      topForm.value = { topCategoryName: '' }
+      subForm.value = { topCategoryId: '', categoryName: '', categoryCode: '' }
+
+      // 리스트 갱신용
+      await loadTopCategories()
+    }
+
   } catch (e) {
     let msg = ''
     if (e.response && e.response.data && e.response.data.message) {
