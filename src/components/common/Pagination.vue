@@ -101,7 +101,7 @@ const goToNextPage = () => {
         emit('update:modelValue', props.modelValue + 1)
     }
 }
-// ✅ 수정된 그룹 단위 앞으로 이동 버튼
+//  수정된 그룹 단위 앞으로 이동 버튼
 const goToNextGroup = () => {
     const nextPage = Math.min(props.modelValue + props.pagesPerGroup, totalPages.value)
     if (props.modelValue !== nextPage) {

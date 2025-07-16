@@ -17,6 +17,10 @@ import RejectReasonModal from '@/components/common/RejectReasonModal.vue'
 import SkeletonDetail from '@/components/common/SkeletonDetail.vue'
 import StatusButton from '@/components/common/StatusButton.vue'
 import { useAuthStore } from '@/features/auth/useAuthStore.js'
+import { useToast} from "vue-toastification";
+
+
+const toast = useToast()
 
 const props = defineProps({
   requisitionId: {
@@ -52,18 +56,19 @@ const modalReject = reactive({
     try {
       const res = await rejectRequisition(props.requisitionId, reason)
       if (res.data?.success) {
-        alert('반려되었습니다.')
+        toast.success('반려되었습니다.')
         modal.visible = false
         await reload()
       } else {
-        alert('반려 실패: ' + (res.data?.message || '알 수 없는 오류'))
+        toast.error('반려 실패: ' + (res.data?.message || '알 수 없는 오류'))
       }
     } catch (e) {
-      alert('반려 실패: 서버 오류')
+      toast.error('반려 실패: 서버 오류')
       console.error('반려 실패:', e)
     }
   }
 })
+
 
 // 삭제 사유 모달
 const modalDelete = reactive({
@@ -73,14 +78,14 @@ const modalDelete = reactive({
     try {
       const res = await deleteRequisition(props.requisitionId, reason)
       if (res.data?.success) {
-        alert('삭제되었습니다.')
+        toast.success('삭제되었습니다.')
         modal.visible = false
         router.push('/requisitions/list')
       } else {
-        alert('삭제 실패: ' + (res.data?.message || '알 수 없는 오류'))
+        toast.error('삭제 실패: ' + (res.data?.message || '알 수 없는 오류'))
       }
     } catch (e) {
-      alert('삭제 실패: 서버 오류')
+      toast.error('삭제 실패: 서버 오류')
       console.error('삭제 실패:', e)
     }
   }
@@ -136,7 +141,7 @@ const reload = async () => {
       }))
     }
   } catch (e) {
-    console.error('❌ 재조회 실패:', e)
+    console.error(' 재조회 실패:', e)
   }
 }
 
@@ -151,15 +156,15 @@ const openSubmitDialog = () => {
     try {
       const res = await submittedRequisition(props.requisitionId)
       if (res.data?.success) {
-        alert('상신되었습니다.')
+        toast.success('상신되었습니다.')
         modal.visible = false
         await reload()
       } else {
-        alert('상신 실패: ' + (res.data?.message || '알 수 없는 오류'))
+        toast.error('상신 실패: ' + (res.data?.message || '알 수 없는 오류'))
       }
     } catch (e) {
       console.error('상신 실패:', e)
-      alert('상신 실패: 서버 오류')
+      toast.error('상신 실패: 서버 오류')
     }
   }
 }
@@ -173,15 +178,15 @@ const openApproveDialog = () => {
     try {
       const res = await approveRequisition(props.requisitionId)
       if (res.data?.success) {
-        alert('승인되었습니다.')
+        toast.success('승인되었습니다.')
         modal.visible = false
         await reload()
       } else {
-        alert('승인 실패: ' + (res.data?.message || '알 수 없는 오류'))
+        toast.error('승인 실패: ' + (res.data?.message || '알 수 없는 오류'))
       }
     } catch (e) {
       console.error('승인 실패:', e)
-      alert('승인 실패: 서버 오류')
+      toast.error('승인 실패: 서버 오류')
     }
   }
 }

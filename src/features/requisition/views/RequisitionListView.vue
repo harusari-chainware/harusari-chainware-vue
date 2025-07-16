@@ -81,7 +81,7 @@ const fetchRequisitions = async () => {
     requisitions.value = Array.isArray(res.data.data) ? res.data.data : []
     totalCount.value = res.data.total || requisitions.value.length // API 형태에 따라 조정
   } catch (e) {
-    console.error('❌ 품의서 목록 조회 실패', e)
+    console.error(' 품의서 목록 조회 실패', e)
     requisitions.value = []
     totalCount.value = 0
   } finally {
@@ -90,7 +90,7 @@ const fetchRequisitions = async () => {
 }
 
 
-// ✅ 새로고침 시 URL 쿼리가 남아있다면 제거
+//  새로고침 시 URL 쿼리가 남아있다면 제거
 onMounted(() => {
   if (Object.keys(route.query).length > 0) {
     // 쿼리 제거 후 리다이렉트 → 이후 watch가 fetchRequisitions 자동 실행

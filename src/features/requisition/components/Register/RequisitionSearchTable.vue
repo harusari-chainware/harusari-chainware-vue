@@ -36,7 +36,7 @@
           :items-per-page="itemsPerPage"
       />
 
-      <!-- ✅ 다중 선택일 때만 제출 버튼 노출 -->
+      <!--  다중 선택일 때만 제출 버튼 노출 -->
       <div v-if="props.multi" class="submit-area">
         <StatusButton type="primary" @click="submitSelected">제출</StatusButton>
       </div>
