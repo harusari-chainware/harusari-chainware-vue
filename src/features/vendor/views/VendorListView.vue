@@ -109,7 +109,7 @@ async function loadVendors() {
   const params = {
     page: page.value - 1,
     size: PAGE_SIZE,
-    sort: 'vendorName,desc',
+    // sort: 'vendorName,desc',
     ...filters
   }
 
@@ -131,10 +131,6 @@ async function loadVendors() {
 
 const goDetail = (item) => {
   router.push(`/vendor/${item.vendorId}`)
-}
-
-const goToCreatePage = () => {
-  router.push('/vendor/register')
 }
 
 onMounted(loadVendors)

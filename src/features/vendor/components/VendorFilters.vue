@@ -39,7 +39,7 @@
     </div>
     <div class="filter-row filter-row-buttons">
       <div class="filter-buttons">
-        <FilterButtons @reset="resetFilters" @apply="applyFilters" />
+        <VendorFilterButtons @reset="resetFilters" @apply="applyFilters" />
       </div>
     </div>
   </div>
@@ -48,8 +48,8 @@
 <script setup>
 import { reactive } from 'vue'
 import FilterSelect from '@/components/common/filters/FilterSelect.vue'
-import FilterButtons from '@/components/common/filters/FilterButtons.vue'
 import FilterDateRange from "@/components/common/filters/FilterDateRange.vue";
+import VendorFilterButtons from "@/features/vendor/components/VendorFilterButtons.vue";
 
 // 필터 state (백엔드 DTO와 동일하게!)
 const filters = reactive({

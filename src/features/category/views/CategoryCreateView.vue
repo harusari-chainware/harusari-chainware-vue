@@ -6,7 +6,7 @@
     <template #basic>
       <div class="category-register-card">
         <div class="form-grid">
-          <!-- 좌: 상위 카테고리 등록 폼 -->
+
           <div class="form-col">
             <h3 class="form-title">상위 카테고리 등록</h3>
             <div class="form-row">
@@ -19,7 +19,6 @@
               />
             </div>
           </div>
-          <!-- 우: 카테고리 등록 폼 -->
           <div class="form-col">
             <h3 class="form-title">카테고리 등록</h3>
             <div class="form-row">
@@ -95,8 +94,6 @@ import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { fetchAllListTopCategories, createTopCategory, createCategory } from '@/features/category/api.js'
 import CategoryLayout from "@/features/category/components/CategoryLayout.vue";
-import StatusButton from "@/components/common/StatusButton.vue";
-import CategoryModal from "@/features/category/components/CategoryModal.vue";
 import CategoryErrorModal from "@/features/category/components/CategoryErrorModal.vue";
 import CategoryDoneModal from "@/features/category/components/CategoryDoneModal.vue";
 
@@ -183,12 +180,22 @@ const handleSubmit = async () => {
       await createCategory(subForm.value);
       subRegistered = true;
     }
-    if  (topRegistered) {
-      doneModal.value = {show: true, type: 'register', isTop: true};
-    } else if (subRegistered) {
-      doneModal.value = {show: true, type: 'register', isTop: false};
+
+    if (topRegistered || subRegistered) {
+      doneModal.value = {
+        show: true,
+        type: 'register',
+        isTop: topRegistered && !subRegistered
+      }
+
+      // ✅ 입력값 초기화
+      topForm.value = { topCategoryName: '' }
+      subForm.value = { topCategoryId: '', categoryName: '', categoryCode: '' }
+
+      // 리스트 갱신용
+      await loadTopCategories()
     }
-    // goBack()은 완료 모달 닫힐 때 실행
+
   } catch (e) {
     let msg = ''
     if (e.response && e.response.data && e.response.data.message) {
@@ -203,7 +210,6 @@ const handleSubmit = async () => {
     showError('등록 실패했습니다.');
   }
 }
-
 
 const goBack = () => {
   router.push('/category/list')

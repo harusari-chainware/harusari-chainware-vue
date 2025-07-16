@@ -201,9 +201,10 @@ function showError(msg) {
 const expireModalOpen = ref(false)
 
 function handleExpireSuccess() {
-  console.log('만료 처리 성공, 새로고침 emit')
+
   doneModalType.value = 'expire'
-  doneModalOpen.value = true
+  doneModalOpen.value = true;
+
   emit('refresh')
 }
 
@@ -240,6 +241,7 @@ async function saveEdit() {
     return;
   }
   try {
+
     await updateContract(props.contract.contractId, {
       contractPrice: edit.value.contractPrice,
       minOrderQty: edit.value.minOrderQty,
@@ -248,8 +250,10 @@ async function saveEdit() {
       contractEndDate: edit.value.contractEndDate,
       // contractStatus는 변경 X
     })
+
     doneModalType.value = 'edit'
     doneModalOpen.value = true
+
     isEditing.value = false
     emit('refresh')
   } catch (e) {
@@ -270,24 +274,6 @@ function cancelEdit() {
     contractStatus: props.contract.contractStatus ?? "",
   }
 }
-
-// // 계약 만료 처리
-// async function expireContract() {
-//   if (props.contract.contractStatus === 'EXPIRED') {
-//     showError('이미 만료된 계약입니다.')
-//     return
-//   }
-//   try {
-//     await updateContract(props.contract.contractId, {
-//       contractStatus: 'EXPIRED'
-//     })
-//     doneModalType.value = 'expire'
-//     doneModalOpen.value = true
-//     emit('refresh')
-//   } catch (e) {
-//     showError('만료 처리 실패: ' + (e.response?.data?.message || e.message))
-//   }
-// }
 
 function formatNumber(val) {
   if (val == null || val === "" || isNaN(val)) return "-"
