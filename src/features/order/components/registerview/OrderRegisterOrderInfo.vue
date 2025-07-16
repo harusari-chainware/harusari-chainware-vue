@@ -51,13 +51,13 @@
 
 <script setup>
 import SearchFieldWithButton from '@/components/common/fields/SearchFieldWithButton.vue'
+import RegisterInfoGroup from "@/components/layout/registerview/RegisterInfoGroup.vue";
 import DatePickerField from '@/components/common/fields/DatePickerField.vue'
 import SelectField from '@/components/common/fields/SelectField.vue'
 import InputField from '@/components/common/fields/InputField.vue'
 import AddressSearchField from '@/components/common/fields/AddressSearchField.vue'
 import FileUploadField from '@/components/common/fields/FileUploadField.vue'
 import { computed } from "vue";
-import RegisterInfoGroup from "@/components/layout/registerview/RegisterInfoGroup.vue";
 
 const props = defineProps({
   vendor: Object,

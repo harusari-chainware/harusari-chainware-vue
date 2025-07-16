@@ -26,6 +26,13 @@
         @searchVendor="openVendorSearch"
         @searchWarehouse="openWarehouseSearch"
     />
+
+
+    <RequisitionRegisterApproverModal
+        :visible="isApproverModalVisible"
+        @update:visible="val => isApproverModalVisible = val"
+        @select="handleApproverSelect"
+    />
   </div>
 </template>
 
@@ -36,6 +43,7 @@ import RequisitionRegisterOrderInfo from '@/features/requisition/components/Regi
 import RequisitionRegisterApproverInfo from '@/features/requisition/components/Register/RequisitionRegisterApproverInfo.vue'
 import RequisitionRegisterDrafterInfo from '@/features/requisition/components/Register/RequisitionRegisterDrafterInfo.vue'
 import { useAuthStore } from '@/features/auth/useAuthStore.js'
+import RequisitionRegisterApproverModal from "@/features/requisition/components/Register/RequisitionRegisterApproverModal.vue";
 
 const props = defineProps({
   orderType: String,
@@ -85,9 +93,6 @@ onMounted(async () => {
   }
 })
 
-function openApproverSearch() {
-  emit('searchApprover')
-}
 
 function openVendorSearch() {
   const keyword = props.vendor?.vendorName || ''
@@ -98,6 +103,24 @@ function openWarehouseSearch() {
   const keyword = props.warehouse?.warehouseName || ''
   emit('searchWarehouse', keyword)
 }
+
+const isApproverModalVisible = ref(false)
+
+function openApproverSearch() {
+  isApproverModalVisible.value = true
+}
+
+function handleApproverSelect(member) {
+  emit('update:approver', {
+    memberId: member.memberId,
+    name: member.name,
+    email: member.email,
+    phoneNumber: member.phoneNumber,
+    position: member.position
+  })
+  isApproverModalVisible.value = false
+}
+
 </script>
 
 <style scoped>
