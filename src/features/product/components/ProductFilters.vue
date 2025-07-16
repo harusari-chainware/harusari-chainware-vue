@@ -48,7 +48,7 @@
       <div></div>
       <div></div>
       <div class="filter-buttons">
-        <FilterButtons @reset="resetFilters" @apply="applyFilters" />
+        <ProductFilterButtons @reset="resetFilters" @apply="applyFilters" />
       </div>
     </div>
   </div>
@@ -57,9 +57,9 @@
 <script setup>
 import {onMounted, reactive, ref, watch} from 'vue'
 import FilterSelect from '@/components/common/filters/FilterSelect.vue'
-import FilterButtons from '@/components/common/filters/FilterButtons.vue'
 import {fetchAllListTopCategories, fetchAllTopCategories} from '@/features/category/api.js'
 import FilterDate from '@/components/common/filters/FilterDate.vue'
+import ProductFilterButtons from "@/features/product/components/ProductFilterButtons.vue";
 
 const props = defineProps({
   topCategories: { type: Array, required: true }  // fetchAllTopCategories() 결과!
@@ -136,24 +136,48 @@ const productStatusOptions = [
 ]
 
 // 필터 적용
+
 const applyFilters = () => {
-  console.log('[applyFilters] 필터 값:', filters)
-  emit('apply', { ...filters })
+  const payload = { ...filters }
+
+  if (filters.productStatus === 'ACTIVE') {
+    payload.productStatusFilter = 'ACTIVE_ONLY'
+  } else if (filters.productStatus === 'INACTIVE') {
+    payload.productStatusFilter = 'INACTIVE_ONLY'
+  } else {
+    payload.productStatusFilter = 'ACTIVE_ONLY'
+  }
+
+  emit('apply', payload)
 }
 
 // 초기화
+
 const resetFilters = () => {
-  Object.assign(filters, {
-    topCategoryId: '',
-    categoryId: '',
-    storeType: '',
-    productStatus: '',
-    productName: '',
-    createdAt: ''
+  Object.keys(filters).forEach(k => {
+    if (typeof filters[k] === 'object' && filters[k] !== null) {
+      Object.keys(filters[k]).forEach(subKey => {
+        filters[k][subKey] = ''
+      })
+    } else {
+      filters[k] = ''
+    }
   })
-  categoryOptions.value = [{ label: '전체', value: '' }]
-  emit('reset', {})
+
+  categoryOptionsName.value = [{ label: '전체', value: '' }]
+
+  // 💡 reset 대신 apply 이벤트로 빈 필터값 전달 → 즉시 전체 조회
+  emit('apply', {
+    topCategoryName: '',
+    categoryName: '',
+    storeType: '',
+    productName: '',
+    createdAt: '',
+    productStatusFilter: 'ACTIVE_ONLY'
+  })
+
 }
+
 </script>
 
 <style scoped>

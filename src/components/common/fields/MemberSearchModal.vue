@@ -26,7 +26,7 @@ const searchMembers = async () => {
     const contents = response?.data?.data?.contents
     members.value = Array.isArray(contents) ? contents : []
   } catch (e) {
-    console.error('❌ 멤버 검색 실패', e)
+    console.error(' 멤버 검색 실패', e)
     members.value = []
   } finally {
     isLoading.value = false

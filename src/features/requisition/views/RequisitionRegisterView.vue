@@ -53,7 +53,10 @@
     </template>
 
     <template #footer>
-      <RequisitionRegisterFooter />
+      <RequisitionRegisterFooter
+          @submit="submit"
+          @cancel="cancel"
+      />
     </template>
   </RegisterLayout>
 </template>
@@ -88,7 +91,7 @@ const form = reactive({
 
 const showRightPanel = ref(false)
 const searchType = ref(null)
-const searchKeyword = ref('') // ✅ 검색어 저장용
+const searchKeyword = ref('') //  검색어 저장용
 
 function openSearch(type, keyword = '') {
   console.log('[openSearch called]', type, keyword)
@@ -129,7 +132,7 @@ function handleSelectProducts(products) {
       .filter(p => !existingIds.has(p.contractId))
       .map(p => ({
         id: p.contractId,               // or uuid if needed
-        contractId: p.contractId, // ✅ 이 줄 추가!
+        contractId: p.contractId, //  이 줄 추가!
         productId: p.contractId,
         productName: p.productName,
         quantity: p.minOrderQty,
@@ -206,16 +209,16 @@ async function submit() {
     await createRequisition(payload)
     alert('품의서가 성공적으로 등록되었습니다.')
     resetForm()
-    router.push('/requisitions/list')
   } catch (error) {
     alert('등록 중 오류가 발생했습니다.')
-    console.error('❌ 등록 오류:', error)
+    console.error(' 등록 오류:', error)
   }
 }
 
 function cancel() {
   if (confirm('입력한 내용을 모두 초기화하시겠습니까?')) {
     resetForm()
+    router.push({ name: 'RequisitionListView'})
   }
 }
 

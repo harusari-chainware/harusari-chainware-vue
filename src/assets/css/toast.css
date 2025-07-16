@@ -1,0 +1,70 @@
+.Vue-Toastification__container {
+    top: 50px !important;
+    left: 50% !important;
+    transform: translateX(calc(-50% + 400px)); /* 사이드바 여백 고려 */
+    width: 100%;
+    max-width: 480px;
+    z-index: 9999;
+    pointer-events: none;
+}
+
+.Vue-Toastification__toast {
+    pointer-events: all;
+    font-family: 'SUIT', 'Pretendard', sans-serif;
+    border-radius: 10px;
+    padding: 12px 20px;
+    font-size: 14px;
+    line-height: 1.6;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.06);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-left: 4px solid #3aaed8;
+    background-color: #f7fbfd;
+    color: #1f2d3d;
+    transition: all 0.2s ease-in-out;
+}
+
+.Vue-Toastification__toast--success {
+    border-left-color: #3aaed8;
+    background-color: #ebf8fc;
+    color: #147ca6;
+}
+
+.Vue-Toastification__toast--error {
+    border-left-color: #e74c3c;
+    background-color: #fef0ef;
+    color: #9e2c1a;
+}
+
+.Vue-Toastification__toast--info {
+    border-left-color: #7daec5;
+    background-color: #f0f7fc;
+    color: #15597e;
+}
+
+.Vue-Toastification__toast--warning {
+    border-left-color: #ffb200;
+    background-color: #fff8e5;
+    color: #8a6d00;
+}
+
+.Vue-Toastification__close-button {
+    color: #ccc;
+    font-size: 14px;
+    margin-left: 8px;
+    padding: 2px;
+    transition: color 0.2s ease;
+}
+
+.Vue-Toastification__close-button:hover {
+    color: #666;
+}
+
+.Vue-Toastification__progress-bar {
+    background-color: #3aaed8;
+    height: 2px;
+    border-radius: 1px;
+    opacity: 0.3;
+    margin-top: 2px;
+}

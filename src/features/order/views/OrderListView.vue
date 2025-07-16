@@ -68,7 +68,7 @@ const loadOrders = async () => {
       size: itemsPerPage
     }
     const { data } = await fetchOrders(params)
-    console.log('✅ fetchOrders 응답:', data)
+    console.log('fetchOrders 응답:', data)
 
     if (!data || !data.data || !Array.isArray(data.data.contents)) {
       orders.value = []

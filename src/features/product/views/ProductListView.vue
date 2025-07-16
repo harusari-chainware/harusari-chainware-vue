@@ -7,7 +7,6 @@
       <ProductFilters
           :top-categories="topCategories"
           @apply="handleSearch"
-          @reset="handleReset"
       />
     </template>
 

@@ -16,7 +16,7 @@
     />
 
     <!-- 버튼 -->
-    <FilterButtons
+    <CategoryFilterButtons
         @reset="resetFilters"
         @apply="applyFilters"
     />
@@ -26,7 +26,7 @@
 <script setup>
 import { reactive, ref, watch, watchEffect } from 'vue'
 import FilterSelect from '@/components/common/filters/FilterSelect.vue'
-import FilterButtons from '@/components/common/filters/FilterButtons.vue'
+import CategoryFilterButtons from "@/features/category/components/CategoryFilterButtons.vue";
 
 const props = defineProps({
   topCategories: {

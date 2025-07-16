@@ -24,24 +24,12 @@ const sortOrder = ref(route.query.sortOrder || 'desc')
 const currentPage = ref(Number(route.query.page || 1))
 const itemsPerPage = 10
 
-/*const pagedPurchaseOrders = computed(() => {
-  const sorted = [...purchaseOrders.value].sort((a, b) => {
-    const aVal = a[sortKey.value]
-    const bVal = b[sortKey.value]
-    if (aVal < bVal) return sortOrder.value === 'asc' ? -1 : 1
-    if (aVal > bVal) return sortOrder.value === 'asc' ? 1 : -1
-    return 0
-  })
-  const start = (currentPage.value - 1) * itemsPerPage
-  return sorted.slice(start, start + itemsPerPage)
-})*/
-
 const pagedPurchaseOrders = computed(() => {
   const start = (currentPage.value - 1) * itemsPerPage
   return purchaseOrders.value.slice(start, start + itemsPerPage)
 })
 
-// ✅ fetch 함수: Requisition 구조 동일하게 적용
+// fetch 함수: Requisition 구조 동일하게 적용
 const fetchPurchaseOrders = async () => {
   isLoading.value = true
   try {
@@ -56,7 +44,7 @@ const fetchPurchaseOrders = async () => {
     purchaseOrders.value = Array.isArray(res.data.data) ? res.data.data : []
     totalCount.value = res.data.total || purchaseOrders.value.length
   } catch (e) {
-    console.error('❌ 발주 목록 조회 실패', e)
+    console.error('발주 목록 조회 실패', e)
     purchaseOrders.value = []
     totalCount.value = 0
   } finally {

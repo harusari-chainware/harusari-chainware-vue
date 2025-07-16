@@ -1,7 +1,7 @@
 <template>
   <DetailLayout
       title="거래처 상세 정보 조회"
-      description="거래처 상세 정보를 확인할 수 있습니다."
+      description="거래처 상세 정보를 확인/수정할 수 있습니다."
   >
     <template #actions>
       <template v-if="!isEditing">
@@ -92,7 +92,7 @@
             >
               <span>🧾 {{ agreementFileName || form.agreementOriginalFileName }}</span>
               <span v-if="agreementFileSize" class="file-size">({{ agreementFileSize }})</span>
-              <button class="remove-btn" @click="removeAgreementFile">❌</button>
+              <button class="remove-btn" @click="removeAgreementFile"></button>
             </div>
           </div>
 
@@ -194,7 +194,7 @@ const form = reactive({
   vendorManagerName: '',
   phoneNumber: '',
   vendorName: '',
-  franchiseContact: '',
+  // franchiseContact: '',
   vendorTaxId: '',
   agreementOriginalFileName: '',
   vendorAddress: { zipcode: '', addressRoad: '', addressDetail: '' },

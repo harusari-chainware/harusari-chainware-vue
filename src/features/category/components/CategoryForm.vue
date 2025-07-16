@@ -149,7 +149,7 @@ const handleSubmit = async () => {
 
     props.isModal ? emit('refresh') || emit('close') : emit('submitted')
   } catch (err) {
-    console.error('❌ 등록/수정 실패:', err)
+    console.error(' 등록/수정 실패:', err)
     if (err.response?.status === 409) {
       return showError('이미 존재하는 카테고리입니다.')
     } else {

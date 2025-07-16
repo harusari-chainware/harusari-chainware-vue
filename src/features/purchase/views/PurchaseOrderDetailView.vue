@@ -1,12 +1,15 @@
 <script setup>
-import {ref, onMounted, computed} from 'vue'
-import { getPurchaseOrderDetail } from '@/features/purchase/PurchaseApi.js'
+import { ref, reactive, onMounted, computed } from 'vue'
+import { approvePurchase, getPurchaseOrderDetail, rejectPurchase } from '@/features/purchase/PurchaseApi.js'
 
 import DetailLayout from '@/components/layout/DetailLayout.vue'
 import StatusButton from "@/components/common/StatusButton.vue"
 import PurchaseOrderDetailBasic from '../components/PurchaseOrderDetailBasic.vue'
 import PurchaseOrderDetailDetail from '../components/PurchaseOrderDetailDetail.vue'
-import {useAuthStore} from "@/features/auth/useAuthStore.js";
+import { useAuthStore } from "@/features/auth/useAuthStore.js"
+import ConfirmModal from "@/components/common/ConfirmModal.vue"
+import RejectReasonModal from "@/components/common/RejectReasonModal.vue"
+import { useToast } from "vue-toastification"
 
 const props = defineProps({
   purchaseOrderId: {
@@ -15,11 +18,9 @@ const props = defineProps({
   }
 })
 
-
-
+const toast = useToast()
 const purchaseDetail = ref(null)
 const isLoading = ref(true)
-
 
 const authStore = useAuthStore()
 const authority = authStore.authority
@@ -34,8 +35,30 @@ const isGeneralManager = computed(() => authority === 'GENERAL_MANAGER')
 const isSeniorManager = computed(() => authority === 'SENIOR_MANAGER')
 const isVendor = computed(() => authority === 'VENDOR_MANAGER')
 const isWarehouse = computed(() => authority === 'WAREHOUSE_MANAGER')
-
 const isManager = computed(() => isGeneralManager.value || isSeniorManager.value)
+
+const modal = reactive({
+  visible: false,
+  title: '',
+  description: '',
+  onConfirm: () => {}
+})
+
+const modalReject = reactive({
+  visible: false,
+  title: '발주 반려',
+  onConfirm: async (reason) => {
+    try {
+      await rejectPurchase(props.purchaseOrderId, reason)
+      toast.success('발주가 반려되었습니다.')
+      modalReject.visible = false
+      location.reload()
+    } catch (e) {
+      toast.error('반려에 실패했습니다.')
+      console.error(e)
+    }
+  }
+})
 
 /**
  * 제품 항목을 detail table용 item 구조로 변환
@@ -53,7 +76,7 @@ function mapProductsToItems(products) {
 onMounted(async () => {
   const id = Number(props.purchaseOrderId)
   if (!id) {
-    console.error("❌ 유효하지 않은 ID")
+    console.error(" 유효하지 않은 ID")
     return
   }
 
@@ -68,55 +91,65 @@ onMounted(async () => {
     } = res.data.data
 
     purchaseDetail.value = {
-      // 기본 정보
       purchaseOrderId: purchaseOrderInfo.purchaseOrderId,
-      purchaseOrderCode: purchaseOrderInfo.purchaseOrderCode,       // 컴포넌트가 기대하는 이름으로 alias
+      purchaseOrderCode: purchaseOrderInfo.purchaseOrderCode,
       requisitionCode: purchaseOrderInfo.requisitionCode,
       status: purchaseOrderInfo.status,
       dueDate: purchaseOrderInfo.dueDate,
       createdAt: purchaseOrderInfo.createdAt,
-      submittedAt: purchaseOrderInfo.submittedAt,        // 컴포넌트에서 updatedAt 사용 중
+      submittedAt: purchaseOrderInfo.submittedAt,
       approvedAt: purchaseOrderInfo.approvedAt,
       shippedAt: purchaseOrderInfo.shippedAt,
-
-      // 작성자 정보
       drafter: {
         name: drafter.name,
         position: drafter.position,
         email: drafter.email,
         contact: drafter.contact
       },
-
-      // 거래처 정보
       vendor: {
         name: vendor.name,
         type: vendor.type,
         managerName: vendor.managerName,
         vendorContact: vendor.vendorContact
       },
-
-      // 창고 정보
       warehouse: {
         name: warehouse.name,
         managerName: warehouse.managerName,
         warehouseContact: warehouse.warehouseContact
       },
-
-      // 수치 정보
       totalAmount: purchaseOrderInfo.totalAmount,
       totalQuantity: products.reduce((sum, p) => sum + p.quantity, 0),
-
-      // 제품 목록
       items: mapProductsToItems(products)
     }
 
-    console.log("✅ 최종 바인딩 데이터:", purchaseDetail.value)
+    console.log(" 최종 바인딩 데이터:", purchaseDetail.value)
   } catch (e) {
-    console.error("❌ 상세 조회 실패", e)
+    console.error(" 상세 조회 실패", e)
   } finally {
     isLoading.value = false
   }
 })
+
+const handleApprove = () => {
+  modal.title = '발주 승인'
+  modal.description = '해당 발주를 승인하시겠습니까?'
+  modal.onConfirm = async () => {
+    try {
+      await approvePurchase(props.purchaseOrderId)
+      toast.success('발주가 승인되었습니다.')
+      modal.visible = false
+      location.reload()
+    } catch (e) {
+      toast.error('승인에 실패했습니다.')
+      console.error(e)
+    }
+  }
+  modal.visible = true
+}
+
+const handleReject = () => {
+  modalReject.visible = true
+}
 </script>
 
 <template>
@@ -149,7 +182,6 @@ onMounted(async () => {
       </template>
     </template>
 
-
     <!-- 기본 정보 -->
     <template #basic>
       <PurchaseOrderDetailBasic
@@ -167,5 +199,20 @@ onMounted(async () => {
       <p v-else-if="isLoading">로딩 중입니다...</p>
       <p v-else>데이터가 없습니다</p>
     </template>
+
+    <!-- 승인 모달 -->
+    <ConfirmModal
+        v-model="modal.visible"
+        :title="modal.title"
+        :description="modal.description"
+        @confirm="modal.onConfirm"
+    />
+
+    <!-- 반려 모달 -->
+    <RejectReasonModal
+        v-model="modalReject.visible"
+        :title="modalReject.title"
+        @confirm="modalReject.onConfirm"
+    />
   </DetailLayout>
 </template>

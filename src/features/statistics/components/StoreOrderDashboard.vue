@@ -111,7 +111,7 @@ async function loadData() {
     await drawProductChart(stats.productStats)
     await drawTrendChart(stats.trends)
   } catch (err) {
-    console.error('❌ loadData() error:', err)
+    console.error(' loadData() error:', err)
   } finally {
     isFetching = false
   }
