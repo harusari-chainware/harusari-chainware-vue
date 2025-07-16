@@ -162,7 +162,7 @@ async function handleSearch() {
       drawChart('disposalProductChart', productChartData, 'bar', true, productChartRef)
     }, 0)
   } catch (err) {
-    console.error('❌ 폐기율 데이터 로드 실패:', err)
+    console.error(' 폐기율 데이터 로드 실패:', err)
   } finally {
     isLoading.value = false
   }

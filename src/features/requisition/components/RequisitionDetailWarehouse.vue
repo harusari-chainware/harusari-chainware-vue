@@ -7,7 +7,7 @@
     </InfoItem>
     <InfoItem>
       <template #label>담당자</template>
-      <template #value>{{ requisitionDetail.warehouse.name }}</template>
+      <template #value>{{ requisitionDetail.warehouse.manager }}</template>
     </InfoItem>
     <InfoItem>
       <template #label>창고 연락처</template>

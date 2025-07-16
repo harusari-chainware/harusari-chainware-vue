@@ -69,7 +69,7 @@ const search = debounce(async () => {
     results.value = res.data?.data?.contents || []
     showDropdown.value = true
   } catch (e) {
-    console.error('❌ 검색 실패:', e)
+    console.error(' 검색 실패:', e)
     results.value = []
   }
 }, 300)

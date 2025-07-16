@@ -92,7 +92,7 @@
             >
               <span>🧾 {{ agreementFileName || form.agreementOriginalFileName }}</span>
               <span v-if="agreementFileSize" class="file-size">({{ agreementFileSize }})</span>
-              <button class="remove-btn" @click="removeAgreementFile">❌</button>
+              <button class="remove-btn" @click="removeAgreementFile"></button>
             </div>
           </div>
 

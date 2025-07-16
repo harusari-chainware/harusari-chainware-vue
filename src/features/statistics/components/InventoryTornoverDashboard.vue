@@ -98,7 +98,7 @@ async function handleSearch() {
     productDataRaw.value = productRes
     drawProductChart()
   } catch (err) {
-    console.error('❌ 재고 회전율 데이터 로드 실패:', err)
+    console.error(' 재고 회전율 데이터 로드 실패:', err)
   } finally {
     isLoading.value = false
   }

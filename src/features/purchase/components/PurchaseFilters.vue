@@ -21,15 +21,6 @@
         :options="purchaseStatusOptions"
     />
 
-    <!-- 발주일 구간 -->
-<!--    <FilterDateRange
-        label="발주일"
-        :model-value="[filters.createdDateRange.start, filters.createdDateRange.end]"
-        @update:model-value="([start, end]) => {
-          filters.createdDateRange.start = start
-          filters.createdDateRange.end = end
-        }"
-    />-->
     <FilterDateRange
         label="품의 등록일"
         v-model="filters.createdDateRange"
@@ -63,7 +54,7 @@ import VendorSearchModal from '@/components/common/fields/VendorSearchModal.vue'
 const router = useRouter()
 const route = useRoute()
 
-// ✅ 필터 상태
+// 필터 상태
 const filters = reactive({
   drafterName: '',
   vendorName: '',
@@ -74,9 +65,8 @@ const filters = reactive({
   }
 })
 
-// ✅ 상태 옵션
+// 상태 옵션
 const purchaseStatusOptions = [
-  { label: '전체', value: '' },
   { label: '요청', value: 'REQUESTED' },
   { label: '요청 취소', value: 'CANCELLED' },
   { label: '승인', value: 'APPROVED' },
@@ -85,18 +75,7 @@ const purchaseStatusOptions = [
   { label: '창고 입고', value: 'WAREHOUSED' },
 ]
 
-// ✅ 새로고침 시 URL 쿼리 반영
-/*onMounted(() => {
-  const q = route.query
-  filters.drafterName = q.drafterName || ''
-  filters.vendorName = q.vendorName || ''
-  filters.selectedVendorName = q.vendorName || ''
-  filters.status = q.status || ''
-  filters.createdDateRange.start = q.startDate || ''
-  filters.createdDateRange.end = q.endDate || ''
-})*/
-
-// ✅ 검색 실행
+// 검색 실행
 const applyFilters = () => {
   const query = {}
 
@@ -109,7 +88,7 @@ const applyFilters = () => {
   router.push({ name: 'PurchaseOrderListView', query })
 }
 
-// ✅ 초기화
+// 초기화
 const resetFilters = () => {
   filters.drafterName = ''
   filters.vendorName = ''
@@ -122,7 +101,7 @@ const resetFilters = () => {
   router.push({ name: 'PurchaseOrderListView', query: {} })
 }
 
-// ✅ 거래처 검색 모달
+//  거래처 검색 모달
 const isVendorModalVisible = ref(false)
 const openVendorSearchModal = () => {
   isVendorModalVisible.value = true

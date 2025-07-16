@@ -210,7 +210,7 @@ onMounted(async () => {
 
 /* 고정 너비로 정렬 */
 .filter-item.predict-type {
-  width: 300px; /* ✅ 버튼 3개를 감싸기 충분한 너비 */
+  width: 300px; /*  버튼 3개를 감싸기 충분한 너비 */
 }
 
 .filter-item.franchise {

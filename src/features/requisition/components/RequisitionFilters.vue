@@ -29,7 +29,7 @@
         @open="openVendorSearchModal"
     />
 
-    <!-- ✅ 버튼에서 발생하는 @search 이벤트에 함수 연결 -->
+    <!--  버튼에서 발생하는 @search 이벤트에 함수 연결 -->
     <FilterButtons
         @reset="resetFilters"
         @search="applyFilters"
@@ -69,14 +69,13 @@ const filters = reactive({
 })
 
 const requisitionStatusOptions = [
-  { label: '전체', value: '' },
   { label: '작성 중', value: 'SAVED' },
   { label: '상신됨', value: 'SUBMITTED' },
   { label: '승인 완료', value: 'APPROVED' },
   { label: '반려됨', value: 'REJECTED' }
 ]
 
-// ✅ 검색 버튼 클릭 시 실행
+//  검색 버튼 클릭 시 실행
 const applyFilters = () => {
   const query = {}
 
