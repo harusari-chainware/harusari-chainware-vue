@@ -1,3 +1,8 @@
+<template>
+  <div v-if="isLoading">로딩중...</div>
+  <ContractForm v-else :contract="contract" @refresh="loadDetail" />
+</template>
+
 <script setup>
 import { useRoute } from 'vue-router'
 import { onMounted, ref } from 'vue'
@@ -21,7 +26,4 @@ onMounted(loadDetail)
 
 </script>
 
-<template>
-  <div v-if="isLoading">로딩중...</div>
-  <ContractForm v-else :contract="contract" @refresh="loadDetail" />
-</template>
+

@@ -6,80 +6,18 @@
 
       <div class="modal-actions">
         <button @click="emit('close')">취소</button>
-        <button @click="handleDelete">삭제</button>
+        <button @click="emit('confirm')">삭제</button>
       </div>
     </div>
   </div>
-
-  <!-- 등록/수정 완료 모달 -->
-  <CategoryDoneModal
-      v-if="doneModal.show"
-      :type="doneModal.type"
-      :is-top="doneModal.isTop"
-      @close="handleDoneClose"
-  />
-
-  <div>
-    <CategoryErrorModal
-        v-if="ErrorOpen"
-        :message="ErrorMsg"
-        @close="handleErrorClose"
-    />
-  </div>
-
 </template>
 
 <script setup>
-import {defineProps, defineEmits, ref} from 'vue'
-import { deleteCategory, deleteTopCategory } from '@/features/category/api.js'
-import CategoryErrorModal from "@/features/category/components/CategoryErrorModal.vue";
-import CategoryDoneModal from "@/features/category/components/CategoryDoneModal.vue";
-
+const emit = defineEmits(['close', 'confirm'])
 const props = defineProps({
   targetId: Number,
   isTop: Boolean
 })
-
-const emit = defineEmits(['close', 'deleted'])
-
-const ErrorOpen = ref(false)
-const ErrorMsg = ref('')
-
-const handleErrorClose = () => {
-  ErrorOpen.value = false
-  emit('close')
-}
-
-// 등록/수정 완료 모달 상태
-const doneModal = ref({
-  show: false,
-  type: 'delete',    // 'register' | 'edit'
-  isTop: false
-})
-
-const handleDelete = async () => {
-  try {
-    if (props.isTop) {
-      await deleteTopCategory(props.targetId)
-    } else {
-      await deleteCategory(props.targetId)
-    }
-    doneModal.value = { show: true, type: 'delete', isTop: props.isTop }
-    // emit('deleted')는 완료모달 닫을 때
-  } catch (e) {
-    ErrorMsg.value = (e?.response?.data?.message)
-        ? e.response.data.message
-        : '삭제 실패했습니다. 서버 오류'
-    ErrorOpen.value = true
-  }
-}
-
-// 완료 모달에서 확인 누르면 닫기
-const handleDoneClose = () => {
-  doneModal.value.show = false
-  emit('deleted')
-  emit('close')
-}
 </script>
 
 <style scoped>

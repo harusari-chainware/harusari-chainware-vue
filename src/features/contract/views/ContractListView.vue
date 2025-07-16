@@ -10,7 +10,6 @@
           :vendor-type-options="vendorTypeOptions"
           :contract-status-options="contractStatusOptions"
           @apply="handleSearch"
-          @reset="handleReset"
       />
     </template>
 
@@ -81,8 +80,8 @@ const vendorTypeOptions = [
   { label: 'AGENCY', value: 'AGENCY' }
 ]
 const contractStatusOptions = [
-  { label: 'ACTIVE', value: 'ACTIVE' },
-  { label: 'EXPIRED', value: 'EXPIRED' }
+  { label: '활성', value: 'ACTIVE' },
+  { label: '만료', value: 'EXPIRED' }
 ]
 
 // 필터 reactive (API 파라미터 매핑)
