@@ -13,7 +13,7 @@
       />
     </template>
 
-    <template #top-actions-right>
+    <template v-if="isManager" #top-actions-right>
 <!--      <CreateButton @click="openModal">파일 출력</CreateButton>-->
       <CreateButton @click="goToCreatePage">계약 추가</CreateButton>
     </template>
@@ -46,7 +46,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
+import {ref, reactive, onMounted, computed} from 'vue'
 import ListLayout from '@/components/layout/ListLayout.vue'
 import Pagination from '@/components/common/Pagination.vue'
 import ContractFilters from '../components/ContractFilters.vue'
@@ -55,8 +55,12 @@ import { fetchAllListTopCategories } from '@/features/category/api.js'
 import { fetchContracts } from '@/features/contract/api.js'
 import CreateButton from "@/components/common/top-actions/CreateButton.vue";
 import { useRouter } from 'vue-router'
+import {useAuthStore} from "@/features/auth/useAuthStore.js";
 
 const router = useRouter()
+
+const authStore = useAuthStore()
+const authority = authStore.authority
 
 const goToCreatePage = () => {
   router.push('/contract/register')
@@ -94,6 +98,12 @@ const filters = reactive({
   contractStatus: '',
   vendorType: ''
 })
+
+const isGeneralManager = computed(() => authority === 'GENERAL_MANAGER')
+const isSeniorManager = computed(() => authority === 'SENIOR_MANAGER')
+
+const isManager = computed(() => isGeneralManager.value || isSeniorManager.value)
+
 
 const loadContracts = async () => {
   console.log('[loadContracts] filters:', filters)
