@@ -11,7 +11,6 @@ import EmptyResult from "@/components/common/EmptyResult.vue";
 import PurchaseTable from "@/features/purchase/components/PurchaseTable.vue";
 import Pagination from "@/components/common/Pagination.vue";
 
-
 const route = useRoute()
 const router = useRouter()
 
@@ -29,7 +28,7 @@ const pagedPurchaseOrders = computed(() => {
   return purchaseOrders.value.slice(start, start + itemsPerPage)
 })
 
-// fetch 함수: Requisition 구조 동일하게 적용
+// 페이징 적용된 API 호출
 const fetchPurchaseOrders = async () => {
   isLoading.value = true
   try {
@@ -41,8 +40,9 @@ const fetchPurchaseOrders = async () => {
       sortOrder: sortOrder.value
     })
 
-    purchaseOrders.value = Array.isArray(res.data.data) ? res.data.data : []
-    totalCount.value = res.data.total || purchaseOrders.value.length
+    const responseData = res.data.data
+    purchaseOrders.value = Array.isArray(responseData.contents) ? responseData.contents : []
+    totalCount.value = responseData.pagination?.totalItems || purchaseOrders.value.length
   } catch (e) {
     console.error('발주 목록 조회 실패', e)
     purchaseOrders.value = []
@@ -54,13 +54,12 @@ const fetchPurchaseOrders = async () => {
 
 onMounted(() => {
   if (Object.keys(route.query).length > 0) {
-    // 쿼리 제거 후 리다이렉트 → 이후 watch가 getPurchaseOrders 자동 실행
     router.replace({ name: 'PurchaseOrderListView', query: {} })
   } else {
     fetchPurchaseOrders()
   }
 })
-// 페이지 변경 시 재조회
+
 watch(
     [() => currentPage.value, () => sortKey.value, () => sortOrder.value, () => route.query],
     fetchPurchaseOrders,
@@ -95,7 +94,7 @@ const sortOptions = [
           message="등록된 발주가 없습니다."
       />
       <template v-else>
-        <PurchaseTable :purchase="pagedPurchaseOrders" />
+        <PurchaseTable :purchase="purchaseOrders" />
         <Pagination
             v-model="currentPage"
             :total-items="totalCount"
