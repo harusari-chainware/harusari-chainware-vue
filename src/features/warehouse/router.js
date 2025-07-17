@@ -1,4 +1,5 @@
 import WarehouseDummyView from "@/features/warehouse/views/WarehouseDummyView.vue";
+import InventoryView from "@/features/warehouse/views/InventoryView.vue";
 
 export const warehouseRoutes = [
     {
@@ -8,8 +9,8 @@ export const warehouseRoutes = [
     },
     {
         path: '/warehouse/inventory/list',
-        name: 'WarehouseDummy2View',
-        component: WarehouseDummyView
+        name: 'InventoryView',
+        component: InventoryView
     },
     {
         path: '/warehouse/inventory/register',
