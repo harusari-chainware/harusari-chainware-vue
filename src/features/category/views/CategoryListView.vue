@@ -14,7 +14,7 @@
     </template>
 
     <!-- top-actions -->
-    <template #top-actions-right>
+    <template v-if="isManager" #top-actions-right>
       <CreateButton @click="openCreateModal">카테고리 추가</CreateButton>
     </template>
 
@@ -100,6 +100,7 @@ import CategoryDeleteConfirmModal from '../components/CategoryDeleteConfirmModal
 import SelectCategoryTypeModal from '../components/SelectCategoryTypeModal.vue'
 import CategoryDoneModal from '@/features/category/components/CategoryDoneModal.vue'
 import CategoryErrorModal from '@/features/category/components/CategoryErrorModal.vue'
+import {useAuthStore} from "@/features/auth/useAuthStore.js";
 
 const mergedCategories = ref([])
 const isLoading = ref(true)
@@ -118,6 +119,14 @@ const doneModal = ref({
   type: 'edit',
   isTop: false
 })
+
+const authStore = useAuthStore()
+const authority = authStore.authority
+
+const isGeneralManager = computed(() => authority === 'GENERAL_MANAGER')
+const isSeniorManager = computed(() => authority === 'SENIOR_MANAGER')
+
+const isManager = computed(() => isGeneralManager.value || isSeniorManager.value)
 
 const ErrorOpen = ref(false)
 const ErrorMsg = ref('')

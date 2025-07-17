@@ -140,6 +140,7 @@
               <label>계약 종료일</label>
               <FilterDate
                   v-model="form.contractEndDate"
+                  :min-date="new Date()"
               />
               <span style="flex:2.5"></span>
           </div>
