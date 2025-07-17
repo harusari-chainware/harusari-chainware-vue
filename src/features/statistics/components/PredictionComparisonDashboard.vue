@@ -210,7 +210,9 @@ onMounted(async () => {
 
 /* 고정 너비로 정렬 */
 .filter-item.predict-type {
-  width: 300px; /*  버튼 3개를 감싸기 충분한 너비 */
+  width: auto; /* 고정폭 대신 내용에 맞게 자동 너비 */
+  min-width: 300px;
+  flex: 1;
 }
 
 .filter-item.franchise {

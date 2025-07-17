@@ -29,8 +29,8 @@ const unitMap = computed(() => {
   const type = predictionType.value
   return {
     mape: '%',
-    mae: type === 'sales' ? '원' : '건',
-    rmse: type === 'sales' ? '원' : '건'
+    mae: type === 'sales' ? '원' : '수량',
+    rmse: type === 'sales' ? '원' : '수량'
   }
 })
 
@@ -163,7 +163,7 @@ function handleSearch() {
 }
 
 function trendColor(trend) {
-  return trend?.startsWith('+') ? 'text-green-500' : 'text-red-500'
+  return trend?.startsWith('-') ? 'text-green-500' : 'text-red-500'
 }
 
 function handleSearchKeyword() {

@@ -41,11 +41,17 @@ onMounted(() => {
     defaultDate: props.modelValue || null,
     minDate: props.minDate || null,
     onChange: ([selectedDate]) => {
-      emit('update:modelValue', selectedDate ? selectedDate.toISOString().split('T')[0] : '')
+      if (selectedDate) {
+        const year = selectedDate.getFullYear()
+        const month = String(selectedDate.getMonth() + 1).padStart(2, '0')
+        const day = String(selectedDate.getDate()).padStart(2, '0')
+        emit('update:modelValue', `${year}-${month}-${day}`)
+      } else {
+        emit('update:modelValue', '')
+      }
     }
   })
 })
-
 watch(() => props.modelValue, (newVal) => {
   if (fpInstance && newVal !== fpInstance.input.value) {
     fpInstance.setDate(newVal, false)

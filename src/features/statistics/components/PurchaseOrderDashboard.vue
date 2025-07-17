@@ -188,7 +188,7 @@ function drawProductChart(data) {
   if (!ctx) return
   if (productChart.value) productChart.value.destroy()
 
-  const labels = data.map(d => d.productName)
+  const labels = data.map(d => `${d.vendorName} - ${d.productName}`)
   const values = data.map(d => d.amount)
   const total = values.reduce((sum, val) => sum + val, 0)
 
@@ -202,7 +202,11 @@ function drawProductChart(data) {
           'rgba(96, 165, 250, 0.8)', 'rgba(34, 197, 94, 0.8)',
           'rgba(251, 191, 36, 0.8)', 'rgba(244, 114, 182, 0.8)',
           'rgba(139, 92, 246, 0.8)', 'rgba(79, 70, 229, 0.8)',
-          'rgba(16, 185, 129, 0.8)', 'rgba(236, 72, 153, 0.8)'
+          'rgba(16, 185, 129, 0.8)', 'rgba(236, 72, 153, 0.8)',
+          'rgba(253, 224, 71, 0.8)', 'rgba(34, 211, 238, 0.8)',
+          'rgba(245, 158, 11, 0.8)', 'rgba(132, 204, 22, 0.8)',
+          'rgba(236, 72, 72, 0.8)', 'rgba(192, 132, 252, 0.8)',
+          'rgba(59, 130, 246, 0.8)', 'rgba(99, 102, 241, 0.8)'
         ],
         borderColor: '#fff',
         borderWidth: 2
@@ -212,15 +216,19 @@ function drawProductChart(data) {
       responsive: true,
       maintainAspectRatio: false,
       plugins: {
-        legend: { position: 'right', labels: { boxWidth: 12, padding: 12 } },
+        legend: {
+          display: false
+        },
         tooltip: {
           callbacks: {
             label: function (ctx) {
               const value = ctx.raw
-              const label = ctx.label || ''
+              const lines = (ctx.label || '').split('\n')
+              const label = lines[0] || ''
+              const sub = lines[1] || ''
               const ratio = ((value / total) * 100).toFixed(1)
               const amount = value.toLocaleString('ko-KR')
-              return `${label}: ₩${amount} (${ratio}%)`
+              return [`${label}: ₩${amount} (${ratio}%)`, sub]
             }
           }
         }
@@ -229,6 +237,17 @@ function drawProductChart(data) {
     }
   })
 }
+const chartColors = [
+  'rgba(96, 165, 250, 0.8)', 'rgba(34, 197, 94, 0.8)',
+  'rgba(251, 191, 36, 0.8)', 'rgba(244, 114, 182, 0.8)',
+  'rgba(139, 92, 246, 0.8)', 'rgba(79, 70, 229, 0.8)',
+  'rgba(16, 185, 129, 0.8)', 'rgba(236, 72, 153, 0.8)',
+  'rgba(253, 224, 71, 0.8)', 'rgba(34, 211, 238, 0.8)',
+  'rgba(245, 158, 11, 0.8)', 'rgba(132, 204, 22, 0.8)',
+  'rgba(236, 72, 72, 0.8)', 'rgba(192, 132, 252, 0.8)',
+  'rgba(59, 130, 246, 0.8)', 'rgba(99, 102, 241, 0.8)'
+]
+
 
 function formatTrendLabel(dateStr) {
   return dateStr.slice(5).replace('-', '/')
@@ -353,7 +372,24 @@ onMounted(async () => {
       <!-- 상품별 발주량 -->
       <div class="chart-card">
         <div class="chart-header"><span>상품별 발주량</span></div>
-        <canvas v-if="shouldRenderChart" ref="productCanvas" height="240"></canvas>
+        <div class="product-chart-container">
+          <canvas ref="productCanvas" height="240"></canvas>
+          <div class="custom-legend">
+            <div
+                class="legend-item"
+                v-for="(item, index) in latestProductStats"
+                :key="index"
+            >
+      <span
+          class="legend-color"
+          :style="{ backgroundColor: chartColors[index % chartColors.length] }"
+      ></span>
+              <span class="legend-label">
+        {{ item.vendorName }} - {{ item.productName }}
+      </span>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -504,4 +540,69 @@ canvas {
 .mt-4 {
   margin-top: 2rem;
 }
+.product-chart-container {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.product-chart-container canvas {
+  flex: 1;
+  max-width: 70%; /* 도넛 차트 너비 제한 */
+}
+
+.product-chart-container {
+  display: flex;
+  gap: 1rem;
+}
+
+.product-chart-container canvas {
+  flex: 1;
+  max-width: 70%;
+}
+
+.custom-legend {
+  max-height: 280px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+  min-width: 150px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  font-size: 13px;
+  line-height: 1.3;
+}
+
+.legend-color {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  margin-right: 6px;
+  flex-shrink: 0;
+}
+
+.legend-label {
+  word-break: keep-all;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.product-chart-container {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.product-chart-container canvas {
+  flex: 0 0 50%; /* 차트가 전체 영역의 절반만 차지 */
+  max-width: 50%;
+}
+
+
 </style>
