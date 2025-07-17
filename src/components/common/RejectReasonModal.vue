@@ -5,7 +5,7 @@
         <h2 class="modal-title">{{ title }}</h2>
         <textarea
             v-model="reason"
-            placeholder="반려 사유를 입력해주세요."
+            placeholder="사유를 입력해주세요."
             class="modal-textarea"
         ></textarea>
 

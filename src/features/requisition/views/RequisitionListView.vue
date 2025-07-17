@@ -22,7 +22,7 @@
           message="등록된 품의서가 없습니다."
       />
       <template v-else>
-        <RequisitionTable :requisitions="pagedRequisitions" />
+        <RequisitionTable :requisitions="requisitions" />
         <Pagination
             v-model="currentPage"
             :total-items="totalCount"
@@ -71,23 +71,29 @@ const fetchRequisitions = async () => {
   isLoading.value = true
   try {
     const res = await getRequisitionList({
-      ...route.query, //검색 필터 쿼리 반영
+      ...route.query,
       page: currentPage.value - 1,
       size: itemsPerPage,
       sortKey: sortKey.value,
       sortOrder: sortOrder.value
     })
 
-    requisitions.value = Array.isArray(res.data.data) ? res.data.data : []
-    totalCount.value = res.data.total || requisitions.value.length // API 형태에 따라 조정
+    const responseData = res.data.data
+    requisitions.value = Array.isArray(responseData.contents)
+        ? responseData.contents
+        : []
+
+    totalCount.value = responseData.pagination?.totalItems || requisitions.value.length
+
   } catch (e) {
-    console.error(' 품의서 목록 조회 실패', e)
+    console.error('📛 품의서 목록 조회 실패', e)
     requisitions.value = []
     totalCount.value = 0
   } finally {
     isLoading.value = false
   }
 }
+
 
 
 //  새로고침 시 URL 쿼리가 남아있다면 제거
