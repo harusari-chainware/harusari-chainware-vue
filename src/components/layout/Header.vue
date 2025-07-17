@@ -119,7 +119,7 @@ const allMenus = [
     /*거래처 상세조회 수정 필요*/
   {
     label: '거래처',
-    route: '/vendor',
+    route: '/vendor/list',
     roles: ['VENDOR_MANAGER', 'WAREHOUSE_MANAGER'],
     group: 'vendor'
   },
