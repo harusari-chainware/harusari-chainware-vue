@@ -146,16 +146,10 @@ const allMenus = [
   },
 
   {
-    label: '품의/발주/입고',
+    label: '품의/발주',
     route: '/requisitions/list',
     roles: ['GENERAL_MANAGER', 'SENIOR_MANAGER'],
     group: 'procurement'
-  },
-  {
-    label: '입고',
-    route: '/purchases/list',
-    roles: ['WAREHOUSE_MANAGER'],
-    group: 'purchase'
   },
   {
     label: '발주',
