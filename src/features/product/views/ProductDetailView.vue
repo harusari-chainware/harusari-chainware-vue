@@ -15,146 +15,116 @@
       </template>
     </template>
 
+    <!-- 기본 정보 -->
     <template #basic>
-      <div class="info-group">
-        <!-- 제품명 -->
-        <div class="info-row">
-          <label>제품명</label>
-          <input v-if="isEditing" v-model="product.productName" class="modal-input" />
-          <input v-else type="text" :value="product.productName" readonly />
-        </div>
+      <div class="card">
+        <div class="grid-4col">
+          <div class="info-item">
+            <label>제품명</label>
+            <input v-if="isEditing" v-model="product.productName" class="modal-input" />
+            <input v-else type="text" :value="product.productName" readonly />
+          </div>
+          <div class="info-item">
+            <label>제품코드</label>
+            <input v-if="isEditing" v-model="product.productCode" class="modal-input" />
+            <input v-else type="text" :value="product.productCode" readonly />
+          </div>
+          <div class="info-item">
+            <label>상위 카테고리명</label>
+            <input type="text" :value="topCategoryName" readonly />
+          </div>
+          <div class="info-item">
+            <label>카테고리명</label>
+            <input type="text" :value="categoryName" readonly />
+          </div>
 
-        <!-- 제품코드 -->
-        <div class="info-row">
-          <label>제품코드</label>
-          <input v-if="isEditing" v-model="product.productCode" class="modal-input" />
-          <input v-else type="text" :value="product.productCode" readonly />
-        </div>
+          <div class="info-item">
+            <label>단가</label>
+            <input v-if="isEditing" v-model="product.basePrice" class="modal-input" />
+            <input v-else type="text" :value="formattedBasePrice" readonly />
+          </div>
+          <div class="info-item">
+            <label>안전 재고 수량</label>
+            <input type="text" v-model="product.safetyStock" :readonly="!isEditing" />
+          </div>
+          <div class="info-item">
+            <label>원산지</label>
+            <input type="text" v-model="product.origin" :readonly="!isEditing" />
+          </div>
+          <div class="info-item">
+            <label>제품 단위</label>
+            <input type="text" v-model="product.unitQuantity" :readonly="!isEditing" />
+          </div>
 
-        <!-- 상위 카테고리명 -->
-        <div class="info-row">
-          <label>상위 카테고리명</label>
-          <input type="text" :value="topCategoryName" readonly />
-        </div>
+          <div class="info-item">
+            <label>규격</label>
+            <input type="text" v-model="product.unitSpec" :readonly="!isEditing" />
+          </div>
+          <div class="info-item">
+            <label>보관상태</label>
+            <input type="text" v-model="product.storeType" :readonly="!isEditing" />
+          </div>
+          <div class="info-item">
+            <label>유통기한</label>
+            <input v-if="isEditing" v-model="product.shelfLife" class="modal-input" />
+            <input v-else type="text" :value="formattedShelfLife" readonly />
+          </div>
+          <div class="info-item">
+            <label>등록 일시</label>
+            <input type="text" :value="product.productCreatedAt" disabled />
+          </div>
 
-        <!-- 카테고리명 -->
-        <div class="info-row">
-          <label>카테고리명</label>
-          <input type="text" :value="categoryName" readonly />
-        </div>
-
-        <!-- 단가 -->
-        <div class="info-row">
-          <label>단가</label>
-          <input
-              v-if="isEditing"
-              v-model="product.basePrice"
-              class="modal-input"
-          />
-          <input
-              v-else
-              type="text"
-              :value="formattedBasePrice"
-              readonly
-          />
-        </div>
-
-        <!-- 안전 재고 수량 -->
-        <div class="info-row">
-          <label>안전 재고 수량</label>
-          <input type="text" v-model="product.safetyStock" :readonly="!isEditing" />
-        </div>
-
-        <!-- 원산지 -->
-        <div class="info-row">
-          <label>원산지</label>
-          <input type="text" v-model="product.origin" :readonly="!isEditing" />
-        </div>
-
-        <!-- 제품 단위 -->
-        <div class="info-row">
-          <label>제품 단위</label>
-          <input type="text" v-model="product.unitQuantity" :readonly="!isEditing" />
-        </div>
-
-        <!-- 규격 -->
-        <div class="info-row">
-          <label>규격</label>
-          <input type="text" v-model="product.unitSpec" :readonly="!isEditing" />
-        </div>
-
-        <!-- 보관상태 -->
-        <div class="info-row">
-          <label>보관상태</label>
-          <input type="text" v-model="product.storeType" :readonly="!isEditing" />
-        </div>
-
-        <!-- 유통기한 -->
-        <div class="info-row">
-          <label>유통기한</label>
-          <input
-              v-if="isEditing"
-              v-model="product.shelfLife"
-              class="modal-input"
-          />
-          <input
-              v-else
-              type="text"
-              :value="formattedShelfLife"
-              readonly
-          />
-        </div>
-
-        <!-- 등록일시, 수정일시 -->
-        <div class="info-row">
-          <label>등록 일시</label>
-          <input type="text" :value="product.productCreatedAt" disabled />
-        </div>
-        <div class="info-row">
-          <label>수정 일시</label>
-          <input type="text" :value="product.productModifiedAt" disabled />
+          <div class="info-item">
+            <label>수정 일시</label>
+            <input type="text" :value="product.productModifiedAt" disabled />
+          </div>
         </div>
       </div>
+
     </template>
 
-    <!-- 거래처 테이블 -->
+    <!-- 거래처 계약 정보 테이블 -->
     <template #detail>
-      <div class="table-wrapper">
-        <table>
-          <thead>
-          <tr>
-            <th>거래처 ID</th>
-            <th>거래처명</th>
-            <th>계약 단가</th>
-            <th>최소 발주 수량</th>
-            <th>납기일</th>
-            <th>계약 상태</th>
-            <th>계약 시작일</th>
-            <th>계약 종료일</th>
-          </tr>
-          </thead>
-          <tbody>
-          <tr v-for="contract in contracts" :key="contract.contractId">
-            <td>{{ contract.vendorId }}</td>
-            <td>{{ contract.vendorName }}</td>
-            <td>{{ contract.contractPrice }}</td>
-            <td>{{ contract.minOrderQty }}</td>
-            <td>{{ contract.leadTime }}</td>
-            <td>{{ contract.contractStatus }}</td>
-            <td>{{ contract.contractStartDate }}</td>
-            <td>{{ contract.contractEndDate }}</td>
-          </tr>
-          <tr v-if="contracts.length === 0">
-            <td colspan="8">연결된 거래처가 없습니다.</td>
-          </tr>
-          </tbody>
-        </table>
-        <Pagination
-            v-model="page"
-            :total-items="pagination.totalItems"
-            :items-per-page="itemsPerPage"
-            @update:modelValue="loadProductDetail"
-        />
+      <div class="card">
+        <h3 class="card-title">계약 정보</h3>
+        <div class="table-wrapper">
+          <table class="default-table">
+            <thead>
+            <tr>
+              <th>거래처 ID</th>
+              <th>거래처명</th>
+              <th>계약 단가</th>
+              <th>최소 발주 수량</th>
+              <th>납기일</th>
+              <th>계약 상태</th>
+              <th>계약 시작일</th>
+              <th>계약 종료일</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr v-for="contract in contracts" :key="contract.contractId">
+              <td>{{ contract.vendorId }}</td>
+              <td>{{ contract.vendorName }}</td>
+              <td>{{ contract.contractPrice }}</td>
+              <td>{{ contract.minOrderQty }}</td>
+              <td>{{ contract.leadTime }}</td>
+              <td>{{ contract.contractStatus }}</td>
+              <td>{{ contract.contractStartDate }}</td>
+              <td>{{ contract.contractEndDate }}</td>
+            </tr>
+            <tr v-if="contracts.length === 0">
+              <td colspan="8">연결된 거래처가 없습니다.</td>
+            </tr>
+            </tbody>
+          </table>
+
+          <Pagination
+              v-model="page"
+              :total-items="pagination.totalItems"
+              :items-per-page="itemsPerPage"
+              @update:modelValue="loadProductDetail"
+          />
+        </div>
       </div>
     </template>
   </DetailLayout>
@@ -389,70 +359,94 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-.info-group {
+.grid-4col {
+  display: grid;
+  grid-template-columns: repeat(1, 1fr);
+  gap: 20px;
+}
+
+@media (min-width: 768px) {
+  .grid-4col {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .grid-4col {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.card {
+  background: #ffffff;
+  border: 1px solid #e0e6ed;
+  border-radius: 8px;
+  padding: 24px;
+  margin-bottom: 24px;
+  box-shadow: 0 2px 4px rgba(15, 34, 58, 0.03);
+}
+
+.card-title {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 16px;
+  color: #1f2d3d;
+}
+
+.grid-2col {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 1.5rem 2rem;
-  max-width: 1000px;
-  margin: 0 auto 2rem auto;
+  gap: 20px;
 }
+
 @media (min-width: 768px) {
-  .info-group {
+  .grid-2col {
     grid-template-columns: repeat(3, 1fr);
   }
 }
-.info-row {
+
+.info-item {
   display: flex;
   flex-direction: column;
 }
-.info-row label {
-  font-weight: bold;
-  margin-bottom: 0.5rem;
+
+.info-item label {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 6px;
+  color: #333;
 }
-.info-row input,
+
+.info-item input,
 .modal-input {
-  padding: 0.5rem;
+  padding: 10px;
   border: 1px solid #ccc;
-  border-radius: 4px;
+  border-radius: 6px;
   background: #f9f9f9;
+  font-size: 14px;
 }
-.info-row input:read-only {
-  background: #f3f3f3;
+
+.info-item input:read-only {
+  background: #f4f6f9;
 }
-.table-wrapper {
-  margin-top: 1rem;
-}
-table {
+
+.default-table {
   width: 100%;
   border-collapse: collapse;
+  font-size: 14px;
 }
-thead th {
-  background: #f3f3f3;
-  padding: 0.75rem;
-  border-bottom: 1px solid #ccc;
+
+.default-table th {
+  background: #f4f6f9;
+  padding: 12px;
+  border-bottom: 1px solid #dfe4ea;
+  color: #1f2d3d;
+}
+
+.default-table td {
+  padding: 12px;
+  border-bottom: 1px solid #f0f3f7;
   text-align: center;
 }
-tbody td {
-  padding: 0.75rem;
-  border-bottom: 1px solid #eee;
-  text-align: center;
-}
 
-button.danger {
-  padding: 6px 16px;
-  font-size: var(--font-button);
-  font-weight: 500;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: all 0.2s;
-  border: none;
-  white-space: nowrap;
-
-  background-color: #ef4444;
-  color: white;
-}
-
-button.danger:hover {
-  background-color: #dc2626;
-}
 </style>

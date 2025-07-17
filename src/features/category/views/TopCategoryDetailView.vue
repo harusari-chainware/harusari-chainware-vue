@@ -1,118 +1,89 @@
 <template>
   <DetailLayout
-      title="상위 카테고리 상세 조회"
-      description="상위 카테고리와 연결된 카테고리를 확인할 수 있습니다."
+      title="상위 카테고리 상세"
+      description="상위 카테고리와 연결된 하위 카테고리 정보를 확인할 수 있습니다."
   >
+    <!-- 액션 버튼 -->
     <template #actions>
       <StatusButton type="primary" v-if="!isEditing" @click="isEditing = true">수정</StatusButton>
       <StatusButton type="primary" v-else @click="saveEdit">저장</StatusButton>
       <StatusButton type="danger" @click="handleDelete">삭제</StatusButton>
     </template>
 
+    <!-- 기본 정보 카드 -->
     <template #basic>
-      <div class="info-group">
-        <div class="info-row">
-          <label>상위 카테고리</label>
-          <input type="text" v-model="detail.topCategoryName" :readonly="!isEditing" />
-        </div>
-        <div class="info-row">
-          <label>총 제품 개수</label>
-          <input type="text" :value="detail.productCount" disabled />
-        </div>
-        <div class="info-row">
-          <label>등록 일시</label>
-          <input type="text" :value="detail.createdAt" disabled />
-        </div>
-        <div class="info-row">
-          <label>수정 일시</label>
-          <input type="text" :value="detail.modifiedAt" disabled />
+      <div class="card">
+        <div class="grid-2col">
+          <div class="info-item">
+            <label>상위 카테고리명</label>
+            <input type="text" v-model="detail.topCategoryName" :readonly="!isEditing" />
+          </div>
+          <div class="info-item">
+            <label>총 제품 개수</label>
+            <input type="text" :value="detail.productCount" disabled />
+          </div>
+          <div class="info-item">
+            <label>등록일시</label>
+            <input type="text" :value="detail.createdAt" disabled />
+          </div>
+          <div class="info-item">
+            <label>수정일시</label>
+            <input type="text" :value="detail.modifiedAt" disabled />
+          </div>
         </div>
       </div>
     </template>
 
+    <!-- 하위 카테고리 목록 -->
     <template #detail>
-      <div class="table-wrapper">
-        <table>
-          <thead>
-          <tr>
-            <th>카테고리 ID</th>
-            <th>카테고리명</th>
-            <th>제품 개수</th>
-            <th>등록 일시</th>
-            <th>수정 일시</th>
-            <th>상태 변경</th>
-          </tr>
-          </thead>
-          <tbody>
-          <tr v-for="category in pagedCategories" :key="category.categoryId">
-            <td>{{ category.categoryId }}</td>
-
-            <td>
-              <template v-if="editingCategoryId === category.categoryId">
-                <input v-model="editedCategory.categoryName" />
-              </template>
-              <template v-else>
-                {{ category.categoryName }}
-              </template>
-            </td>
-
-            <td>{{ category.productCount }}</td>
-            <td>{{ category.categoryCreatedAt }}</td>
-            <td>{{ category.categoryModifiedAt }}</td>
-
-            <td>
-              <template v-if="editingCategoryId === category.categoryId">
-                <button @click="saveCategoryEdit(category)">저장</button>
-                <button @click="cancelCategoryEdit">취소</button>
-              </template>
-              <template v-else>
-                <button class="action-btn" @click="openCategoryEditModal(category)">수정</button>
-                <button class="action-btn red" @click="deleteCategoryHandler(category)">삭제</button>
-              </template>
-            </td>
-          </tr>
-          </tbody>
-        </table>
-        <Pagination v-model="page" :total-items="detail.categories.length" :items-per-page="itemsPerPage" />
+      <div class="card">
+        <h3 class="card-title">하위 카테고리 목록</h3>
+        <div class="table-wrapper">
+          <table class="default-table">
+            <thead>
+            <tr>
+              <th>ID</th>
+              <th>카테고리명</th>
+              <th>제품 개수</th>
+              <th>등록일시</th>
+              <th>수정일시</th>
+              <th>상태 변경</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr v-for="category in pagedCategories" :key="category.categoryId">
+              <td>{{ category.categoryId }}</td>
+              <td>
+                <template v-if="editingCategoryId === category.categoryId">
+                  <input v-model="editedCategory.categoryName" />
+                </template>
+                <template v-else>
+                  {{ category.categoryName }}
+                </template>
+              </td>
+              <td>{{ category.productCount }}</td>
+              <td>{{ category.categoryCreatedAt }}</td>
+              <td>{{ category.categoryModifiedAt }}</td>
+              <td>
+                <template v-if="editingCategoryId === category.categoryId">
+                  <button @click="saveCategoryEdit(category)">저장</button>
+                  <button @click="cancelCategoryEdit">취소</button>
+                </template>
+                <template v-else>
+                  <button class="action-btn" @click="openCategoryEditModal(category)">수정</button>
+                  <button class="action-btn red" @click="deleteCategoryHandler(category)">삭제</button>
+                </template>
+              </td>
+            </tr>
+            </tbody>
+          </table>
+          <Pagination v-model="page" :total-items="detail.categories.length" :items-per-page="itemsPerPage" />
+        </div>
       </div>
     </template>
   </DetailLayout>
-
-  <CategoryModal
-      v-if="showCategoryModal"
-      :is-top="false"
-      :category-edit-data="selectedCategory"
-      :top-categories="topCategories"
-      @close="showCategoryModal = false"
-      @refresh="handleRefresh"
-  />
-
-  <!-- 등록/수정 완료 모달 -->
-  <CategoryDoneModal
-      v-if="doneModal.show"
-      :type="doneModal.type"
-      :is-top="doneModal.isTop"
-      @close="doneModal.show = false"
-  />
-
-  <div>
-    <CategoryErrorModal
-        v-if="ErrorOpen"
-        :message="ErrorMsg"
-        @close="ErrorOpen = false"
-    />
-  </div>
-
-  <!-- 삭제 확인 모달 -->
-  <CategoryDeleteConfirmModal
-      v-if="deleteTarget"
-      :target-id="deleteTarget.id"
-      :is-top="deleteTarget.isTop"
-      @close="deleteTarget = null"
-      @deleted="loadTopCategory"
-  />
-
 </template>
+
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
@@ -301,53 +272,68 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.info-group {
+.card {
+  background: #ffffff;
+  border: 1px solid #e0e6ed;
+  border-radius: 8px;
+  padding: 24px;
+  margin-bottom: 24px;
+  box-shadow: 0 2px 4px rgba(15, 34, 58, 0.03);
+}
+
+.card-title {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 16px;
+  color: #1f2d3d;
+}
+
+.grid-2col {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 1rem 2rem;
-  margin-bottom: 2rem;
+  gap: 20px;
 }
-.info-row {
+
+.info-item {
   display: flex;
   flex-direction: column;
 }
-.info-row label {
-  font-weight: bold;
-  margin-bottom: 0.5rem;
+
+.info-item label {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 6px;
+  color: #333;
 }
-.info-row input {
-  padding: 0.5rem;
+
+.info-item input {
+  padding: 10px;
   border: 1px solid #ccc;
-  border-radius: 4px;
+  border-radius: 6px;
   background: #f9f9f9;
+  font-size: 14px;
 }
-.info-row input:read-only {
-  background: #f3f3f3;
+.info-item input:read-only {
+  background: #f4f6f9;
 }
-.table-wrapper {
-  margin-top: 1rem;
-}
-table {
+
+.default-table {
   width: 100%;
   border-collapse: collapse;
+  font-size: 14px;
 }
-thead th {
-  background: #f3f3f3;
-  padding: 0.75rem;
-  border-bottom: 1px solid #ccc;
+
+.default-table th {
+  background: #f4f6f9;
+  padding: 12px;
+  border-bottom: 1px solid #dfe4ea;
+  color: #1f2d3d;
+}
+
+.default-table td {
+  padding: 12px;
+  border-bottom: 1px solid #f0f3f7;
   text-align: center;
-}
-tbody td {
-  padding: 0.75rem;
-  border-bottom: 1px solid #eee;
-  text-align: center;
-}
-button {
-  padding: 4px 8px;
-  border: 1px solid #aaa;
-  border-radius: 4px;
-  background: #eee;
-  cursor: pointer;
 }
 
 .action-btn {
@@ -369,7 +355,6 @@ button {
   border-color: #357ae8;
   box-shadow: 0 1px 4px rgba(53, 122, 232, 0.09);
 }
-
 .action-btn.red {
   background: #fff5f5;
   color: #df2121;
@@ -381,4 +366,5 @@ button {
   border-color: #df2121;
   box-shadow: 0 1px 4px rgba(223,33,33,0.07);
 }
+
 </style>
