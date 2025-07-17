@@ -113,8 +113,10 @@ const allMenus = [
     label: '가맹점',
     route: '/franchise/list',
     roles: ['FRANCHISE_MANAGER'],
-    group: 'vendor'
+    group: 'franchise'
   },
+
+    /*거래처 상세조회 수정 필요*/
   {
     label: '거래처',
     route: '/vendor',
