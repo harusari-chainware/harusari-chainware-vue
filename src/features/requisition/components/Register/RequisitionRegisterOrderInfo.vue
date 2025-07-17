@@ -20,6 +20,7 @@
       <DatePickerField
           label="납기일"
           :model-value="deliveryDate"
+          :min-date="new Date()"
           @update:model-value="val => emit('update:deliveryDate', val)"
       />
     </div>

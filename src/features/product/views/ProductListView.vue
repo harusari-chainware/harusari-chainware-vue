@@ -10,7 +10,7 @@
       />
     </template>
 
-    <template #top-actions-right>
+    <template v-if="isManager"  #top-actions-right>
 <!--      <CreateButton @click="openModal">파일 출력</CreateButton>-->
       <CreateButton @click="goToCreatePage">제품 추가</CreateButton>
     </template>
@@ -41,8 +41,12 @@ import CreateButton from "@/components/common/top-actions/CreateButton.vue";
 import ProductTable from '../components/ProductTable.vue'
 import ProductFilters from '../components/ProductFilters.vue'
 import { useRouter } from 'vue-router'
+import {useAuthStore} from "@/features/auth/useAuthStore.js";
 
 const router = useRouter()
+
+const authStore = useAuthStore()
+const authority = authStore.authority
 
 const goToCreatePage = () => {
   router.push('/product/register')
@@ -67,6 +71,11 @@ const topCategories = ref([]) // 전체(상위+하위) 카테고리(카테고리
 const topCategoryListOnly = ref([]) // 상위만 (상위 카테고리 드롭다운 전용)
 const topCategoryOptions = ref([{ label: '전체', value: '' }])
 const categoryOptions = ref([{ label: '전체', value: '' }])
+
+const isGeneralManager = computed(() => authority === 'GENERAL_MANAGER')
+const isSeniorManager = computed(() => authority === 'SENIOR_MANAGER')
+
+const isManager = computed(() => isGeneralManager.value || isSeniorManager.value)
 
 onMounted(async () => {
   // 1. 상위 카테고리(이름/ID만)

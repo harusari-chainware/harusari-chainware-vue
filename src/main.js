@@ -22,7 +22,7 @@ app.use(pinia);
 app.use(router);
 
 app.use(Toast, {
-    position: 'top-center', // ✅ 중앙 상단
+    position: 'top-center', // 중앙 상단
     timeout: 3000,
     closeOnClick: true,
     pauseOnHover: true,

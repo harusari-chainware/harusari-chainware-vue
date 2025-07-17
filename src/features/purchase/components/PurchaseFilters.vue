@@ -22,7 +22,7 @@
     />
 
     <FilterDateRange
-        label="품의 등록일"
+        label="발주 등록일"
         v-model="filters.createdDateRange"
     />
 
@@ -77,13 +77,17 @@ const purchaseStatusOptions = [
 
 // 검색 실행
 const applyFilters = () => {
+  console.log('[🧪 filters 값 확인]', JSON.stringify(filters, null, 2))
+
   const query = {}
 
   if (filters.drafterName) query.drafterName = filters.drafterName
   if (filters.vendorName) query.vendorName = filters.vendorName
   if (filters.status) query.status = filters.status
-  if (filters.createdDateRange.start) query.createdFrom = filters.createdDateRange.start
-  if (filters.createdDateRange.end) query.createdTo = filters.createdDateRange.end
+  if (filters.createdDateRange.start) query.startDate = filters.createdDateRange.start
+  if (filters.createdDateRange.end) query.endDate = filters.createdDateRange.end
+  console.log('[🚀 최종 query]', query)
+
 
   router.push({ name: 'PurchaseOrderListView', query })
 }
