@@ -1,16 +1,17 @@
 <template>
-  <GenericTable :items="orders" :columns="columns">
+  <GenericTable :items="orders ?? []" :columns="columns">
     <!-- 상태 컬럼 커스터마이징 -->
-    <template #cell-status="{ value }">
+    <template #cell-orderStatus="{ value }">
       <StatusBadge :status="value" />
+    </template>
+
+    <template #cell-deliveryCode="{ value }">
+      {{ value? value: '-' }}
     </template>
 
     <!-- 상세보기 버튼 커스터마이징 -->
     <template #cell-actions="{ item }">
-      <RouterLink
-          :to="{ name: 'OrderDetailView' }"
-          class="detail-link"
-      >
+      <RouterLink :to="{ name: 'OrderDetailView', params: { orderId: item.orderId } }" class="detail-link">
         상세보기
       </RouterLink>
     </template>
@@ -18,30 +19,30 @@
 </template>
 
 <script setup>
+import { defineProps } from 'vue'
 import GenericTable from '@/components/common/GenericTable.vue'
 import StatusBadge from '@/components/common/StatusBadge.vue'
-import { formatCurrency} from '@/utils/tableUtils'
+import {formatCurrency, formatDateTime, formatDate, formatAmount} from '@/utils/tableUtils'
 
-defineProps({
+const props = defineProps({
   orders: {
     type: Array,
-    required: true,
+    default: () => [],
   },
 })
 
 // 열 정의
 const columns = [
-  { key: 'no', label: 'No', align: 'center', format: (_, __, index) => index + 1 },
   { key: 'orderCode', label: '주문코드', align: 'center' },
   { key: 'franchiseName', label: '가맹점명', align: 'left' },
-  { key: 'totalProducts', label: '총 제품 수', align: 'right' },
-  { key: 'totalAmount', label: '총 금액', align: 'right', format: formatCurrency },
-  { key: 'deliveryCode', label: '관련 배송 코드', align: 'center' },
-  { key: 'createdAt', label: '주문 등록일', align: 'center' },
-  { key: 'dueDate', label: '납기 요청일', align: 'center' },
-  { key: 'deliveredAt', label: '배송 완료일', align: 'center' },
-  { key: 'status', label: '주문 상태', align: 'center' },
-  { key: 'actions', label: '상세', align: 'center' }
+  { key: 'productCount', label: '총 제품 수', align: 'right', format: formatAmount },
+  { key: 'totalPrice', label: '총 금액', align: 'right', format: formatCurrency },
+  { key: 'deliveryCode', label: '배송코드', align: 'center' },
+  { key: 'createdAt', label: '등록일', align: 'center', format: formatDateTime },
+  { key: 'deliveryDueDate', label: '납기일', align: 'center', format: formatDate },
+  { key: 'deliveryCompletedAt', label: '배송완료일', align: 'center', format: formatDateTime },
+  { key: 'orderStatus', label: '상태', align: 'center' },
+  { key: 'actions', label: '상세', align: 'center' },
 ]
 </script>
 

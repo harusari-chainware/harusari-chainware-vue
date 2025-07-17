@@ -1,47 +1,36 @@
 <template>
   <RegisterLayout title="주문 등록" description="납기일을 지정하고 각 제품에 대해 주문하세요.">
-    <template #actions>
-      <!-- 상단에 액션 버튼이 필요하다면 여기 정의-->
-<!--      <StatusButton type="primary" @click="submit">등록</StatusButton>-->
-<!--      <StatusButton type="reset" @click="cancel">취소</StatusButton>-->
-    </template>
 
+    <!-- 좌측: 가맹점 정보 + 납기일 입력 -->
     <template #left>
       <OrderRegisterLeft
-          v-model:approver="form.approver"
-          v-model:vendor="form.vendor"
-          v-model:warehouse="form.warehouse"
-          v-model:deliveryDate="form.deliveryDate"
-          v-model:orderCategory="form.orderCategory"
-          v-model:memo="form.memo"
-          v-model:address="form.address"
-          v-model:attachments="form.attachments"
           :store="form.store"
-          :orderType="form.orderType"
-          @searchVendor="() => openSearch('vendor')"
-          @searchApprover="() => openSearch('approver')"
-          @searchWarehouse="() => openSearch('warehouse')"
+          :deliveryDate="form.deliveryDate"
+          @update:deliveryDate="val => form.deliveryDate = val"
       />
     </template>
 
+    <!-- 우측 패널: 제품 선택 -->
     <template #right v-if="showRightPanel">
       <OrderRegisterRightPanel
-          :type="searchType"
-          :multi="searchType === 'product'"
-          @select="handleSelect"
+          type="product"
+          multi
+          @select="handleSelectProducts"
           @close="showRightPanel = false"
       />
     </template>
 
+    <!-- 상세: 선택된 제품 목록 -->
     <template #detail>
       <OrderRegisterDetail
           :items="form.items"
           @remove="handleRemove"
           @update-item="handleUpdateItem"
-          @add-product="handleAddProduct"
+          @add-product="openProductSearch"
       />
     </template>
 
+    <!-- 요약: 총 수량/금액 -->
     <template #summary>
       <RegisterSummaryBox
           :total-items="totalItems"
@@ -50,88 +39,143 @@
       />
     </template>
 
+    <!-- 하단 등록 버튼 -->
     <template #footer>
-      <OrderRegisterFooter />
+      <OrderRegisterFooter @submit="submit" @cancel="cancel" />
     </template>
   </RegisterLayout>
 </template>
 
 <script setup>
+import { reactive, ref, onMounted, computed, watch} from 'vue'
+import { fetchMyFranchise, fetchOrderDetail, registerOrder, updateOrder } from '@/features/order/api'
 import RegisterLayout from '@/components/layout/RegisterLayout.vue'
-import RegisterSummaryBox from '@/components/layout/registerview/RegisterSummaryBox.vue'
 import OrderRegisterLeft from '../components/OrderRegisterLeft.vue'
 import OrderRegisterRightPanel from '../components/OrderRegisterRightPanel.vue'
 import OrderRegisterDetail from '../components/OrderRegisterDetail.vue'
+import RegisterSummaryBox from '@/components/layout/registerview/RegisterSummaryBox.vue'
 import OrderRegisterFooter from '../components/OrderRegisterFooter.vue'
-import { dummyOrderRegister } from '@/constants/dummy/orderRegister'
-import { computed, reactive, ref } from 'vue'
-import StatusButton from "@/components/common/StatusButton.vue"
+import { useRouter, useRoute } from 'vue-router'
 
+const router = useRouter()
 const form = reactive({
-  ...dummyOrderRegister,
+  store: {},
+  deliveryDate: '',
   items: []
 })
 
-const showRightPanel = ref(false)
-const searchType = ref(null)
+const route = useRoute()
+const isEditMode = route.query.mode === 'edit'
+const orderId = route.query.orderId
 
-function openSearch(type) {
-  searchType.value = type
+// 초기값 세팅 : 신규 등록 및 주문 수정
+onMounted(async () => {
+  // 가맹점 정보는 항상 조회
+  const res = await fetchMyFranchise()
+  form.store = res.data.data
+
+  // 수정 모드라면 기존 값 덮어쓰기
+  if (isEditMode && orderId) {
+    const res = await fetchOrderDetail(orderId)
+    console.log("onMount로 넘어온 데이터: ", res)
+    const detail = res.data.data
+    form.deliveryDate = detail.orderInfo.deliveryDueDate
+    form.items = detail.products.map(p => ({
+      productId: p.productId,
+      productCode: p.productCode,
+      productName: p.productName,
+      unit: `${p.unitQuantity}${p.unitSpec}`,
+      storeType: p.storageType,
+      unitPrice: p.amount,
+      quantity: p.quantity
+    }))
+  }
+})
+
+// 우측 패널 상태
+const showRightPanel = ref(false)
+function openProductSearch() {
   showRightPanel.value = true
 }
 
-function handleSelect(payload) {
-  if (Array.isArray(payload)) {
-    if (searchType.value === 'product') {
-      // 중복 제거 + 기존 항목 유지
-      const existingIds = new Set(form.items.map(i => i.id))
-      const newItems = payload.filter(p => !existingIds.has(p.id))
-      const enriched = newItems.map(p => ({ ...p, quantity: 1 }))
-      form.items.push(...enriched)
-      showRightPanel.value = false
-    }
-  } else {
-    switch (searchType.value) {
-      case 'vendor':
-        Object.assign(form.vendor, payload)
-        break
-      case 'approver':
-        Object.assign(form.approver, payload)
-        break
-      case 'warehouse':
-        Object.assign(form.warehouse, payload)
-        break
-    }
-    showRightPanel.value = false
+// 제품 선택 처리
+function handleSelectProducts(products) {
+  console.log('[선택된 products]', products)
+  const existingIds = new Set(form.items.map(i => i.productId))
+  const newItems = products.filter(p => !existingIds.has(p.productId))
+      .map(p => {
+        console.log('[product 정보]', {
+          id: p.productId,
+          quantity: p.unitQuantity,
+          spec: p.unitSpec
+        })
+        return {
+          productId: p.productId,
+          productCode: p.productCode,
+          productName: p.productName,
+          unit: p.unit,
+          storeType: p.storeType,
+          unitPrice: p.basePrice,
+          quantity: 1
+        }
+      })
+
+  console.log('[추가될 newItems]', newItems)
+
+  form.items.push(...newItems)
+  showRightPanel.value = false
+}
+
+// 선택한 제품 삭제
+function handleRemove(item) {
+  const index = form.items.findIndex(i => i.productId === item.productId)
+  if (index !== -1) {
+    form.items.splice(index, 1)
   }
 }
 
-function handleRemove(itemToRemove) {
-  const idx = form.items.findIndex(item => item.id === itemToRemove.id)
-  if (idx !== -1) form.items.splice(idx, 1)
-}
-
+// 수량 변경
 function handleUpdateItem(index, field, value) {
   form.items[index][field] = value
 }
 
-function handleAddProduct() {
-  openSearch('product')
-}
-
+// 총계 계산
 const totalItems = computed(() => form.items.length)
-const totalQuantity = computed(() =>
-    form.items.reduce((sum, item) => sum + item.quantity, 0)
-)
-const totalAmount = computed(() =>
-    form.items.reduce((sum, item) => sum + item.unitPrice * item.quantity, 0)
-)
+const totalQuantity = computed(() => form.items.reduce((acc, i) => acc + i.quantity, 0))
+const totalAmount = computed(() => form.items.reduce((acc, i) => acc + i.unitPrice * i.quantity, 0))
 
-function submit() {
-  alert('제출됨: ' + JSON.stringify(form))
+// 제출
+async function submit() {
+  const request = {
+    deliveryDueDate: form.deliveryDate,
+    orderDetails: form.items.map(i => ({
+      productId: i.productId,
+      quantity: i.quantity
+    }))
+  }
+
+  try {
+    let res;
+    if (isEditMode) {
+      res = await updateOrder(orderId, request)
+      alert('주문이 수정되었습니다.')
+    } else {
+      res = await registerOrder(request)
+      alert('주문이 등록되었습니다.')
+    }
+
+    const newOrderId = res.data.data.orderId;
+    await router.push(`/order/${newOrderId}`);
+  } catch (e) {
+    alert(`${isEditMode ? '수정' : '등록'} 실패: ` + (e.response?.data?.message || e.message))
+  }
 }
 
 function cancel() {
-  alert('취소됨')
+  router.push('/orders')
 }
+
+watch(() => form.items, (newVal) => {
+  console.log('[현재 선택된 제품 목록]', newVal)
+}, { deep: true })
 </script>

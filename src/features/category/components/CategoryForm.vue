@@ -1,7 +1,6 @@
 <template>
   <div :class="isModal ? 'modal-backdrop' : 'form-wrapper'">
     <div :class="isModal ? 'modal-box' : 'form-box'">
-      <div style="color: red;">✅ 폼 렌더링됨 (isModal: {{ isModal }})</div>
       <h2 class="modal-title">
         {{ isEdit ? (isTop ? '상위 카테고리 수정' : '카테고리 수정') : (isTop ? '상위 카테고리 등록' : '카테고리 등록') }}
       </h2>
@@ -44,6 +43,14 @@
       </div>
     </div>
   </div>
+
+  <div>
+    <CategoryErrorModal
+        v-if="ErrorOpen"
+        :message="ErrorMsg"
+        @close="ErrorOpen = false"
+    />
+  </div>
 </template>
 
 <script setup>
@@ -53,7 +60,8 @@ import {
   updateCategory,
   createTopCategory,
   updateTopCategory,
-} from '@/api/categoryApi'
+} from '@/features/category/api.js'
+import CategoryErrorModal from "@/features/category/components/CategoryErrorModal.vue";
 
 const props = defineProps({
   isTop: { type: Boolean, default: false },
@@ -61,7 +69,8 @@ const props = defineProps({
   topEditData: { type: Object, default: null },
   categoryEditData: { type: Object, default: null },
   topCategoryId: { type: Number, default: null },
-  topCategories: { type: Array, default: () => [] }
+  topCategories: { type: Array, default: () => [] },
+  hideTitle: { type: Boolean, default: false }
 })
 
 const emit = defineEmits(['close', 'refresh', 'submitted', 'cancelled'])
@@ -71,7 +80,12 @@ const name = ref('')
 const code = ref('')
 const selectedTopCategoryId = ref('')
 
-console.log('✅ CategoryForm.vue 렌더링됨')
+const ErrorOpen = ref(false)
+const ErrorMsg = ref('')
+function showError(msg) {
+  ErrorMsg.value = msg
+  ErrorOpen.value = true
+}
 
 // 자동 대문자 변환
 watch(code, (val) => {
@@ -95,18 +109,16 @@ const emitCancel = () => {
 
 const handleSubmit = async () => {
   if (!name.value.trim()) {
-    alert('카테고리 이름을 입력해주세요.')
-    return
+    return showError('카테고리 이름을 입력해주세요.')
   }
 
   if (!props.isTop) {
     if (!selectedTopCategoryId.value) {
-      alert('상위 카테고리를 선택해주세요.')
-      return
+      return showError('상위 카테고리를 선택해주세요.')
+
     }
     if (!/^[A-Z]{2}$/.test(code.value)) {
-      alert('카테고리 코드는 대문자 2자리여야 합니다. 예: AB')
-      return
+      return showError('카테고리 코드는 대문자 2자리여야 합니다. 예: AB')
     }
   }
 
@@ -137,11 +149,11 @@ const handleSubmit = async () => {
 
     props.isModal ? emit('refresh') || emit('close') : emit('submitted')
   } catch (err) {
-    console.error('❌ 등록/수정 실패:', err)
+    console.error(' 등록/수정 실패:', err)
     if (err.response?.status === 409) {
-      alert('이미 존재하는 카테고리입니다.')
+      return showError('이미 존재하는 카테고리입니다.')
     } else {
-      alert('오류가 발생했습니다. 다시 시도해주세요.')
+      return showError('오류가 발생했습니다. 다시 시도해주세요.')
     }
   }
 }
@@ -149,57 +161,112 @@ const handleSubmit = async () => {
 
 <style scoped>
 .form-wrapper {
-  height: 400px;
-  width: 100%;
-  padding: 1.5rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #f8f9fa;
+  min-height: 420px;
+  background: #f5f6fa;
 }
 
-.form-box {
-  margin: 100px auto;
-  padding: 2rem;
-  background: white;
-  box-shadow: 0 0 4px rgba(0,0,0,0.1);
-  border-radius: 10px;
-  max-width: 600px;
+.form-box,
+.modal-box {
+  width: 100%;
+  max-width: 420px;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 2px 16px rgba(80, 88, 130, 0.08), 0 1.5px 4px rgba(0,0,0,0.03);
+  padding: 32px 28px 24px 28px;
+  margin: 48px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
 .modal-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.4);
+  background: var(--color-primary);
   display: flex;
   align-items: center;
   justify-content: center;
-}
-
-.modal-box {
-  background: #fff;
-  padding: 2rem;
-  width: 400px;
-  border-radius: 10px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
 }
 
 .modal-title {
-  font-size: 20px;
-  margin-bottom: 1rem;
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-bottom: 24px;
+  color: #23233c;
+  letter-spacing: -0.02em;
 }
 
 .modal-input {
   width: 100%;
-  padding: 0.6rem;
-  margin-bottom: 1.2rem;
-  border: 1px solid #ccc;
-  border-radius: 6px;
+  border: 1.2px solid #e4e7ee;
+  background: #fafbfc;
+  border-radius: 8px;
+  font-size: 1rem;
+  padding: 12px 14px;
+  margin-bottom: 16px;
+  transition: border 0.18s;
+}
+
+.modal-input:focus {
+  outline: none;
+  border-color: #3aaed8;
+  background: #fff;
+}
+
+select.modal-input {
+  color: #23233c;
+  font-weight: 500;
 }
 
 .modal-actions {
   display: flex;
   justify-content: flex-end;
-  gap: 10px;
+  gap: 14px;
+  margin-top: 4px;
+}
+
+.modal-actions button {
+  min-width: 84px;
+  border: none;
+  border-radius: 6px;
+  padding: 10px 0;
+  font-size: 1rem;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background 0.15s;
+}
+
+.modal-actions button:first-child {
+  background: #f4f5fa;
+  color: #6e7180;
+}
+
+.modal-actions button:last-child {
+  background: #3aaed8;
+  color: #fff;
+}
+
+.modal-actions button:last-child:hover {
+  background: #3aaed8;
+}
+
+.modal-actions button:first-child:hover {
+  background: #e4e7ee;
+}
+
+@media (max-width: 540px) {
+  .form-box, .modal-box {
+    padding: 18px 10px;
+    min-width: 0;
+    width: 98vw;
+  }
+  .modal-title {
+    font-size: 1.07rem;
+    margin-bottom: 16px;
+  }
 }
 </style>

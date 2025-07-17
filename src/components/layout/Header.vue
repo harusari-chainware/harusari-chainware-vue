@@ -1,22 +1,22 @@
 <template>
   <header class="header">
     <div class="logo-box">
-      <img :src="logo" alt="Chainware 로고" class="logo-img" />
+      <a href="/" @click.prevent="reloadPage">
+        <img :src="logo" alt="Chainware 로고" class="logo-img" />
+      </a>
     </div>
 
     <nav class="top-menu">
-      <!-- 추후 a 태그 안에 v-for="menu in accessibleMenus" 추가 -->
       <a
-          v-for="menu in menuList"
-          :key="menu"
+          v-for="menu in accessibleMenus"
+          :key="menu.label"
           href="#"
-          :class="{ active: menu === selected }"
-          @click.prevent="handleClick(menu)"
+          :class="{ active: menu.label === selected }"
+          @click.prevent="handleClick(menu.label)"
       >
-        {{ menu }}
+        {{ menu.label }}
       </a>
 
-      <!-- 마이페이지 전용 -->
       <div class="top-menu-item" ref="mypageRef">
         <a
             href="#"
@@ -29,9 +29,14 @@
         >
           마이페이지
         </a>
+
         <div v-if="showMypageDropdown" class="dropdown">
-          <a @click="goToMypage">내 정보 조회</a>
-          <a @click="logout">로그아웃</a>
+          <a @click="goToMypage">
+            <i class="fas fa-user"></i> 내 정보 조회
+          </a>
+          <a @click="logout">
+            <i class="fas fa-sign-out-alt"></i> 로그아웃
+          </a>
         </div>
       </div>
     </nav>
@@ -40,53 +45,145 @@
 
 <script setup>
 import logo from '@/assets/images/chainware-logo-short.png'
-import { ref, defineEmits, defineProps, computed, onMounted, onBeforeUnmount } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount, defineProps, defineEmits } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
+import { useAuthStore } from '@/features/auth/useAuthStore.js'
+import { logoutApi } from '@/features/auth/api.js'
+import '@fortawesome/fontawesome-free/css/all.min.css'
 
-const emits = defineEmits(['selectMenu'])
 const props = defineProps({
   selected: String
 })
-
-const menuList = [
-  '대시보드',
-  '회원',
-  '제품',
-  '가맹점/거래처/창고',
-  '주문/반품/배송',
-  '품의/발주/입고',
-  '폐기'
-]
-
-// TODO: 추후 권한 기반 메뉴 노출
-// const accessibleMenus = computed(() =>
-//   getAccessibleHeaderMenus(props.userRole)
-// )
-
+const emits = defineEmits(['selectMenu'])
 
 const router = useRouter()
 const route = useRoute()
+const authStore = useAuthStore()
+const userRole = computed(() => authStore.authority || '')
 
-const showMypageDropdown = ref(null)
+const showMypageDropdown = ref(false)
 const mypageRef = ref(null)
 
-const routeMap = {
-  '대시보드': '/dashboard/prediction',
-  '회원': '/member/list',
-  '제품': '/product/list',
-  '가맹점/거래처/창고': '/franchise/list',
-  '주문/반품/배송': '/order/list',
-  '품의/발주/입고': '/requisition/list',
-  '폐기': '/disposal/franchise/list'
+const reloadPage = () => {
+  window.location.href = '/'
 }
+
+// 전체 메뉴 목록
+/*
+MASTER
+GENERAL_MANAGER
+SENIOR_MANAGER
+WAREHOUSE_MANAGER
+FRANCHISE_MANAGER
+VENDOR_MANAGER
+SYSTEM
+*/
+console.log('현재 유저 권한:', userRole.value)
+
+const allMenus = [
+  {
+    label: '대시보드',
+    route: '/dashboard/prediction',
+    roles: ['GENERAL_MANAGER', 'SENIOR_MANAGER']
+  },
+  {
+    label: '회원',
+    route: '/member/list',
+    roles: ['MASTER']
+  },
+
+  {
+    label: '제품',
+    route: '/product/list',
+    roles: ['GENERAL_MANAGER', 'SENIOR_MANAGER', 'WAREHOUSE_MANAGER', 'FRANCHISE_MANAGER']
+  },
+  {
+    label: '제품',
+    route: '/contract/list',
+    roles: ['VENDOR_MANAGER']
+  },
+
+  {
+    label: '가맹점/거래처/창고',
+    route: '/franchise/list',
+    roles: ['GENERAL_MANAGER', 'SENIOR_MANAGER'],
+    group: 'franchise'
+  },
+  {
+    label: '가맹점',
+    route: '/franchise/list',
+    roles: ['FRANCHISE_MANAGER'],
+    group: 'franchise'
+  },
+
+    /*거래처 상세조회 수정 필요*/
+  {
+    label: '거래처',
+    route: '/vendor/list',
+    roles: ['VENDOR_MANAGER', 'WAREHOUSE_MANAGER'],
+    group: 'vendor'
+  },
+  {
+    label: '창고',
+    route: '/warehouse/list',
+    roles: ['WAREHOUSE_MANAGER'],
+    group: 'warehouse'
+  },
+
+  {
+    label: '주문/배송',
+    route: '/order/list',
+    roles: ['GENERAL_MANAGER', 'SENIOR_MANAGER', 'FRANCHISE_MANAGER'],
+  },
+  {
+    label: '반품',
+    route: '/takeback/list',
+    roles: ['GENERAL_MANAGER', 'SENIOR_MANAGER', 'FRANCHISE_MANAGER'],
+  }, {
+    label: '배송',
+    route: '/delivery/list',
+    roles: ['WAREHOUSE_MANAGER'],
+  },
+
+  {
+    label: '품의/발주/입고',
+    route: '/requisitions/list',
+    roles: ['GENERAL_MANAGER', 'SENIOR_MANAGER'],
+    group: 'procurement'
+  },
+  {
+    label: '입고',
+    route: '/purchases/list',
+    roles: ['WAREHOUSE_MANAGER'],
+    group: 'purchase'
+  },
+  {
+    label: '발주',
+    route: '/purchases/list',
+    roles: ['VENDOR_MANAGER'],
+    group: 'purchase'
+  },
+  {
+    label: '폐기',
+    route: '/disposal/list',
+    roles: ['GENERAL_MANAGER', 'SENIOR_MANAGER', 'WAREHOUSE_MANAGER','FRANCHISE_MANAGER']
+  }
+]
+
+// 권한에 따라 필터링된 메뉴
+const accessibleMenus = computed(() =>
+    allMenus.filter(menu => menu.roles.includes(userRole.value))
+)
 
 const isMypageRoute = computed(() => route.path.startsWith('/mypage'))
 
-const handleClick = (menu) => {
-  emits('selectMenu', menu)
+const handleClick = (menuLabel) => {
+  emits('selectMenu', menuLabel)
   showMypageDropdown.value = false
-  const routePath = routeMap[menu]
-  if (routePath) router.push(routePath)
+  const selectedMenu = accessibleMenus.value.find(menu => menu.label === menuLabel)
+  if (selectedMenu?.route) {
+    router.push(selectedMenu.route)
+  }
 }
 
 const toggleMypageDropdown = () => {
@@ -96,14 +193,19 @@ const toggleMypageDropdown = () => {
 const goToMypage = () => {
   emits('selectMenu', '마이페이지')
   showMypageDropdown.value = false
-  router.push('/mypage/info')
+  router.push('/mypage/profile')
 }
 
-const logout = () => {
+const logout = async () => {
   showMypageDropdown.value = false
-  // TODO: 실제 로그아웃 로직 (토큰 삭제, 상태 초기화 등)
-  alert('로그아웃 되었습니다')
-  // router.push('/login')
+  try {
+    await logoutApi()
+    authStore.clearAuth()
+    await router.push('/login')
+  } catch (error) {
+    console.error('로그아웃 중 오류:', error)
+    alert(`로그아웃 중 오류가 발생했습니다: ${error.response?.data?.message || error.message}`)
+  }
 }
 
 const handleClickOutside = (event) => {
@@ -165,13 +267,7 @@ onBeforeUnmount(() => {
 
 .top-menu a:not(.active):hover {
   background-color: var(--color-primary-light);
-  color: 	var(--color-primary);
-}
-
-.top-menu a.active,
-.mypage-menu.active {
-  background-color: var(--color-primary);
-  color: #fff;
+  color: var(--color-primary);
 }
 
 .top-menu-item {
@@ -188,7 +284,7 @@ onBeforeUnmount(() => {
   border: 1px solid #ccc;
   border-radius: 6px;
   min-width: 140px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
   z-index: 10;
   display: flex;
   flex-direction: column;
@@ -199,10 +295,14 @@ onBeforeUnmount(() => {
   text-decoration: none;
   color: #333;
   font-size: var(--font-header-dropdown);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .dropdown a:hover {
   background-color: var(--color-hover-dark);
+  cursor: pointer;
 }
 
 .mypage-menu {

@@ -3,7 +3,7 @@
       :title="title"
       :columns="columns"
       :items="items"
-      @remove="index => emit('remove', index)"
+      @remove="item => emit('remove', item)"
       @add-product="() => emit('add-product')"
   >
     <!-- 우측 상단에 제품 추가 버튼 -->
@@ -22,9 +22,19 @@
       />
     </template>
 
+    <!-- 보관 방식 Badge 적용 -->
+    <template #cell-storeType="{ item }">
+      <StatusBadge :status="item.storeType" />
+    </template>
+
+    <!-- 단위 금액 currency 적용 -->
+    <template #cell-unitPrice="{ item }">
+      {{ formatCurrency(item.unitPrice) }}
+    </template>
+
     <!-- 총 금액 표시 -->
     <template #cell-totalPrice="{ item }">
-      {{ formatPrice(item.unitPrice * item.quantity) }}
+      {{ formatCurrency(item.unitPrice * item.quantity) }}
     </template>
 
     <!-- 삭제 버튼 -->
@@ -37,6 +47,8 @@
 <script setup>
 import RegisterDetailTable from '@/components/layout/registerview/RegisterDetailTable.vue'
 import StatusButton from '@/components/common/StatusButton.vue'
+import StatusBadge from '@/components/common/StatusBadge.vue'
+import { formatCurrency } from "@/utils/tableUtils.js";
 
 const props = defineProps({
   items: {
@@ -58,10 +70,6 @@ const columns = [
   { key: 'totalPrice', label: '총 금액' },
   { key: 'actions', label: '' }
 ]
-
-function formatPrice(value) {
-  return new Intl.NumberFormat('ko-KR').format(value) + '원'
-}
 </script>
 
 <style scoped>

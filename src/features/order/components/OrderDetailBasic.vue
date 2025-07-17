@@ -1,16 +1,20 @@
 <template>
   <section class="grid grid-2 gap-6">
-    <OrderDetailBasicInfo :order="order" />
-    <OrderDetailDate :order="order" />
+    <OrderDetailBasicInfo
+        :orderInfo="orderInfo" />
+    <OrderDetailDate :orderInfo="orderInfo" />
   </section>
 
   <section class="grid grid-2 gap-6">
-    <OrderDetailFranchise :order="order" />
-    <OrderDetailDeliveryHistory :history="order.deliveryHistory" />
+    <OrderDetailFranchise :franchiseOwnerInfo="franchiseOwnerInfo" />
+    <OrderDetailSummary :orderInfo="orderInfo" />
   </section>
 
-  <OrderDetailSummary :order="order" />
-  <OrderDetailRejectReason :reason="order.rejectReason" v-if="order.rejectReason" />
+  <OrderDetailDeliveryHistory
+      v-if="deliveryHistory.length"
+      :history="deliveryHistory"
+  />
+  <OrderDetailRejectReason :reason="rejectReason" v-if="rejectReason" />
 </template>
 
 <script setup>
@@ -22,9 +26,9 @@ import OrderDetailSummary from './detailview/OrderDetailSummary.vue'
 import OrderDetailRejectReason from './detailview/OrderDetailRejectReason.vue'
 
 defineProps({
-  order: {
-    type: Object,
-    required: true
-  }
+  orderInfo: Object,
+  franchiseOwnerInfo: Object,
+  deliveryHistory: Array,
+  rejectReason: String
 })
 </script>

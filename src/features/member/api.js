@@ -1,16 +1,67 @@
 import api from '@/api/axios.js'
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
-
-/* 컨텍스트 별로 각각 백엔드와 연결되는 api*/
-export function firstDummyAPI(memberId) {
-    return api.get(`/firstDummy/${memberId}`);
-}
-
-export function secondDummyAPI(memberId) {
-    return api.get(`/secondDummy/${memberId}`);
-}
-
 export const getMembers = (params) => {
-    return api.get(`${API_BASE_URL}/members`, { params })
+    return api.get("/members", {params})
+}
+
+export const getMemberDetail = (memberId) => {
+    return api.get(`/members/${memberId}`)
+}
+
+export const getMemberLoginHistory = (memberId, params) => {
+    return api.get(`/members/${memberId}/login-history`, {params})
+}
+
+export const updateMember = (memberId, params) => {
+    return api.put(`/members/${memberId}`, params)
+}
+
+export const deleteMember = (memberId) => {
+    return api.delete(`/members/${memberId}`);
+}
+
+export const checkEmailDuplicateApi = (email) => {
+    return api.get('/members/email-exists', {
+        params: {email}
+    });
+};
+
+export const headquartersMemberRegister = (formData) => {
+    return api.post("/members/headquarters", JSON.stringify(formData), {
+        headers: {'Content-Type': 'application/json'}
+    });
+}
+
+export const warehouseMemberRegister = (formData) => {
+    return api.post("/members/warehouse", JSON.stringify(formData), {
+        headers: {'Content-Type': 'application/json'}
+    });
+}
+
+export const franchiseMemberRegister = (formData) => {
+    return api.post("/members/franchise", formData, {
+        headers: {'Content-Type': 'multipart/form-data'}
+    });
+};
+
+export const vendorMemberRegister = (formData) => {
+    return api.post("/members/vendor", formData, {
+        headers: {'Content-Type': 'multipart/form-data'}
+    });
+}
+
+export const getMyProfile = () => {
+    return api.get('/members/me');
+};
+
+export const updateMyInfo = (formData) => {
+    return api.put('/members/me', JSON.stringify(formData), {
+        headers: {'Content-Type': 'application/json'}
+    });
+}
+
+export const changePassword = (formData) => {
+    return api.put("/members/password", JSON.stringify(formData), {
+        headers: {'Content-Type': 'application/json'}
+    });
 }

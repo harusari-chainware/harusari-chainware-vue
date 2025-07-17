@@ -57,7 +57,6 @@
   </GenericTable>
 </template>
 
-
 <script setup>
 import GenericTable from '@/components/common/GenericTable.vue'
 
@@ -70,7 +69,8 @@ defineProps({
 
 // 열 정의
 const columns = [
-  { key: 'no', label: 'No', align: 'center', format: (_, __, index) => index + 1 },
+  // { key: 'no', label: 'No', align: 'center', format: (_, __, index) => index + 1 },
+  { key: 'no', label: 'No', align: 'center' },
   { key: 'topCategoryName', label: '상위 카테고리명', align: 'center' },
   { key: 'categoryName', label: '카테고리명', align: 'center' },
   { key: 'productCount', label: '제품 수', align: 'center' },
@@ -123,5 +123,38 @@ tbody tr:hover {
 }
 .detail-link:hover {
   text-decoration: underline;
+}
+
+.action-btn {
+  min-width: 44px;
+  padding: 5px 10px;
+  border-radius: 5px;
+  font-size: 13px;
+  font-weight: 500;
+  outline: none;
+  cursor: pointer;
+  transition: all 0.15s;
+  background: #f5f7fa;
+  color: #357ae8;
+  border:  #185adf;
+  margin: 0 2px;
+}
+.action-btn:hover {
+  background: #e3eefd;
+  color: #185adf;
+  border-color: #357ae8;
+  box-shadow: 0 1px 4px rgba(53, 122, 232, 0.09);
+}
+
+.action-btn.red {
+  background: #fff5f5;
+  color: #df2121;
+  border: 1px solid #f7cccc;
+}
+.action-btn.red:hover {
+  background: #ffe5e5;
+  color: #a30c0c;
+  border-color: #df2121;
+  box-shadow: 0 1px 4px rgba(223,33,33,0.07);
 }
 </style>

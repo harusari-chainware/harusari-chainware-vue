@@ -1,14 +1,13 @@
-import PurchaseDummyView from "@/features/purchase/views/PurchaseDummyView.vue";
-
 export const purchaseRoutes = [
     {
-        path: '/purchase/list',
-        name: 'PurchaseDummy1View',
-        component: PurchaseDummyView
+        path: '/purchases/list',
+        name: 'PurchaseOrderListView',
+        component: () => import('@/features/purchase/views/PurchaseOrderListView.vue')
     },
     {
-        path: '/stockin/list',
-        name: 'PurchaseDummy2View',
-        component: PurchaseDummyView
+        path: '/purchases/detail/:purchaseOrderId',
+        name: 'PurchaseOrderDetailView',
+        component: () => import('@/features/purchase/views/PurchaseOrderDetailView.vue'),
+        props: true
     },
 ];

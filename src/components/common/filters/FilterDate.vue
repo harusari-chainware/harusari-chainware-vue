@@ -23,6 +23,10 @@ const props = defineProps({
   placeholder: {
     type: String,
     default: '날짜 선택'
+  },
+  minDate: {
+    type: [String, Date],
+    default: null // 전달 없으면 제한 없음
   }
 })
 
@@ -35,12 +39,19 @@ onMounted(() => {
   fpInstance = flatpickr(input.value, {
     dateFormat: 'Y-m-d',
     defaultDate: props.modelValue || null,
+    minDate: props.minDate || null,
     onChange: ([selectedDate]) => {
-      emit('update:modelValue', selectedDate ? selectedDate.toISOString().split('T')[0] : '')
+      if (selectedDate) {
+        const year = selectedDate.getFullYear()
+        const month = String(selectedDate.getMonth() + 1).padStart(2, '0')
+        const day = String(selectedDate.getDate()).padStart(2, '0')
+        emit('update:modelValue', `${year}-${month}-${day}`)
+      } else {
+        emit('update:modelValue', '')
+      }
     }
   })
 })
-
 watch(() => props.modelValue, (newVal) => {
   if (fpInstance && newVal !== fpInstance.input.value) {
     fpInstance.setDate(newVal, false)

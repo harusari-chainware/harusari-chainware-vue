@@ -8,8 +8,8 @@
           v-model="modelValue"
           :placeholder="placeholder"
           class="field-input"
-          readonly
       />
+      <!-- readonly -->
       <StatusButton type="primary" @click="$emit('search')">검색</StatusButton>
     </div>
   </div>

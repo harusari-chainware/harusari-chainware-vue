@@ -1,29 +1,43 @@
-import { defineStore } from 'pinia'
+import { defineStore } from "pinia";
+import router from "@/router";
+import { refreshApi } from "@/features/auth/api.js";
 
-export const useAuthStore = defineStore('auth', {
+export const useAuthStore = defineStore("auth", {
     state: () => ({
-        email: '',
+        accessToken: "",
+        email: "",
         saveId: false,
-        accessToken: '',
-        refreshToken: '',
+        authority: ""
     }),
     actions: {
+        setAccessToken(token) {
+            this.accessToken = token;
+        },
         setEmail(email) {
-            this.email = email
+            this.email = email;
         },
         setSaveId(save) {
-            this.saveId = save
+            this.saveId = save;
         },
-        setTokens({ accessToken, refreshToken }) {
-            this.accessToken = accessToken
-            this.refreshToken = refreshToken
+        setAuthority(authority) {
+            this.authority = authority;
         },
         clearAuth() {
-            this.email = ''
-            this.saveId = false
-            this.accessToken = ''
-            this.refreshToken = ''
-        }
+            this.accessToken = "";
+            this.authority = "";
+        },
+        async refreshToken() {
+            try {
+                const res = await refreshApi();
+                this.setAccessToken(res.data.accessToken);
+                return res.data.accessToken;
+            } catch (error) {
+                console.error("refreshToken 실패:", error);
+                this.clearAuth();
+                await router.push("/login");
+                throw error;
+            }
+        },
     },
     persist: true,
-})
+});

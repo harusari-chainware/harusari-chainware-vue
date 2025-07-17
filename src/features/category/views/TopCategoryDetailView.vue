@@ -12,7 +12,7 @@
     <template #basic>
       <div class="info-group">
         <div class="info-row">
-          <label>대분류</label>
+          <label>상위 카테고리</label>
           <input type="text" v-model="detail.topCategoryName" :readonly="!isEditing" />
         </div>
         <div class="info-row">
@@ -66,10 +66,8 @@
                 <button @click="cancelCategoryEdit">취소</button>
               </template>
               <template v-else>
-                <!--                <button @click="startCategoryEdit(category)">수정</button>-->
-                <button @click="openCategoryEditModal(category)">수정</button>
-                <!--                <button @click="deleteCategory(category)">삭제</button>-->
-                <button @click="deleteCategoryHandler(category)">삭제</button>
+                <button class="action-btn" @click="openCategoryEditModal(category)">수정</button>
+                <button class="action-btn red" @click="deleteCategoryHandler(category)">삭제</button>
               </template>
             </td>
           </tr>
@@ -86,18 +84,34 @@
       :category-edit-data="selectedCategory"
       :top-categories="topCategories"
       @close="showCategoryModal = false"
-      @refresh="loadTopCategory"
+      @refresh="handleRefresh"
   />
 
-  <template v-if="showDeleteModal">
-    <div class="modal-backdrop">
-      <div class="modal-box">
-        <h3>삭제 불가</h3>
-        <p>하위 카테고리가 존재하여 삭제할 수 없습니다.</p>
-        <button class="confirm-btn" @click="showDeleteModal = false">확인</button>
-      </div>
-    </div>
-  </template>
+  <!-- 등록/수정 완료 모달 -->
+  <CategoryDoneModal
+      v-if="doneModal.show"
+      :type="doneModal.type"
+      :is-top="doneModal.isTop"
+      @close="doneModal.show = false"
+  />
+
+  <div>
+    <CategoryErrorModal
+        v-if="ErrorOpen"
+        :message="ErrorMsg"
+        @close="ErrorOpen = false"
+    />
+  </div>
+
+  <!-- 삭제 확인 모달 -->
+  <CategoryDeleteConfirmModal
+      v-if="deleteTarget"
+      :target-id="deleteTarget.id"
+      :is-top="deleteTarget.isTop"
+      @close="deleteTarget = null"
+      @deleted="loadTopCategory"
+  />
+
 </template>
 
 <script setup>
@@ -108,12 +122,16 @@ import StatusButton from '@/components/common/StatusButton.vue'
 import Pagination from '@/components/common/Pagination.vue'
 import {
   fetchTopCategoryWithProducts,
+  fetchAllListTopCategories,
   fetchAllTopCategories,
   updateTopCategory,
   updateCategory,
   deleteCategory
-} from '@/api/categoryApi'
+} from '@/features/category/api.js'
 import CategoryModal from '@/features/category/components/CategoryModal.vue'
+import CategoryErrorModal from "@/features/category/components/CategoryErrorModal.vue";
+import CategoryDoneModal from "@/features/category/components/CategoryDoneModal.vue";
+import CategoryDeleteConfirmModal from "@/features/category/components/CategoryDeleteConfirmModal.vue";
 
 const showCategoryModal = ref(false)
 const selectedCategory = ref(null)
@@ -130,9 +148,16 @@ const detail = ref({
 })
 
 const isEditing = ref(false)
-const showDeleteModal = ref(false)
 const page = ref(1)
 const itemsPerPage = 5
+const ErrorOpen = ref(false)
+const ErrorMsg = ref('')
+const deleteTarget = ref(null)
+
+function showError(msg) {
+  ErrorMsg.value = msg
+  ErrorOpen.value = true
+}
 
 const editingCategoryId = ref(null)
 const editedCategory = ref({
@@ -141,27 +166,47 @@ const editedCategory = ref({
   topCategoryId: ''
 })
 
+// 등록/수정 완료 모달 상태
+const doneModal = ref({
+  show: false,
+  type: 'edit',    //  'register' | 'edit' | 'delete'
+  isTop: false
+})
+
 const topCategories = ref([])
 
 const loadTopCategory = async () => {
+  // 1. 상세 데이터(카테고리 목록 포함)
   const res = await fetchTopCategoryWithProducts(topCategoryId)
   const topCategoryData = res.data.data
 
-  const allCategoryRes = await fetchAllTopCategories()
-  // 응답에 따라 아래처럼 바꾸세요
-  const allTopCategories = allCategoryRes.data.data.topCategories
+  // 2. 드롭다운용 상위카테고리 리스트
+  const allListRes = await fetchAllListTopCategories()
+  const listTopCategories = Array.isArray(allListRes.data.data) ? allListRes.data.data : []
 
-  topCategoryData.categories = topCategoryData.categories.map(cat => {
-    // topCategories 내 하위 카테고리 배열에서 매칭
+  topCategories.value = listTopCategories.map(top => ({
+    label: top.topCategoryName,
+    value: String(top.topCategoryId)
+  }))
+
+  // 3. 병합용 전체(상위+하위 포함) 상위카테고리
+  const allTopRes = await fetchAllTopCategories()
+  // 구조: { data: { topCategories: [...] } }
+  const allTopCategories = Array.isArray(allTopRes.data.data.topCategories)
+      ? allTopRes.data.data.topCategories
+      : []
+
+  // 4. 하위카테고리 병합 (카테고리 코드/상위명/ID 등)
+  topCategoryData.categories = (topCategoryData.categories ?? []).map(cat => {
     let matchedTop = allTopCategories.find(top =>
         (top.categories ?? []).some(c => c.categoryId === cat.categoryId)
     )
-    let matchedCategory = matchedTop?.categories.find(c => c.categoryId === cat.categoryId)
+    let matchedCategory = matchedTop?.categories?.find(c => c.categoryId === cat.categoryId)
 
     return {
       ...cat,
       categoryCode: matchedCategory?.categoryCode ?? '',
-      topCategoryId: matchedTop?.topCategoryId ?? '',
+      topCategoryId: String(matchedTop?.topCategoryId ?? ''),
       topCategoryName: matchedTop?.topCategoryName ?? ''
     }
   })
@@ -173,24 +218,27 @@ const saveEdit = async () => {
     await updateTopCategory(topCategoryId, {
       topCategoryName: detail.value.topCategoryName
     })
-    alert('수정 완료')
+    doneModal.value = { show: true, type: 'edit', isTop: true }
     isEditing.value = false
     await loadTopCategory()
   } catch (e) {
-    alert('수정 실패')
+    showError( '수정 실패했습니다.')
   }
 }
 
 const pagedCategories = computed(() => {
   const start = (page.value - 1) * itemsPerPage
-  return detail.value.categories.slice(start, start + itemsPerPage)
+  const arr = detail.value.categories.slice(start, start + itemsPerPage)
+  return arr
 })
 
 const openCategoryEditModal = (category) => {
   // 병합된 데이터에서 정확한 categoryId 찾아서 넘김
   const fullCategory = detail.value.categories.find(c => c.categoryId === category.categoryId)
   console.log('🎯 모달에 넘길 카테고리:', fullCategory)
-  selectedCategory.value = { ...fullCategory }  // ✅ categoryCode 포함된 최신 데이터
+  selectedCategory.value = { ...fullCategory,
+    topCategoryId: String(fullCategory.topCategoryId)
+  }
   showCategoryModal.value = true
 }
 
@@ -203,14 +251,27 @@ const cancelCategoryEdit = () => {
   }
 }
 
+const handleRefresh = async (opts = {}) => {
+  await loadTopCategory()
+  showCategoryModal.value = false // 모달 닫기
+  // 수정 완료 모달 옵션으로 오면 띄움
+  if (opts && opts.showDone) {
+    doneModal.value = {
+      show: true,
+      type: opts.type ?? 'edit',
+      isTop: opts.isTop ?? false
+    }
+  }
+}
+
 const saveCategoryEdit = async (category) => {
   try {
     await updateCategory(category.categoryId, { ...editedCategory.value })
     await loadTopCategory()
     cancelCategoryEdit()
-    alert('하위 카테고리 수정 완료')
+    doneModal.value = { show: true, type: 'edit', isTop: false }
   } catch (e) {
-    alert('하위 카테고리 수정 실패')
+    return showError('하위 카테고리 수정 실패했습니다.')
   }
 }
 
@@ -219,53 +280,27 @@ const getTopCategoryName = (id) => {
   return match ? match.topCategoryName : '-'
 }
 
-const deleteCategoryHandler = async (category) => {
-  if (category.productCount > 0) {
-    alert('해당 카테고리에 연결된 제품이 있어 삭제할 수 없습니다.')
-    return
-  }
-
-  if (!confirm(`카테고리 "${category.categoryName}"을 정말 삭제하시겠습니까?`)) {
-    return
-  }
-
-  try {
-    await deleteCategory(category.categoryId)
-    alert('카테고리가 삭제되었습니다.')
-    await loadTopCategory()
-  } catch (e) {
-    console.error(e)
-    alert('카테고리 삭제 실패')
-  }
-}
-
 const handleDelete = () => {
   if (detail.value.categories.length > 0) {
-    showDeleteModal.value = true
-    return
+    return showError( '하위 카테고리가 존재하여 삭제할 수 없습니다.')
   }
-  if (confirm('정말 삭제하시겠습니까?')) {
-    alert('삭제 처리') // TODO: 삭제 API 호출
+  deleteTarget.value = { id: topCategoryId, isTop: true }
+}
+
+const deleteCategoryHandler = (category) => {
+  if (category.productCount > 0) {
+    return showError('해당 카테고리에 연결된 제품이 있어 삭제할 수 없습니다.')
   }
+  deleteTarget.value = { id: category.categoryId, isTop: false }
 }
 
 onMounted(() => {
   loadTopCategory()
 })
 
-// onMounted(async () => {
-//   await loadTopCategories()
-//   await loadTopCategory()
-// })
-
-// onMounted(() => {
-//   loadTopCategories()
-//   loadTopCategory()
-// })
 </script>
 
 <style scoped>
-/* 기존 스타일 그대로 유지 */
 .info-group {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -314,29 +349,36 @@ button {
   background: #eee;
   cursor: pointer;
 }
-.modal-backdrop {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.4);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-}
-.modal-box {
-  background: #fff;
-  padding: 2rem;
-  border-radius: 10px;
-  width: 320px;
-  text-align: center;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
-}
-.confirm-btn {
-  margin-top: 1rem;
-  padding: 6px 12px;
-  background: #ffc107;
-  border: none;
-  border-radius: 4px;
+
+.action-btn {
+  min-width: 44px;
+  padding: 5px 10px;
+  border-radius: 5px;
+  font-size: 13px;
+  font-weight: 500;
+  outline: none;
   cursor: pointer;
+  transition: all 0.15s;
+  background: #f5f7fa;
+  color: #357ae8;
+  margin: 0 2px;
+}
+.action-btn:hover {
+  background: #e3eefd;
+  color: #185adf;
+  border-color: #357ae8;
+  box-shadow: 0 1px 4px rgba(53, 122, 232, 0.09);
+}
+
+.action-btn.red {
+  background: #fff5f5;
+  color: #df2121;
+  border: 1px solid #f7cccc;
+}
+.action-btn.red:hover {
+  background: #ffe5e5;
+  color: #a30c0c;
+  border-color: #df2121;
+  box-shadow: 0 1px 4px rgba(223,33,33,0.07);
 }
 </style>
