@@ -25,6 +25,7 @@ const peakDayAmount = ref(0)
 const pattern = ref('HOURLY')
 const salesPatternChart = ref(null)
 const shouldRenderChart = ref(true)
+const isLoading = ref(false)
 
 const salesChartSubtitle = ref('시간대별 매출 추이')
 const subtitleMap = {
@@ -52,7 +53,6 @@ function handleSearchKeyword() {
     franchiseId.value = ''
     return
   }
-
   const match = franchiseList.value.find(i => i.name.includes(keyword))
   franchiseId.value = match ? match.id : ''
 }
@@ -68,7 +68,6 @@ async function loadSalesData() {
     todaySales.value = totalSalesAmount ?? 0
     growthRate.value = isFinite(changeRate) ? changeRate : 0
 
-    // 📌 어제 vs 오늘 계산은 DAILY에만 사용
     if (period.value === 'DAILY') {
       if (isFinite(changeRate) && changeRate !== -100) {
         const estimated = todaySales.value / (1 + changeRate / 100)
@@ -77,7 +76,6 @@ async function loadSalesData() {
         yesterdaySales.value = 0
       }
     } else {
-      // 📌 주간/월간은 전 주/전 달 매출 직접 요청
       const prevData = await fetchTotalSales({
         period: period.value,
         franchiseId: franchiseId.value || null,
@@ -102,78 +100,75 @@ function getPreviousPeriodDate() {
   return base.toISOString().slice(0, 10)
 }
 
-async function drawSalesPatternChart() {
-  try {
-    const [hourlyData, weeklyData, dynamicData] = await Promise.all([
-      fetchSalesPattern({ period: 'HOURLY', franchiseId: franchiseId.value || null, targetDate: targetDate.value }),
-      fetchSalesPattern({ period: 'WEEKLY', franchiseId: franchiseId.value || null, targetDate: targetDate.value }),
-      fetchSalesPattern({ period: pattern.value, franchiseId: franchiseId.value || null, targetDate: targetDate.value })
-    ])
+async function waitForCanvasReady() {
+  await nextTick()
+  await new Promise(resolve => requestAnimationFrame(resolve))
+}
 
-    updatePeakHour(hourlyData)
-    updatePeakDay(weeklyData)
+async function drawSalesPatternChart(dynamicData) {
+  await waitForCanvasReady()
+  const canvas = document.getElementById('salesPatternChart')
+  if (!canvas) {
+    console.warn('⛔️ canvas 엘리먼트를 찾을 수 없습니다.')
+    return
+  }
 
-    await nextTick()
+  const ctx = canvas.getContext('2d')
+  if (!ctx) {
+    console.warn('⛔️ canvas context 생성 실패')
+    return
+  }
 
-    const canvas = document.getElementById('salesPatternChart')
-    if (!canvas) return
-    const ctx = canvas.getContext('2d')
-    if (!ctx) return
-    if (salesPatternChart.value) salesPatternChart.value.destroy()
+  if (salesPatternChart.value) {
+    try {
+      salesPatternChart.value.destroy()
+    } catch (e) {
+      console.warn('⚠️ 차트 destroy 중 오류 발생:', e)
+    }
+  }
 
-    const labels = dynamicData.map(i =>
-        pattern.value === 'MONTHLY' ? i.date?.slice(5) :
-            pattern.value === 'WEEKLY' ? i.weekday :
-                `${i.hour}시`
-    )
-    const values = dynamicData.map(i => i.totalAmount)
+  const labels = dynamicData.map(i =>
+      pattern.value === 'MONTHLY' ? i.date?.slice(5) :
+          pattern.value === 'WEEKLY' ? i.weekday :
+              `${i.hour}시`
+  )
+  const values = dynamicData.map(i => i.totalAmount)
 
-    salesPatternChart.value = new Chart(ctx, {
-      type: pattern.value === 'WEEKLY' ? 'bar' : 'line',
-      data: {
-        labels,
-        datasets: [{
-          label: '매출액',
-          data: values,
-          backgroundColor: 'rgba(79, 70, 229, 0.2)',
-          borderColor: 'rgba(79, 70, 229, 1)',
-          borderWidth: 2,
-          tension: 0.4,
-          fill: true
-        }]
+  salesPatternChart.value = new Chart(ctx, {
+    type: pattern.value === 'WEEKLY' ? 'bar' : 'line',
+    data: {
+      labels,
+      datasets: [{
+        label: '매출액',
+        data: values,
+        backgroundColor: 'rgba(79, 70, 229, 0.2)',
+        borderColor: 'rgba(79, 70, 229, 1)',
+        borderWidth: 2,
+        tension: 0.4,
+        fill: true
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: true,
+      aspectRatio: 2.5,
+      plugins: {
+        legend: { display: false }
       },
-      options: {
-        responsive: true,
-        maintainAspectRatio: true,
-        aspectRatio: 2.5,
-        plugins: {
-          legend: { display: false }
-        },
-        scales: {
-          y: {
-            beginAtZero: true,
-            ticks: {
-              callback: val => val >= 1000 ? `${(val / 1000).toFixed(0)}K` : val,
-              font: {
-                size: 15,
-                weight: 'bold'
-              }
-            }
-          },
-          x: {
-            ticks: {
-              font: {
-                size: 15,
-                weight: 'bold'
-              }
-            }
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: {
+            callback: val => val >= 1000 ? `${(val / 1000).toFixed(0)}K` : val,
+            font: { size: 15, weight: 'bold' }
           }
+        },
+        x: {
+          ticks: { font: { size: 15, weight: 'bold' } }
         }
       }
-    })
-  } catch (err) {
-    console.error('매출 패턴 차트 렌더링 실패:', err)
-  }
+    }
+  })
 }
 
 function updatePeakHour(data) {
@@ -191,20 +186,42 @@ function updatePeakDay(data) {
 async function onPatternTabClick(p) {
   pattern.value = p
   salesChartSubtitle.value = subtitleMap[p]
+  isLoading.value = true
+
+  const [hourlyData, weeklyData, dynamicData] = await Promise.all([
+    fetchSalesPattern({ period: 'HOURLY', franchiseId: franchiseId.value || null, targetDate: targetDate.value }),
+    fetchSalesPattern({ period: 'WEEKLY', franchiseId: franchiseId.value || null, targetDate: targetDate.value }),
+    fetchSalesPattern({ period: p, franchiseId: franchiseId.value || null, targetDate: targetDate.value })
+  ])
+
+  updatePeakHour(hourlyData)
+  updatePeakDay(weeklyData)
+
   shouldRenderChart.value = false
   await nextTick()
   shouldRenderChart.value = true
-  await nextTick()
-  await drawSalesPatternChart()
+  await drawSalesPatternChart(dynamicData)
+  isLoading.value = false
 }
 
 async function handleSearchClick() {
+  isLoading.value = true
   await loadSalesData()
+
+  const [hourlyData, weeklyData, dynamicData] = await Promise.all([
+    fetchSalesPattern({ period: 'HOURLY', franchiseId: franchiseId.value || null, targetDate: targetDate.value }),
+    fetchSalesPattern({ period: 'WEEKLY', franchiseId: franchiseId.value || null, targetDate: targetDate.value }),
+    fetchSalesPattern({ period: pattern.value, franchiseId: franchiseId.value || null, targetDate: targetDate.value })
+  ])
+
+  updatePeakHour(hourlyData)
+  updatePeakDay(weeklyData)
+
   shouldRenderChart.value = false
   await nextTick()
   shouldRenderChart.value = true
-  await nextTick()
-  await drawSalesPatternChart()
+  await drawSalesPatternChart(dynamicData)
+  isLoading.value = false
 }
 
 async function resetForm() {
@@ -318,7 +335,15 @@ onMounted(async () => {
           </div>
         </div>
         <div class="chart-container">
-          <canvas v-if="shouldRenderChart" id="salesPatternChart" width="700" height="300"></canvas>
+          <div v-if="isLoading" class="chart-loading">📊 데이터 로딩 중...</div>
+          <canvas
+              :key="pattern"
+              id="salesPatternChart"
+              ref="chartCanvas"
+              width="700"
+              height="300"
+              v-show="!isLoading"
+          />
         </div>
       </div>
     </div>
@@ -493,5 +518,11 @@ canvas {
   display: block;
   margin-left: auto;
   margin-right: auto;
+}
+.chart-loading {
+  text-align: center;
+  font-weight: bold;
+  color: #888;
+  padding: 140px 0;
 }
 </style>

@@ -208,6 +208,11 @@ function drawChart(id, data, type = 'line', horizontal = false, refObj) {
   const valueAxis = horizontal ? 'x' : 'y'
   const categoryAxis = horizontal ? 'y' : 'x'
 
+  // ✅ 최대값 계산 후 여유 buffer (20%) 적용
+  const allValues = data.datasets.flatMap(ds => ds.data)
+  const rawMax = Math.max(...allValues)
+  const suggestedMax = Math.ceil(rawMax * 1.2 * 10) / 10 || 1 // 데이터가 0만 있을 경우 1로 보정
+
   refObj.value = new Chart(ctx, {
     type,
     data,
@@ -226,7 +231,11 @@ function drawChart(id, data, type = 'line', horizontal = false, refObj) {
       scales: {
         [valueAxis]: {
           beginAtZero: true,
-          ticks: { callback: v => `${v.toFixed(0)}%` },
+          min: 0,
+          max: suggestedMax,
+          ticks: {
+            callback: v => `${v.toFixed(1)}%`
+          },
           grid: { color: '#f3f4f6' }
         },
         [categoryAxis]: {
