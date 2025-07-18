@@ -8,3 +8,29 @@ export function firstDummyAPI(memberId) {
 export function secondDummyAPI(memberId) {
     return api.get(`/secondDummy/${memberId}`);
 }
+
+export function fetchTakeBacks(params) {
+    return api.get('/takeback', { params })
+}
+
+export function fetchTakeBackDetail(id) {
+    return api.get(`/takeback/${id}`)
+}
+
+export function approveTakeBackAPI(id) {
+    return api.put(`/takeback/${id}/approve`);
+}
+export function rejectTakeBackAPI(id, request) {
+    return api.put(`/takeback/${id}/reject`, request);
+}
+export function collectTakeBackAPI(id) {
+    return api.put(`/takeback/${id}/collect`);
+}
+
+export function fetchAllWarehouses() {
+    return api.get('/warehouse/all').then(res => res.data.data);
+}
+
+export function fetchAllFranchises() {
+    return api.get('/franchises/all').then(res => res.data.data);
+}

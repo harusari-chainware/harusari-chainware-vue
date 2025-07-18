@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, watch, nextTick } from 'vue'
+import { ref, computed, onMounted, watch, nextTick } from 'vue'
 import Chart from 'chart.js/auto'
 import FilterDate from '@/components/common/filters/FilterDate.vue'
 import {
@@ -22,12 +22,14 @@ const trendChartRef = ref(null)
 const productChartRef = ref(null)
 const trendCanvasEl = ref(null)
 const productCanvasEl = ref(null)
-const showTrendChart = ref(false)
-const showProductChart = ref(false)
 
 const trendRes = ref([])
 const productDataRaw = ref([])
 const productTab = ref('top')
+
+// 👇 오류 방지용 computed
+const showTrendChart = computed(() => trendRes.value.length > 0)
+const showProductChart = computed(() => productDataRaw.value.length > 0)
 
 function getYesterday() {
   const d = new Date()
@@ -70,8 +72,6 @@ function handleSearchKeyword() {
 async function handleSearch() {
   try {
     isLoading.value = true
-    showTrendChart.value = false
-    showProductChart.value = false
 
     const trendParams = { period: period.value, targetDate: targetDate.value }
     const productParams = { period: period.value, targetDate: targetDate.value }
@@ -88,39 +88,28 @@ async function handleSearch() {
     productDataRaw.value = await fetchInventoryTurnover(productParams)
 
     await nextTick()
-    showTrendChart.value = true
-    showProductChart.value = true
+    requestAnimationFrame(() => {
+      drawTrendChart()
+      drawProductChart()
+    })
   } catch (err) {
-    console.error(' 재고 회전율 데이터 로드 실패:', err)
+    console.error('재고 회전율 데이터 로드 실패:', err)
   } finally {
     isLoading.value = false
   }
 }
 
 function delayedSearch(newPeriod) {
-  isLoading.value = true
   period.value = newPeriod
-  setTimeout(() => handleSearch(), 300)
+  handleSearch()
 }
 
 function changeProductTab(tab) {
   productTab.value = tab
-  drawProductChart()
+  requestAnimationFrame(() => {
+    drawProductChart()
+  })
 }
-
-watch(showTrendChart, async (v) => {
-  if (v) {
-    await nextTick()
-    requestAnimationFrame(drawTrendChart)
-  }
-})
-
-watch(showProductChart, async (v) => {
-  if (v) {
-    await nextTick()
-    requestAnimationFrame(drawProductChart)
-  }
-})
 
 function drawTrendChart() {
   const canvas = trendCanvasEl.value
@@ -129,7 +118,7 @@ function drawTrendChart() {
   const ctx = canvas.getContext('2d')
   if (!ctx) return
 
-  if (trendChartRef.value && typeof trendChartRef.value.destroy === 'function') {
+  if (trendChartRef.value?.destroy) {
     trendChartRef.value.destroy()
   }
 
@@ -162,27 +151,15 @@ function drawProductChart() {
   const ctx = canvas.getContext('2d')
   if (!ctx) return
 
-  if (productChartRef.value && typeof productChartRef.value.destroy === 'function') {
+  if (productChartRef.value?.destroy) {
     productChartRef.value.destroy()
   }
 
   const source = [...productDataRaw.value]
-
-  // ✅ 유효한 데이터만 필터링
-  const validData = source.filter(i =>
-      typeof i.turnoverRate === 'number' && !isNaN(i.turnoverRate)
-  )
-
-  // ✅ 정렬 및 상위/하위 10개 추출
-  const sorted =
-      productTab.value === 'top'
-          ? validData.sort((a, b) => b.turnoverRate - a.turnoverRate).slice(0, 10)
-          : validData.sort((a, b) => a.turnoverRate - b.turnoverRate).slice(0, 10)
-
-  // ✅ 디버깅용 콘솔 로그
-  console.log('📦 productDataRaw:', productDataRaw.value)
-  console.log('✅ validData:', validData)
-  console.log('🎯 sorted:', sorted)
+  const validData = source.filter(i => typeof i.turnoverRate === 'number' && !isNaN(i.turnoverRate))
+  const sorted = productTab.value === 'top'
+      ? validData.sort((a, b) => b.turnoverRate - a.turnoverRate).slice(0, 10)
+      : validData.sort((a, b) => a.turnoverRate - b.turnoverRate).slice(0, 10)
 
   const data = {
     labels: sorted.map(i => i.productName),
@@ -193,7 +170,7 @@ function drawProductChart() {
         backgroundColor: 'rgba(99, 102, 241, 0.5)',
         borderColor: 'rgba(99, 102, 241, 1)',
         borderWidth: 1,
-        barThickness: 30  // ✅ 막대 너비 강제 설정
+        barThickness: 30
       }
     ]
   }
@@ -201,7 +178,7 @@ function drawProductChart() {
   productChartRef.value = new Chart(ctx, {
     type: 'bar',
     data,
-    options: chartOptions('x', 'y')  // x = value axis, y = category axis
+    options: chartOptions('x', 'y')
   })
 }
 
@@ -305,9 +282,11 @@ watch(locationType, () => {
             <button :class="{ active: period === 'MONTHLY' }" @click="() => delayedSearch('MONTHLY')">월간</button>
           </div>
         </div>
-        <canvas v-if="showTrendChart" id="turnoverTrendChart" ref="trendCanvasEl"></canvas>
+        <div v-if="isLoading" class="chart-loading">📈 데이터 로딩 중...</div>
+        <canvas v-if="showTrendChart && !isLoading" id="turnoverTrendChart" ref="trendCanvasEl" />
       </div>
 
+      <!-- 📦 상품별 회전율 -->
       <div class="chart-card col-4">
         <div class="chart-header">
           <h3>제품별 재고 회전율</h3>
@@ -316,7 +295,8 @@ watch(locationType, () => {
             <button :class="{ active: productTab === 'bottom' }" @click="() => changeProductTab('bottom')">하위 10개</button>
           </div>
         </div>
-        <canvas v-if="showProductChart" id="productTurnoverChart" ref="productCanvasEl"></canvas>
+        <div v-if="isLoading" class="chart-loading">📦 데이터 로딩 중...</div>
+        <canvas v-if="showProductChart && !isLoading" id="productTurnoverChart" ref="productCanvasEl" />
       </div>
     </div>
   </div>
@@ -416,5 +396,11 @@ watch(locationType, () => {
 canvas {
   width: 100% !important;
   height: 300px !important;
+}
+.chart-loading {
+  text-align: center;
+  font-weight: bold;
+  color: #888;
+  padding: 100px 0;
 }
 </style>
