@@ -44,6 +44,7 @@
             </div>
         </div>
     </div>
+    <ConfirmModal ref="alertModal" />
 </template>
 
 <script setup>
@@ -52,6 +53,7 @@ import { useRouter } from 'vue-router'
 import InputField from '@/components/common/fields/InputField.vue'
 import SelectField from '@/components/common/fields/SelectField.vue'
 import { updateMember, deleteMember } from '@/features/member/api.js'
+import ConfirmModal from "@/features/member/mypage/components/ConfirmModal.vue";
 
 const props = defineProps({
     member: { type: Object, required: true }
@@ -60,6 +62,7 @@ const props = defineProps({
 const emit = defineEmits(['refresh'])
 const router = useRouter()
 const isEditMode = ref(false)
+const alertModal = ref(null);
 
 const form = ref({
     name: '',
@@ -164,7 +167,7 @@ const cancelEdit = () => {
 
 const handleSave = async () => {
     if (!form.value.authorityName) {
-        alert('권한을 선택해주세요.')
+        await alertModal.value.open('권한을 선택해주세요.')
         return
     }
     if (!confirm('회원 정보를 수정하시겠습니까?')) return
@@ -179,7 +182,7 @@ const handleSave = async () => {
         isEditMode.value = false
     } catch (error) {
         console.error('회원 정보 수정 실패:', error)
-        alert('회원 정보 수정에 실패했습니다.')
+        await alertModal.value.open('회원 정보 수정에 실패했습니다.')
     }
 }
 
@@ -188,11 +191,11 @@ const handleDelete = async () => {
 
     try {
         await deleteMember(props.member.memberId)
-        alert('회원이 탈퇴 처리되었습니다.')
+        await alertModal.value.open('회원이 탈퇴 처리되었습니다.')
         await router.push('/member/list')
     } catch (error) {
         console.error('회원 탈퇴 실패:', error)
-        alert('회원 탈퇴 처리에 실패했습니다.')
+        await alertModal.value.open('회원 탈퇴 처리에 실패했습니다.')
     }
 }
 

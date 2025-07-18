@@ -48,6 +48,7 @@
             </transition>
         </template>
     </DetailLayout>
+    <ConfirmModal ref="alertModal" />
 </template>
 
 <script setup>
@@ -55,6 +56,7 @@ import { reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import DetailLayout from '@/components/layout/DetailLayout.vue'
 import { changePassword } from '@/features/member/api.js'
+import ConfirmModal from "@/features/member/mypage/components/ConfirmModal.vue";
 
 const router = useRouter()
 
@@ -67,6 +69,7 @@ const form = reactive({
 const currentError = ref('')
 const passwordError = ref('')
 const confirmError = ref('')
+const alertModal = ref(null);
 
 const validatePassword = (password) => password.length >= 8
 
@@ -92,11 +95,11 @@ const handleSubmit = async () => {
 
     try {
         await changePassword(form)
-        alert('비밀번호가 변경되었습니다. 다시 로그인해주세요.')
+        await alertModal.value.open('비밀번호가 변경되었습니다.\n다시 로그인해주세요.')
         await router.push('/login')
     } catch (error) {
         const message = error.response?.data?.message || '비밀번호 변경에 실패했습니다.'
-        alert(message)
+        await alertModal.value.open(message)
     }
 }
 </script>
