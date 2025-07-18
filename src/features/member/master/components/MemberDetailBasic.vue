@@ -170,13 +170,13 @@ const handleSave = async () => {
         await alertModal.value.open('권한을 선택해주세요.')
         return
     }
-    if (!confirm('회원 정보를 수정하시겠습니까?')) return
 
     try {
         const payload = {
             ...form.value,
             phoneNumber: form.value.phoneNumber.replace(/\D/g, '')
         }
+        await alertModal.value.open('회원 정보를 수정하시겠습니까?')
         await updateMember(props.member.memberId, payload)
         emit('refresh')
         isEditMode.value = false
@@ -187,9 +187,8 @@ const handleSave = async () => {
 }
 
 const handleDelete = async () => {
-    if (!confirm('정말로 이 회원을 탈퇴 처리하시겠습니까?')) return
-
     try {
+        await alertModal.value.open('정말로 이 회원을 탈퇴 처리하시겠습니까?')
         await deleteMember(props.member.memberId)
         await alertModal.value.open('회원이 탈퇴 처리되었습니다.')
         await router.push('/member/list')
