@@ -9,7 +9,7 @@ export const orderRoutes = [
         component: OrderListView,
         meta: {
             requiresAuth: true,
-            roles: ['GENERAL_MANAGER', 'SENIOR_MANAGER', 'WAREHOUSE_MANAGER', 'FRANCHISE_MANAGER']
+            roles: ['GENERAL_MANAGER', 'SENIOR_MANAGER', 'WAREHOUSE_MANAGER', 'FRANCHISE_MANAGER', 'SUPER_ADMIN']
         }
     },
     {
@@ -18,7 +18,7 @@ export const orderRoutes = [
         component: OrderRegisterView,
         meta: {
             requiresAuth: true,
-            roles: ['FRANCHISE_MANAGER']
+            roles: ['FRANCHISE_MANAGER', 'SUPER_ADMIN']
         }
     },
     {
@@ -28,7 +28,7 @@ export const orderRoutes = [
         props: true,
         meta: {
             requiresAuth: true,
-            roles: ['GENERAL_MANAGER', 'SENIOR_MANAGER', 'WAREHOUSE_MANAGER', 'FRANCHISE_MANAGER']
+            roles: ['GENERAL_MANAGER', 'SENIOR_MANAGER', 'WAREHOUSE_MANAGER', 'FRANCHISE_MANAGER', 'SUPER_ADMIN']
         }
     },
 ];
