@@ -206,7 +206,6 @@ const pagedCategories = computed(() => {
 const openCategoryEditModal = (category) => {
   // 병합된 데이터에서 정확한 categoryId 찾아서 넘김
   const fullCategory = detail.value.categories.find(c => c.categoryId === category.categoryId)
-  console.log('🎯 모달에 넘길 카테고리:', fullCategory)
   selectedCategory.value = { ...fullCategory,
     topCategoryId: String(fullCategory.topCategoryId)
   }

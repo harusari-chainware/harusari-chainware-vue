@@ -74,8 +74,11 @@ const categoryOptions = ref([{ label: '전체', value: '' }])
 
 const isGeneralManager = computed(() => authority === 'GENERAL_MANAGER')
 const isSeniorManager = computed(() => authority === 'SENIOR_MANAGER')
+const isSuperAdmin = computed(() => authority === 'SUPER_ADMIN')
 
-const isManager = computed(() => isGeneralManager.value || isSeniorManager.value)
+const isManager = computed(() =>
+    isGeneralManager.value || isSeniorManager.value || isSuperAdmin.value
+)
 
 onMounted(async () => {
   // 1. 상위 카테고리(이름/ID만)
@@ -116,13 +119,11 @@ const PAGE_SIZE = 10
 const pagedProducts = computed(() => products.value)
 
 const loadProducts = async () => {
-  console.log('[loadProducts] filters:', filters)
   const params = {
     ...filters,
     page: page.value,
     size: PAGE_SIZE
   }
-  console.log('[loadProducts] params:', params)
   Object.keys(params).forEach(k => {
     if (params[k] === '' || params[k] == null) delete params[k]
   })
@@ -132,7 +133,6 @@ const loadProducts = async () => {
 }
 
 const handleSearch = (newFilters) => {
-  console.log('[handleSearch] 전달된 값:', newFilters)
   Object.assign(filters, newFilters) // 부모 filters reactive에 반영!
   page.value = 1
   loadProducts()

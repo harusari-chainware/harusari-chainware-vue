@@ -102,7 +102,7 @@ async function handleLogin() {
 
             if (decoded.authority === 'MASTER') {
                 await router.push('/member/list');
-            } else if (decoded.authority === 'GENERAL_MANAGER' || decoded.authority === 'SENIOR_MANAGER') {
+            } else if (decoded.authority === 'GENERAL_MANAGER' || decoded.authority === 'SENIOR_MANAGER' || decoded.authority === 'SUPER_ADMIN') {
                 await router.push('/dashboard/prediction');
             } else if (decoded.authority === 'WAREHOUSE_MANAGER') {
                 await router.push('/purchases/list');
