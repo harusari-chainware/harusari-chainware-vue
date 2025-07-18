@@ -7,9 +7,9 @@
       @add-product="() => emit('add-product')"
   >
     <!-- 제품 추가 버튼 -->
-    <template #actions>
+<!--    <template #actions>
       <StatusButton type="primary" @click="() => emit('add-product')">+ 제품 추가</StatusButton>
-    </template>
+    </template>-->
 
     <!-- 수량 입력 -->
     <template #cell-quantity="{ item, index }">

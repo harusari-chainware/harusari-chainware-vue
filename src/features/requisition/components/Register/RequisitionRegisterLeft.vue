@@ -95,7 +95,7 @@ onMounted(async () => {
 
 
 function openVendorSearch() {
-  const keyword = props.vendor?.vendorName || ''
+  const keyword = props.vendor?.vendorId || ''
   emit('searchVendor', keyword) // keyword 포함 emit
 }
 

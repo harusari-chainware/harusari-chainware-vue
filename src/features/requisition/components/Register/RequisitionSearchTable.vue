@@ -58,7 +58,7 @@ const props = defineProps({
   type: String,
   multi: { type: Boolean, default: false },
   selected: { type: Array, default: () => [] },
-  vendorName: { type: String, default: null }
+  vendorId: { type: Number, default: null }
 })
 
 const emit = defineEmits(['update:selected', 'select'])
@@ -110,7 +110,7 @@ const submitSelected = () => {
 async function fetchDataByType(type) {
   switch (type) {
     case 'product': {
-      if (!props.vendorName) {
+      if (!props.vendorId) {
         tableConfig.value = {
           columns: [],
           data: [],
@@ -123,7 +123,7 @@ async function fetchDataByType(type) {
 
       try {
         const res = await fetchContracts({
-          vendorName: props.vendorName,
+          vendorId: props.vendorId,
           page: currentPage.value,
           size: itemsPerPage
         })
@@ -178,7 +178,7 @@ watch(currentPage, async () => {
   }
 })
 
-watch(() => props.vendorName, async () => {
+watch(() => props.vendorId, async () => {
   currentPage.value = 1
   await fetchDataByType(props.type)
 })
