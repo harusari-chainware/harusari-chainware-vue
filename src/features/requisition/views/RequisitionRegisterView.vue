@@ -52,6 +52,7 @@ onMounted(() => {
       items: props.initialData.items || []
     })
   }
+  openSearch('product')
 })
 
 const showRightPanel = ref(false)
@@ -230,7 +231,7 @@ function resetForm() {
           :type="searchType"
           :keyword="searchKeyword"
           :multi="searchType === 'product'"
-          :vendor-name="form.vendor?.vendorName"
+          :vendor-id="form.vendor?.vendorId"
           @select="handleSelect"
           @selectProduct="handleSelectProducts"
           @close="showRightPanel = false"

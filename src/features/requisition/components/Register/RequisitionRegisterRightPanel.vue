@@ -3,7 +3,7 @@
       <div class="right-panel">
         <RequisitionSearchTable
             type="product"
-            :vendor-name="props.vendorName"
+            :vendor-id="props.vendorId"
             :multi="true"
             :selected="selectedProduct ? [selectedProduct] : []"
             @update:selected="(val) => selectedProduct = val[0]"
@@ -20,7 +20,7 @@
 
       const props = defineProps({
         type: String,
-        vendorName: String
+        vendorId: Number
       })
       const panelTitle = computed(() => '계약 상품 검색')
 

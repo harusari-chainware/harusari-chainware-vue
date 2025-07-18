@@ -58,13 +58,16 @@
             </div>
         </div>
     </div>
+    <ConfirmModal ref="alertModal" />
 </template>
 
 <script setup>
 import {ref, defineProps, defineEmits, nextTick, watch} from 'vue';
+import ConfirmModal from "@/features/member/mypage/components/ConfirmModal.vue";
 
 const props = defineProps({ form: Object });
 const emits = defineEmits(['update:agreementFile']);
+const alertModal = ref(null);
 
 const agreementFileName = ref('');
 
@@ -73,12 +76,12 @@ function handleFileChange(event) {
     if (!file) return;
 
     if (file.type !== 'application/pdf') {
-        alert('PDF 파일만 업로드 가능합니다.');
+        alertModal.value.open('PDF 파일만 업로드 가능합니다.');
         event.target.value = '';
         return;
     }
     if (file.size > 10 * 1024 * 1024) {
-        alert('10MB 이하의 파일만 업로드 가능합니다.');
+        alertModal.value.open('10MB 이하의 파일만 업로드 가능합니다.');
         event.target.value = '';
         return;
     }
@@ -94,7 +97,7 @@ function removeFile() {
 
 function execDaumPostcode() {
     if (!window.daum || !window.daum.Postcode) {
-        alert('주소 검색 서비스를 불러오지 못했습니다. 네트워크 상태를 확인하거나 새로고침해 주세요.');
+        alertModal.value.open('주소 검색 서비스를 불러오지 못했습니다.\n네트워크 상태를 확인하거나 새로고침해 주세요.');
         return;
     }
 

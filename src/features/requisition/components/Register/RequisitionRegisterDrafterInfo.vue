@@ -1,4 +1,3 @@
-<!-- OrderRegisterStoreInfo.vue -->
 <template>
   <RegisterInfoGroup title="기안자 정보">
     <div class="grid grid-2 gap-6">
