@@ -186,7 +186,6 @@ const allMenus = [
     roles: [ 'WAREHOUSE_MANAGER', 'FRANCHISE_MANAGER']
   }
 ]
-
 // 권한에 따라 필터링된 메뉴
 const accessibleMenus = computed(() =>
     allMenus.filter(menu => menu.roles.includes(userRole.value))
