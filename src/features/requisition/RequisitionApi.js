@@ -32,3 +32,7 @@ export function approveRequisition(requisitionId){
 export const deleteRequisition = (requisitionId) => {
     return api.delete(`/requisitions/${requisitionId}`)
 }
+
+export const updateRequisition = (requisitionId, payload) => {
+    return api.put(`/requisitions/${requisitionId}`, payload)
+}

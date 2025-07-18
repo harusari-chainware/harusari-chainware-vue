@@ -18,6 +18,7 @@ const franchises = ref([])
 const searchKeyword = ref('')
 const isLoading = ref(false)
 const shouldRenderChart = ref(true)
+const isSearching = ref(false)
 
 const trendChartRef = ref(null)
 const productChartRef = ref(null)
@@ -40,6 +41,30 @@ function formatXAxisLabels(dates, period) {
   return dates
 }
 
+function extractAllLabelsFromBackend(trendRes, period) {
+  const allDates = [
+    ...trendRes.total.map(i => i.date),
+    ...trendRes.headquarters.map(i => i.date),
+    ...trendRes.franchises.map(i => i.date)
+  ]
+  const labelSet = new Set(
+      period === 'MONTHLY'
+          ? allDates.map(d => `${new Date(d).getMonth() + 1}월`)
+          : formatXAxisLabels(allDates, period)
+  )
+  return Array.from(labelSet).sort((a, b) => a.localeCompare(b, 'ko-KR', { numeric: true }))
+}
+
+function alignDataByLabels(dataArr, labels, period) {
+  const keyFunc = i =>
+      period === 'MONTHLY'
+          ? `${new Date(i.date).getMonth() + 1}월`
+          : formatXAxisLabels([i.date], period)[0]
+
+  const dataMap = Object.fromEntries(dataArr.map(i => [keyFunc(i), i.disposalRate]))
+  return labels.map(label => dataMap[label] ?? 0)
+}
+
 async function loadLocationOptions() {
   if (locationType.value === 'warehouse') {
     warehouses.value = await fetchAllWarehouses()
@@ -57,6 +82,7 @@ function handleSearchKeyword() {
 async function handleSearch() {
   try {
     isLoading.value = true
+    isSearching.value = true
     shouldRenderChart.value = false
     await nextTick()
 
@@ -79,14 +105,15 @@ async function handleSearch() {
     }
 
     const trendRes = await fetchDisposalTrend(trendParams)
+    const allLabels = extractAllLabelsFromBackend(trendRes, period.value)
 
     const trendData = locationType.value === 'all'
         ? {
-          labels: formatXAxisLabels(trendRes.total.map(i => i.date), period.value),
+          labels: allLabels,
           datasets: [
             {
               label: '전체',
-              data: trendRes.total.map(i => i.disposalRate),
+              data: alignDataByLabels(trendRes.total, allLabels, period.value),
               borderColor: '#3b82f6',
               backgroundColor: 'rgba(59, 130, 246, 0.1)',
               fill: true,
@@ -94,7 +121,7 @@ async function handleSearch() {
             },
             {
               label: '본사 창고',
-              data: trendRes.headquarters.map(i => i.disposalRate),
+              data: alignDataByLabels(trendRes.headquarters, allLabels, period.value),
               borderColor: '#60a5fa',
               backgroundColor: 'rgba(147, 197, 253, 0.2)',
               fill: true,
@@ -102,7 +129,7 @@ async function handleSearch() {
             },
             {
               label: '가맹점',
-              data: trendRes.franchises.map(i => i.disposalRate),
+              data: alignDataByLabels(trendRes.franchises, allLabels, period.value),
               borderColor: '#facc15',
               backgroundColor: 'rgba(251, 191, 36, 0.2)',
               fill: true,
@@ -111,7 +138,7 @@ async function handleSearch() {
           ]
         }
         : {
-          labels: formatXAxisLabels(trendRes.map(i => i.date), period.value),
+          labels: allLabels,
           datasets: [
             {
               label: trendRes[0]?.targetName ?? '선택 대상',
@@ -133,16 +160,12 @@ async function handleSearch() {
     }, 0)
 
     const productRes = await fetchDisposalRate(productParams)
-
     const productGrouped = {}
     for (const item of productRes) {
-      const key =
-          period.value === 'MONTHLY'
-              ? `${new Date(item.date).getMonth() + 1}월`
-              : period.value === 'WEEKLY'
-                  ? `${new Date(item.date).getMonth() + 1}월 ${Math.ceil(new Date(item.date).getDate() / 7)}주차`
-                  : item.date
-      productGrouped[item.productName] = (productGrouped[item.productName] || 0) + item.disposalRate
+      const key = item.productName
+      if (item.disposalRate > 0) {
+        productGrouped[key] = (productGrouped[key] || 0) + item.disposalRate
+      }
     }
 
     const productChartData = {
@@ -162,9 +185,10 @@ async function handleSearch() {
       drawChart('disposalProductChart', productChartData, 'bar', true, productChartRef)
     }, 0)
   } catch (err) {
-    console.error('❌ 폐기율 데이터 로드 실패:', err)
+    console.error('폐기율 데이터 로드 실패:', err)
   } finally {
-    isLoading.value = false
+    setTimeout(() => (isLoading.value = false), 200)
+    setTimeout(() => (isSearching.value = false), 300)
   }
 }
 
@@ -176,16 +200,9 @@ function delayedSearch(newPeriod) {
 
 function drawChart(id, data, type = 'line', horizontal = false, refObj) {
   const canvas = document.getElementById(id)
-  if (!canvas) {
-    console.warn(`⚠️ Canvas element not found: #${id}`)
-    return
-  }
+  if (!canvas) return
   const ctx = canvas.getContext('2d')
-  if (!ctx) {
-    console.warn(`⚠️ Canvas context not available for: #${id}`)
-    return
-  }
-
+  if (!ctx) return
   if (refObj.value && typeof refObj.value.destroy === 'function') refObj.value.destroy()
 
   const valueAxis = horizontal ? 'x' : 'y'
@@ -202,14 +219,14 @@ function drawChart(id, data, type = 'line', horizontal = false, refObj) {
         legend: { display: true },
         tooltip: {
           callbacks: {
-            label: ctx => `${ctx.dataset.label}: ${ctx.parsed[horizontal ? 'x' : 'y']}%`
+            label: ctx => `${ctx.dataset.label}: ${ctx.parsed[horizontal ? 'x' : 'y'].toFixed(2)}%`
           }
         }
       },
       scales: {
         [valueAxis]: {
           beginAtZero: true,
-          ticks: { callback: v => `${v}%` },
+          ticks: { callback: v => `${v.toFixed(0)}%` },
           grid: { color: '#f3f4f6' }
         },
         [categoryAxis]: {
@@ -270,8 +287,9 @@ watch(locationType, () => {
           <FilterDate label="기준일" v-model="targetDate" />
         </div>
         <div class="filter-item">
-          <label style="visibility: hidden">조회</label>
-          <button class="btn-search" @click="handleSearch">조회</button>
+          <button class="btn-search" @click="handleSearch">
+            조회
+          </button>
         </div>
       </div>
     </div>
@@ -286,10 +304,12 @@ watch(locationType, () => {
             <button :class="{ active: period === 'MONTHLY' }" @click="() => delayedSearch('MONTHLY')">월간</button>
           </div>
         </div>
+        <div v-if="isLoading" class="chart-loading">📊 데이터 로딩 중...</div>
         <canvas v-if="shouldRenderChart" id="disposalTrendChart"></canvas>
       </div>
       <div class="chart-card col-4">
         <h3>상품별 폐기율</h3>
+        <div v-if="isLoading" class="chart-loading">📦 데이터 로딩 중...</div>
         <canvas v-if="shouldRenderChart" id="disposalProductChart"></canvas>
       </div>
     </div>
@@ -297,6 +317,30 @@ watch(locationType, () => {
 </template>
 
 <style scoped>
+.chart-loading {
+  text-align: center;
+  font-weight: bold;
+  color: #888;
+  padding: 1.5rem 0;
+}
+.dashboard {
+  padding: 2rem;
+  background-color: #f7f9fc;
+  font-family: 'Noto Sans KR', sans-serif;
+  position: relative;
+}
+.loading-overlay {
+  position: absolute;
+  top: 70px;
+  left: 0;
+  right: 0;
+  background: rgba(255, 255, 255, 0.8);
+  color: #3b82f6;
+  font-weight: bold;
+  padding: 1rem;
+  text-align: center;
+  z-index: 10;
+}
 .dashboard {
   padding: 2rem;
   background-color: #f7f9fc;

@@ -17,8 +17,15 @@ const franchises = ref([])
 const warehouses = ref([])
 const searchKeyword = ref('')
 const isLoading = ref(false)
+
 const trendChartRef = ref(null)
 const productChartRef = ref(null)
+const trendCanvasEl = ref(null)
+const productCanvasEl = ref(null)
+const showTrendChart = ref(false)
+const showProductChart = ref(false)
+
+const trendRes = ref([])
 const productDataRaw = ref([])
 const productTab = ref('top')
 
@@ -49,7 +56,7 @@ function formatXAxisLabels(dates, period) {
 async function loadLocationOptions() {
   if (locationType.value === 'warehouse') {
     warehouses.value = await fetchAllWarehouses()
-  } else if (locationType.value === 'franchise') {
+  } else {
     franchises.value = await fetchAllFranchises()
   }
 }
@@ -63,14 +70,12 @@ function handleSearchKeyword() {
 async function handleSearch() {
   try {
     isLoading.value = true
-    const trendParams = {
-      period: period.value,
-      targetDate: targetDate.value || undefined
-    }
-    const productParams = {
-      period: period.value,
-      targetDate: targetDate.value || undefined
-    }
+    showTrendChart.value = false
+    showProductChart.value = false
+
+    const trendParams = { period: period.value, targetDate: targetDate.value }
+    const productParams = { period: period.value, targetDate: targetDate.value }
+
     if (locationType.value === 'warehouse' && locationId.value) {
       trendParams.warehouseId = Number(locationId.value)
       productParams.warehouseId = Number(locationId.value)
@@ -78,27 +83,15 @@ async function handleSearch() {
       trendParams.franchiseId = Number(locationId.value)
       productParams.franchiseId = Number(locationId.value)
     }
-    const trendRes = await fetchInventoryTurnoverTrend(trendParams)
-    const productRes = await fetchInventoryTurnover(productParams)
-    const trendData = {
-      labels: formatXAxisLabels(trendRes.map(i => i.date), period.value),
-      datasets: [
-        {
-          label: '재고 회전율',
-          data: trendRes.map(i => i.turnoverRate),
-          backgroundColor: 'rgba(96, 165, 250, 0.2)',
-          borderColor: 'rgba(96, 165, 250, 1)',
-          pointBackgroundColor: 'rgba(96, 165, 250, 1)',
-          fill: true,
-          tension: 0.3
-        }
-      ]
-    }
-    drawChart('turnoverTrendChart', trendData, 'line', false, trendChartRef)
-    productDataRaw.value = productRes
-    drawProductChart()
+
+    trendRes.value = await fetchInventoryTurnoverTrend(trendParams)
+    productDataRaw.value = await fetchInventoryTurnover(productParams)
+
+    await nextTick()
+    showTrendChart.value = true
+    showProductChart.value = true
   } catch (err) {
-    console.error('❌ 재고 회전율 데이터 로드 실패:', err)
+    console.error(' 재고 회전율 데이터 로드 실패:', err)
   } finally {
     isLoading.value = false
   }
@@ -107,7 +100,7 @@ async function handleSearch() {
 function delayedSearch(newPeriod) {
   isLoading.value = true
   period.value = newPeriod
-  setTimeout(() => handleSearch(), 1000)
+  setTimeout(() => handleSearch(), 300)
 }
 
 function changeProductTab(tab) {
@@ -115,13 +108,83 @@ function changeProductTab(tab) {
   drawProductChart()
 }
 
+watch(showTrendChart, async (v) => {
+  if (v) {
+    await nextTick()
+    requestAnimationFrame(drawTrendChart)
+  }
+})
+
+watch(showProductChart, async (v) => {
+  if (v) {
+    await nextTick()
+    requestAnimationFrame(drawProductChart)
+  }
+})
+
+function drawTrendChart() {
+  const canvas = trendCanvasEl.value
+  if (!canvas || typeof canvas.getContext !== 'function') return
+
+  const ctx = canvas.getContext('2d')
+  if (!ctx) return
+
+  if (trendChartRef.value && typeof trendChartRef.value.destroy === 'function') {
+    trendChartRef.value.destroy()
+  }
+
+  const data = {
+    labels: formatXAxisLabels(trendRes.value.map(i => i.date), period.value),
+    datasets: [
+      {
+        label: '재고 회전율',
+        data: trendRes.value.map(i => i.turnoverRate),
+        backgroundColor: 'rgba(96, 165, 250, 0.2)',
+        borderColor: 'rgba(96, 165, 250, 1)',
+        pointBackgroundColor: 'rgba(96, 165, 250, 1)',
+        fill: true,
+        tension: 0.3
+      }
+    ]
+  }
+
+  trendChartRef.value = new Chart(ctx, {
+    type: 'line',
+    data,
+    options: chartOptions('y', 'x')
+  })
+}
+
 function drawProductChart() {
+  const canvas = productCanvasEl.value
+  if (!canvas || typeof canvas.getContext !== 'function') return
+
+  const ctx = canvas.getContext('2d')
+  if (!ctx) return
+
+  if (productChartRef.value && typeof productChartRef.value.destroy === 'function') {
+    productChartRef.value.destroy()
+  }
+
   const source = [...productDataRaw.value]
+
+  // ✅ 유효한 데이터만 필터링
+  const validData = source.filter(i =>
+      typeof i.turnoverRate === 'number' && !isNaN(i.turnoverRate)
+  )
+
+  // ✅ 정렬 및 상위/하위 10개 추출
   const sorted =
       productTab.value === 'top'
-          ? source.sort((a, b) => b.turnoverRate - a.turnoverRate).slice(0, 10)
-          : source.sort((a, b) => a.turnoverRate - b.turnoverRate).slice(0, 10)
-  const productChartData = {
+          ? validData.sort((a, b) => b.turnoverRate - a.turnoverRate).slice(0, 10)
+          : validData.sort((a, b) => a.turnoverRate - b.turnoverRate).slice(0, 10)
+
+  // ✅ 디버깅용 콘솔 로그
+  console.log('📦 productDataRaw:', productDataRaw.value)
+  console.log('✅ validData:', validData)
+  console.log('🎯 sorted:', sorted)
+
+  const data = {
     labels: sorted.map(i => i.productName),
     datasets: [
       {
@@ -129,49 +192,44 @@ function drawProductChart() {
         data: sorted.map(i => i.turnoverRate),
         backgroundColor: 'rgba(99, 102, 241, 0.5)',
         borderColor: 'rgba(99, 102, 241, 1)',
-        borderWidth: 1
+        borderWidth: 1,
+        barThickness: 30  // ✅ 막대 너비 강제 설정
       }
     ]
   }
-  drawChart('productTurnoverChart', productChartData, 'bar', true, productChartRef)
+
+  productChartRef.value = new Chart(ctx, {
+    type: 'bar',
+    data,
+    options: chartOptions('x', 'y')  // x = value axis, y = category axis
+  })
 }
 
-function drawChart(id, data, type = 'line', horizontal = false, refObj) {
-  nextTick(() => {
-    const ctx = document.getElementById(id)?.getContext('2d')
-    if (!ctx) return
-    if (refObj.value && typeof refObj.value.destroy === 'function') refObj.value.destroy()
-    const valueAxis = horizontal ? 'x' : 'y'
-    const categoryAxis = horizontal ? 'y' : 'x'
-    refObj.value = new Chart(ctx, {
-      type,
-      data,
-      options: {
-        indexAxis: horizontal ? 'y' : 'x',
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: { display: true },
-          tooltip: {
-            callbacks: {
-              label: ctx => `${ctx.dataset.label}: ${ctx.parsed[horizontal ? 'x' : 'y']}회`
-            }
-          }
-        },
-        scales: {
-          [valueAxis]: {
-            beginAtZero: true,
-            ticks: { callback: v => `${v}회` },
-            grid: { color: '#f3f4f6' }
-          },
-          [categoryAxis]: {
-            ticks: { autoSkip: false },
-            grid: { color: '#f9fafb' }
-          }
+function chartOptions(valueAxis, categoryAxis) {
+  return {
+    indexAxis: valueAxis === 'x' ? 'y' : 'x',
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { display: true },
+      tooltip: {
+        callbacks: {
+          label: ctx => `${ctx.dataset.label}: ${ctx.parsed[valueAxis]}회`
         }
       }
-    })
-  })
+    },
+    scales: {
+      [valueAxis]: {
+        beginAtZero: true,
+        ticks: { callback: v => `${v}회` },
+        grid: { color: '#f3f4f6' }
+      },
+      [categoryAxis]: {
+        ticks: { autoSkip: false },
+        grid: { color: '#f9fafb' }
+      }
+    }
+  }
 }
 
 onMounted(() => {
@@ -232,7 +290,7 @@ watch(locationType, () => {
         </div>
         <div class="filter-item">
           <label style="visibility: hidden">조회</label>
-          <button class="btn-search" @click="handleSearch">조회</button>
+          <button class="btn-search" :disabled="isLoading" @click="handleSearch">조회</button>
         </div>
       </div>
     </div>
@@ -242,24 +300,14 @@ watch(locationType, () => {
         <div class="chart-header">
           <h3>재고 회전율 추이</h3>
           <div class="tab-buttons">
-            <button
-                v-if="locationType !== 'franchise'"
-                :class="{ active: period === 'DAILY' }"
-                @click="() => delayedSearch('DAILY')"
-            >일간</button>
-            <button
-                v-if="locationType !== 'franchise'"
-                :class="{ active: period === 'WEEKLY' }"
-                @click="() => delayedSearch('WEEKLY')"
-            >주간</button>
-            <button
-                :class="{ active: period === 'MONTHLY' }"
-                @click="() => delayedSearch('MONTHLY')"
-            >월간</button>
+            <button :class="{ active: period === 'DAILY' }" @click="() => delayedSearch('DAILY')">일간</button>
+            <button :class="{ active: period === 'WEEKLY' }" @click="() => delayedSearch('WEEKLY')">주간</button>
+            <button :class="{ active: period === 'MONTHLY' }" @click="() => delayedSearch('MONTHLY')">월간</button>
           </div>
         </div>
-        <canvas id="turnoverTrendChart"></canvas>
+        <canvas v-if="showTrendChart" id="turnoverTrendChart" ref="trendCanvasEl"></canvas>
       </div>
+
       <div class="chart-card col-4">
         <div class="chart-header">
           <h3>제품별 재고 회전율</h3>
@@ -268,7 +316,7 @@ watch(locationType, () => {
             <button :class="{ active: productTab === 'bottom' }" @click="() => changeProductTab('bottom')">하위 10개</button>
           </div>
         </div>
-        <canvas id="productTurnoverChart"></canvas>
+        <canvas v-if="showProductChart" id="productTurnoverChart" ref="productCanvasEl"></canvas>
       </div>
     </div>
   </div>

@@ -188,7 +188,7 @@ const handleSubmit = async () => {
         isTop: topRegistered && !subRegistered
       }
 
-      // ✅ 입력값 초기화
+      // 입력값 초기화
       topForm.value = { topCategoryName: '' }
       subForm.value = { topCategoryId: '', categoryName: '', categoryCode: '' }
 

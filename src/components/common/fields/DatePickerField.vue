@@ -24,6 +24,10 @@ const props = defineProps({
   placeholder: {
     type: String,
     default: '날짜 선택'
+  },
+  minDate: {
+    type: [String, Date],
+    default: null // 전달 없으면 제한 없음
   }
 })
 
@@ -36,6 +40,7 @@ onMounted(() => {
   fpInstance = flatpickr(input.value, {
     dateFormat: 'Y-m-d',
     defaultDate: props.modelValue || null,
+    minDate: props.minDate || null,
     onChange: ([selectedDate]) => {
       emit('update:modelValue', selectedDate ? selectedDate.toISOString().split('T')[0] : '')
     }

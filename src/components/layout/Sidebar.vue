@@ -1,30 +1,30 @@
 <template>
   <aside class="sidebar">
     <nav class="sidebar-area">
-      <SidebarSection :groups="sidebarMap[selectedMenu]" />
-<!--      <SidebarSection :groups="filteredSidebarMap[selectedMenu]" />-->
+      <SidebarSection :groups="filteredSidebar[selectedMenu]" />
     </nav>
   </aside>
 </template>
 
 <script setup>
-import SidebarSection from './sidebar/SidebarSection.vue'
-import { sidebarMap } from '@/constants/sidebarMap'
-// import { getFilteredSidebarMap } from '@/utils/filteredSidebarMap'
 import { defineProps, computed } from 'vue'
+import SidebarSection from './sidebar/SidebarSection.vue'
+import { getFilteredSidebarMap } from '@/utils/filteredSidebarMap'
 
-defineProps({
+const props = defineProps({
   selectedMenu: {
     type: String,
     required: true
   },
-  // userRole : String
+  userRole: {
+    type: String,
+    required: true
+  }
 })
 
-// TODO: 추후 권한 기반 사이드바 필터링 활성화
-// const filteredSidebarMap = computed(() =>
-//     getFilteredSidebarMap(props.userRole)
-// )
+const filteredSidebar = computed(
+    () => getFilteredSidebarMap(props.userRole)
+)
 </script>
 
 <style scoped>
@@ -36,7 +36,7 @@ defineProps({
   border-right: 1px solid var(--color-border-light);
 }
 
-.sidebar-area{
+.sidebar-area {
   margin-left: 0.3rem;
 }
 </style>

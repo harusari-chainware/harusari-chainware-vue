@@ -15,7 +15,7 @@
 
     <script setup>
       import RequisitionSearchTable from '@/features/requisition/components/Register/RequisitionSearchTable.vue'
-      import {computed} from "vue";
+      import {computed, ref} from "vue";
       import RegisterRightPanel from "@/components/layout/registerview/RegisterRightPanel.vue";
 
       const props = defineProps({
@@ -23,6 +23,8 @@
         vendorName: String
       })
       const panelTitle = computed(() => '계약 상품 검색')
+
+      const selectedProduct = ref(null)
 
 
       const emit = defineEmits(['selectProduct'])

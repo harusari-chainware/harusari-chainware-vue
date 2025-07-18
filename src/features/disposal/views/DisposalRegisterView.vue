@@ -10,11 +10,11 @@ const authStore = useAuthStore()
 const activeTab = ref('normal')
 const recentDisposals = ref([])
 
-// ✅ 권한을 ref로 가져와서 watch로 반응
+//  권한을 ref로 가져와서 watch로 반응
 const authorityType = ref('')
 const showTakebackTab = computed(() => authorityType.value !== 'FRANCHISE_MANAGER')
 
-// ✅ 권한 초기화
+//  권한 초기화
 watch(
     () => authStore.authority,
     (value) => {

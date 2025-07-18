@@ -26,17 +26,6 @@
       </StatusButton>
     </template>
 
-
-    <!-- 더보기 버튼으로 넘어가는 게 필요하다면 -->
-<!--    <template #footer>-->
-<!--      <DetailTablePagination-->
-<!--          :model-value="page"-->
-<!--          :total-items="total"-->
-<!--          :items-per-page="itemsPerPage"-->
-<!--          @update:modelValue="handlePageChange"-->
-<!--      />-->
-<!--    </template>-->
-
     <!-- 더보기 버튼으로 넘어가는 게 필요하다면 -->
     <template #footer>
       <DetailTableMoreLink to="/category/list" label="페이지 이동 확인" />
@@ -56,20 +45,7 @@ const props = defineProps({
   items: {
     type: Array,
     required: true
-  },
-  // pagination 사용하면 아래 것들도
-  // page: {
-  //   type: Number,
-  //   required: true
-  // },
-  // total: {
-  //   type: Number,
-  //   required: true
-  // },
-  // itemsPerPage: {
-  //   type: Number,
-  //   default: 10
-  // }
+  }
 })
 
 const columns = [

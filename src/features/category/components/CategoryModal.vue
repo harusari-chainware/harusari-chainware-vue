@@ -153,7 +153,7 @@ const handleSubmit = async () => {
     emit('refresh')
     emit('close')
   } catch (err) {
-    console.error('❌ 등록/수정 실패:', err)
+    console.error(' 등록/수정 실패:', err)
     if (err.response?.status === 409) {
       return showError('이미 존재하는 카테고리입니다.')
     } else {
