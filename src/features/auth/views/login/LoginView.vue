@@ -100,7 +100,17 @@ async function handleLogin() {
                 authStore.setSaveId(false);
             }
 
-            await router.push('/dashboard/prediction');
+            if (decoded.authority === 'MASTER') {
+                await router.push('/member/list');
+            } else if (decoded.authority === 'GENERAL_MANAGER' || decoded.authority === 'SENIOR_MANAGER') {
+                await router.push('/dashboard/prediction');
+            } else if (decoded.authority === 'WAREHOUSE_MANAGER') {
+                await router.push('/purchases/list');
+            } else if (decoded.authority === 'FRANCHISE_MANAGER') {
+                await router.push('/order/list');
+            } else if (decoded.authority === 'VENDOR_MANAGER') {
+                await router.push('/purchases/list');
+            }
         } else {
             errorMessage.value = res.message || '로그인에 실패했습니다.';
         }
