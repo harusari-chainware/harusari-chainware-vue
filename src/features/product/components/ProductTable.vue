@@ -84,12 +84,6 @@ watchEffect(() => {
         (top.categories || []).some(cat => String(cat.categoryId) === String(prod.categoryId))
     )
     if (!found) {
-      // console.warn('매칭되는 카테고리 없음! productId:', prod.productId, 'categoryId:', prod.categoryId)
-      console.log('현재 카테고리 목록:', props.categories.map(top => ({
-        topCategoryId: top.topCategoryId,
-        topCategoryName: top.topCategoryName,
-        categories: (top.categories || []).map(cat => cat.categoryId)
-      })))
     }
   })
 })
@@ -102,9 +96,6 @@ props.products.forEach(prod => {
     console.warn('매칭되는 카테고리 없음! productId:', prod.productId, 'categoryId:', prod.categoryId)
   }
 })
-
-console.log('products:', JSON.parse(JSON.stringify(props.products)))
-console.log('topCategories:', JSON.parse(JSON.stringify(props.categories)))
 
 const columns = [
   { key: 'productId', label: '제품 ID', align: 'center' },

@@ -77,6 +77,7 @@ WAREHOUSE_MANAGER
 FRANCHISE_MANAGER
 VENDOR_MANAGER
 SYSTEM
+SUPER_ADMIN
 */
 console.log('현재 유저 권한:', userRole.value)
 
@@ -84,18 +85,18 @@ const allMenus = [
   {
     label: '대시보드',
     route: '/dashboard/prediction',
-    roles: ['GENERAL_MANAGER', 'SENIOR_MANAGER']
+    roles: ['GENERAL_MANAGER', 'SENIOR_MANAGER', 'SUPER_ADMIN']
   },
   {
     label: '회원',
     route: '/member/list',
-    roles: ['MASTER']
+    roles: ['MASTER', 'SUPER_ADMIN']
   },
 
   {
     label: '제품',
     route: '/product/list',
-    roles: ['GENERAL_MANAGER', 'SENIOR_MANAGER', 'WAREHOUSE_MANAGER', 'FRANCHISE_MANAGER']
+    roles: ['GENERAL_MANAGER', 'SENIOR_MANAGER', 'WAREHOUSE_MANAGER', 'FRANCHISE_MANAGER', 'SUPER_ADMIN']
   },
   {
     label: '제품',
@@ -106,7 +107,7 @@ const allMenus = [
   {
     label: '가맹점/거래처/창고',
     route: '/franchise/list',
-    roles: ['GENERAL_MANAGER', 'SENIOR_MANAGER'],
+    roles: ['GENERAL_MANAGER', 'SENIOR_MANAGER', 'SUPER_ADMIN'],
     group: 'franchise'
   },
   {
@@ -131,6 +132,11 @@ const allMenus = [
   },
 
   {
+    label: '주문/반품/배송',
+    route: '/order/list',
+    roles: ['SUPER_ADMIN'],
+  },
+  {
     label: '주문/배송',
     route: '/order/list',
     roles: ['GENERAL_MANAGER', 'SENIOR_MANAGER', 'FRANCHISE_MANAGER'],
@@ -148,7 +154,7 @@ const allMenus = [
   {
     label: '품의/발주',
     route: '/requisitions/list',
-    roles: ['GENERAL_MANAGER', 'SENIOR_MANAGER'],
+    roles: ['GENERAL_MANAGER', 'SENIOR_MANAGER', 'SUPER_ADMIN'],
     group: 'procurement'
   },
   {
@@ -160,7 +166,7 @@ const allMenus = [
   {
     label: '폐기',
     route: '/disposal/list',
-    roles: ['GENERAL_MANAGER', 'SENIOR_MANAGER', 'WAREHOUSE_MANAGER','FRANCHISE_MANAGER']
+    roles: ['GENERAL_MANAGER', 'SENIOR_MANAGER', 'WAREHOUSE_MANAGER','FRANCHISE_MANAGER', 'SUPER_ADMIN']
   }
 ]
 

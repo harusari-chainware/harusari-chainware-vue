@@ -261,7 +261,6 @@ const searchVendors = async () => {
       size: 10,
       page: 1
     })
-    console.log('거래처 자동완성 응답', res.data);
 
     // filteredVendors.value = res.data.data.content
 
@@ -269,7 +268,6 @@ const searchVendors = async () => {
     const content = res?.data?.data?.contents
     filteredVendors.value = Array.isArray(content) ? content : []
 
-    console.log('filteredVendors:', filteredVendors.value)
     showVendorSuggestions.value = true
     selectedVendorIdx.value = -1
   } catch (e) {

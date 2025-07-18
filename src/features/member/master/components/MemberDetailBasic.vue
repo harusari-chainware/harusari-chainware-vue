@@ -75,7 +75,9 @@ const authorityOptions = [
     { label: '창고 관리자', value: 'WAREHOUSE_MANAGER' },
     { label: '가맹점 담당자', value: 'FRANCHISE_MANAGER' },
     { label: '거래처 담당자', value: 'VENDOR_MANAGER' },
-    { label: '시스템', value: 'SYSTEM' }
+    { label: '시스템', value: 'SYSTEM' },
+    { label: '최고 관리자', value: 'SUPER_ADMIN' }
+
 ]
 
 const labelToValueMap = {
@@ -85,7 +87,8 @@ const labelToValueMap = {
     '창고 관리자': 'WAREHOUSE_MANAGER',
     '가맹점 담당자': 'FRANCHISE_MANAGER',
     '거래처 담당자': 'VENDOR_MANAGER',
-    '시스템': 'SYSTEM'
+    '시스템': 'SYSTEM',
+    '최고 관리자': 'SUPER_ADMIN'
 }
 
 function formatDateTime(dateTime) {
@@ -115,6 +118,7 @@ function authorityBadgeClass(label) {
         case '가맹점 담당자': return 'badge-franchise'
         case '거래처 담당자': return 'badge-vendor'
         case '시스템': return 'badge-system'
+        case '최고 관리자': return 'badge-super'
         default: return 'badge-default'
     }
 }
@@ -369,5 +373,9 @@ watch(() => form.value.phoneNumber, (val) => {
 
 .badge-default {
     background-color: #9ca3af;
+}
+
+.badge-super {
+  background-color: #7fb7ca;
 }
 </style>
