@@ -44,6 +44,7 @@
         <!-- 거래처 담당자 선택 시 거래처 관련 입력 폼 표시 -->
         <VendorForm v-if="form.authority === 'vendor-manager'" :form="form" @update:agreementFile="handleFileChange"/>
     </div>
+    <ConfirmModal ref="alertModal" />
 </template>
 
 <script setup>
@@ -51,6 +52,7 @@ import {ref, watch} from 'vue';
 import {useRouter} from 'vue-router';
 import FranchiseForm from '@/features/member/master/components/join/FranchiseForm.vue';
 import VendorForm from "@/features/member/master/components/join/VendorForm.vue";
+import ConfirmModal from "@/features/member/mypage/components/ConfirmModal.vue";
 import WarehouseForm from "@/features/member/master/components/join/WarehouseForm.vue";
 import {
     checkEmailDuplicateApi,
@@ -60,6 +62,7 @@ import {
     warehouseMemberRegister
 } from '@/features/member/api.js';
 
+const alertModal = ref(null);
 const router = useRouter();
 
 const form = ref({
@@ -278,12 +281,12 @@ async function submitForm() {
             response = await warehouseMemberRegister(payload);
         }
 
-        console.log('회원 등록 성공', response);
-        alert('회원 등록이 완료되었습니다.');
+        // console.log('회원 등록 성공', response);
+        await alertModal.value.open('회원 등록이 완료되었습니다.');
         await router.push('/member/list');
     } catch (error) {
-        console.error('회원 등록 실패:', error);
-        alert('회원 등록에 실패했습니다.');
+        // console.error('회원 등록 실패:', error);
+        await alertModal.value.open('회원 등록에 실패했습니다.');
     }
 }
 

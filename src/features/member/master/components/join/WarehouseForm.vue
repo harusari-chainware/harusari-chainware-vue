@@ -49,18 +49,22 @@
             />
         </div>
     </div>
+    <ConfirmModal ref="alertModal" />
 </template>
 
 <script setup>
-import { defineProps, nextTick } from 'vue';
+import {defineProps, nextTick, ref} from 'vue';
+import ConfirmModal from "@/features/member/mypage/components/ConfirmModal.vue";
 
 const props = defineProps({
     form: Object,
 });
 
+const alertModal = ref(null);
+
 function execDaumPostcode() {
     if (!window.daum || !window.daum.Postcode) {
-        alert('주소 검색 서비스를 불러오지 못했습니다. 네트워크 상태를 확인하거나 새로고침해 주세요.');
+        alertModal.value.open('주소 검색 서비스를 불러오지 못했습니다. 네트워크 상태를 확인하거나 새로고침해 주세요.');
         return;
     }
 
