@@ -2,7 +2,7 @@
   <header class="header">
     <div class="logo-box">
       <a href="/" @click.prevent="reloadPage">
-        <img :src="logo" alt="Chainware 로고" class="logo-img" />
+        <img :src="logo" alt="Chainware 로고" class="logo-img"/>
       </a>
     </div>
 
@@ -45,10 +45,10 @@
 
 <script setup>
 import logo from '@/assets/images/chainware-logo-short.png'
-import { ref, computed, onMounted, onBeforeUnmount, defineProps, defineEmits } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
-import { useAuthStore } from '@/features/auth/useAuthStore.js'
-import { logoutApi } from '@/features/auth/api.js'
+import {ref, computed, onMounted, onBeforeUnmount, defineProps, defineEmits} from 'vue'
+import {useRouter, useRoute} from 'vue-router'
+import {useAuthStore} from '@/features/auth/useAuthStore.js'
+import {logoutApi} from '@/features/auth/api.js'
 import '@fortawesome/fontawesome-free/css/all.min.css'
 
 const props = defineProps({
@@ -65,7 +65,28 @@ const showMypageDropdown = ref(false)
 const mypageRef = ref(null)
 
 const reloadPage = () => {
-  window.location.href = '/'
+  switch (userRole.value) {
+    case 'MASTER':
+      router.push('/member/list')
+      break
+
+    case 'GENERAL_MANAGER':
+    case 'SENIOR_MANAGER':
+    case 'SUPER_ADMIN':
+      router.push('/dashboard/prediction')
+      break
+    case 'VENDOR_MANAGER':
+      router.push('/purchases/list')
+      break
+    case 'WAREHOUSE_MANAGER':
+      router.push('/purchases/list')
+      break
+    case 'FRANCHISE_MANAGER':
+      router.push('/order/list')
+      break
+    default:
+      router.push('/login')
+  }
 }
 
 // 전체 메뉴 목록
@@ -105,51 +126,42 @@ const allMenus = [
   },
 
   {
-    label: '가맹점/거래처/창고',
-    route: '/franchise/list',
+    label: '거래처/창고',
+    route: '/vendor/list',
     roles: ['GENERAL_MANAGER', 'SENIOR_MANAGER', 'SUPER_ADMIN'],
     group: 'franchise'
   },
-  {
-    label: '가맹점',
-    route: '/franchise/list',
-    roles: ['FRANCHISE_MANAGER'],
-    group: 'franchise'
-  },
+  // {
+  //   label: '가맹점',
+  //   route: '/franchise/list',
+  //   roles: ['FRANCHISE_MANAGER'],
+  //   group: 'franchise'
+  // },
 
-    /*거래처 상세조회 수정 필요*/
+  /*거래처 상세조회 수정 필요*/
+  // {
+  //   label: '거래처',
+  //   route: '/vendor/list',
+  //   roles: ['VENDOR_MANAGER'],
+  //   group: 'vendor'
+  // },
   {
-    label: '거래처',
-    route: '/vendor/list',
-    roles: ['VENDOR_MANAGER', 'WAREHOUSE_MANAGER'],
-    group: 'vendor'
-  },
-  {
-    label: '창고',
-    route: '/warehouse/list',
+    label: '거래처/창고',
+    route: '/warehouse/inventory/list',
     roles: ['WAREHOUSE_MANAGER'],
     group: 'warehouse'
   },
 
   {
-    label: '주문/반품/배송',
+    label: '주문/반품',
     route: '/order/list',
-    roles: ['SUPER_ADMIN'],
+    roles: ['SUPER_ADMIN', 'GENERAL_MANAGER', 'SENIOR_MANAGER', 'FRANCHISE_MANAGER'],
   },
-  {
-    label: '주문/배송',
-    route: '/order/list',
-    roles: ['GENERAL_MANAGER', 'SENIOR_MANAGER', 'FRANCHISE_MANAGER'],
-  },
-  {
-    label: '반품',
-    route: '/takeback/list',
-    roles: ['GENERAL_MANAGER', 'SENIOR_MANAGER', 'FRANCHISE_MANAGER'],
-  }, {
-    label: '배송',
-    route: '/delivery/list',
-    roles: ['WAREHOUSE_MANAGER'],
-  },
+ // {
+ //    label: '배송',
+ //    route: '/delivery/list',
+ //    roles: ['WAREHOUSE_MANAGER'],
+ //  },
 
   {
     label: '품의/발주',
@@ -160,13 +172,13 @@ const allMenus = [
   {
     label: '발주',
     route: '/purchases/list',
-    roles: ['VENDOR_MANAGER'],
+    roles: ['VENDOR_MANAGER', "WAREHOUSE_MANAGER",],
     group: 'purchase'
   },
   {
     label: '폐기',
     route: '/disposal/list',
-    roles: ['GENERAL_MANAGER', 'SENIOR_MANAGER', 'WAREHOUSE_MANAGER','FRANCHISE_MANAGER', 'SUPER_ADMIN']
+    roles: ['GENERAL_MANAGER', 'SENIOR_MANAGER', 'WAREHOUSE_MANAGER', 'FRANCHISE_MANAGER', 'SUPER_ADMIN']
   }
 ]
 
