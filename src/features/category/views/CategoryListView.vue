@@ -125,8 +125,11 @@ const authority = authStore.authority
 
 const isGeneralManager = computed(() => authority === 'GENERAL_MANAGER')
 const isSeniorManager = computed(() => authority === 'SENIOR_MANAGER')
+const isSuperAdmin = computed(() => authority === 'SUPER_ADMIN')
 
-const isManager = computed(() => isGeneralManager.value || isSeniorManager.value)
+const isManager = computed(() =>
+    isGeneralManager.value || isSeniorManager.value || isSuperAdmin.value
+)
 
 const ErrorOpen = ref(false)
 const ErrorMsg = ref('')

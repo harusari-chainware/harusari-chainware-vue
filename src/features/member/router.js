@@ -10,19 +10,19 @@ export const memberRoutes = [
         path: '/member/list',
         name: 'MemberList',
         component: MemberListView,
-        meta: {requiresAuth: true, roles: ['MASTER']}
+        meta: {requiresAuth: true, roles: ['MASTER', 'SUPER_ADMIN']}
     },
     {
         path: '/member/:memberId',
         name: 'MemberDetailView',
         component: MemberDetailView,
-        meta: {requiresAuth: true, roles: ['MASTER']}
+        meta: {requiresAuth: true, roles: ['MASTER', 'SUPER_ADMIN']}
     },
     {
         path: '/member/register',
         name: 'MemberRegister',
         component: MemberRegisterView,
-        meta: {requiresAuth: true, roles: ['MASTER']}
+        meta: {requiresAuth: true, roles: ['MASTER', 'SUPER_ADMIN']}
     },
     {
         path: '/mypage/profile',
@@ -31,7 +31,7 @@ export const memberRoutes = [
         requiresAuth: true,
         roles: [
             'MASTER', 'GENERAL_MANAGER', 'SENIOR_MANAGER',
-            'WAREHOUSE_MANAGER', 'FRANCHISE_MANAGER', 'VENDOR_MANAGER'
+            'WAREHOUSE_MANAGER', 'FRANCHISE_MANAGER', 'VENDOR_MANAGER', 'SUPER_ADMIN'
         ]
     },
     {
@@ -42,7 +42,7 @@ export const memberRoutes = [
             requiresAuth: true,
             roles: [
                 'MASTER', 'GENERAL_MANAGER', 'SENIOR_MANAGER',
-                'WAREHOUSE_MANAGER', 'FRANCHISE_MANAGER', 'VENDOR_MANAGER'
+                'WAREHOUSE_MANAGER', 'FRANCHISE_MANAGER', 'VENDOR_MANAGER', 'SUPER_ADMIN'
             ]
         }
     }

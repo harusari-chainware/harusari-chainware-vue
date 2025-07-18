@@ -6,17 +6,29 @@ export const orderRoutes = [
     {
         path: '/order/list',
         name: 'OrderListView',
-        component: OrderListView
+        component: OrderListView,
+        meta: {
+            requiresAuth: true,
+            roles: ['GENERAL_MANAGER', 'SENIOR_MANAGER', 'WAREHOUSE_MANAGER', 'FRANCHISE_MANAGER']
+        }
     },
     {
         path: '/order/register',
         name: 'OrderRegisterView',
-        component: OrderRegisterView
+        component: OrderRegisterView,
+        meta: {
+            requiresAuth: true,
+            roles: ['FRANCHISE_MANAGER']
+        }
     },
     {
         path: '/order/:orderId',
         name: 'OrderDetailView',
         component: OrderDetailView,
-        props: true
+        props: true,
+        meta: {
+            requiresAuth: true,
+            roles: ['GENERAL_MANAGER', 'SENIOR_MANAGER', 'WAREHOUSE_MANAGER', 'FRANCHISE_MANAGER']
+        }
     },
 ];

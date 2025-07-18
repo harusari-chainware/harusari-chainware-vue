@@ -67,13 +67,6 @@ watchEffect(() => {
 
 // 상위 카테고리 선택 시 하위 카테고리 옵션 변경
 watch(() => filters.topCategoryId, (newTopId) => {
-  console.log('props.topCategories:', props.topCategories.map(tc => ({
-    topCategoryId: tc.topCategoryId,
-    topCategoryName: tc.topCategoryName,
-    categories: tc.categories,
-    typeOfId: typeof tc.topCategoryId,
-  })))
-  console.log('topCategoryNameOptions:', topCategoryNameOptions.value)
 
   filters.categoryId = ''
 

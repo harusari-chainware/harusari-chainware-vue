@@ -101,18 +101,18 @@ const filters = reactive({
 
 const isGeneralManager = computed(() => authority === 'GENERAL_MANAGER')
 const isSeniorManager = computed(() => authority === 'SENIOR_MANAGER')
+const isSuperAdmin = computed(() => authority === 'SUPER_ADMIN')
 
-const isManager = computed(() => isGeneralManager.value || isSeniorManager.value)
-
+const isManager = computed(() =>
+    isGeneralManager.value || isSeniorManager.value || isSuperAdmin.value
+)
 
 const loadContracts = async () => {
-  console.log('[loadContracts] filters:', filters)
   const params = {
     ...filters,
     page: page.value,
     size: PAGE_SIZE
   }
-  console.log('[loadContracts] params:', params)
   // 비어있는 파라미터 삭제
   Object.keys(params).forEach(k => {
     if (params[k] === '' || params[k] == null) delete params[k]

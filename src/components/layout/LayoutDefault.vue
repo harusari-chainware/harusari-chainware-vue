@@ -1,7 +1,5 @@
 <template>
   <div class="layout-default">
-    <!-- 권한에 따른 분기처리를 위해 추후 사이드바와 헤더 안에 :userRole="userRole" 추가-->
-
     <!-- 위에 헤더 -->
     <Header
         :selected="selectedMenu"
@@ -10,7 +8,11 @@
 
     <!-- 아래: 사이드바 + 메인 콘텐츠 -->
     <div class="body-wrapper">
-      <Sidebar class="sidebar" :selectedMenu="selectedMenu" />
+      <Sidebar
+          class="sidebar"
+          :selectedMenu="selectedMenu"
+          :userRole="userStore.authority"
+      />
       <main class="main-content">
         <RouterView />
       </main>
@@ -23,12 +25,13 @@ import Sidebar from '@/components/layout/Sidebar.vue'
 import Header from '@/components/layout/Header.vue'
 import { ref, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
+import {useAuthStore} from "@/features/auth/useAuthStore.js";
 
 const route = useRoute()
 const selectedMenu = ref('')
 
-// TODO: 추후 백엔드 연동 시 사용자 권한 값 주입
-// const userRole = 'FRANCHISE_MANAGER'
+const userStore = useAuthStore()
+const userRole = userStore.authority
 
 const routeToMenuMap = [
   { path: '/dashboard', menu: '대시보드' },

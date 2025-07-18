@@ -109,7 +109,6 @@ const getCategoryName = (categoryId) => {
 
 // 필터 적용
 const applyFilters = () => {
-  console.log('[applyFilters] 필터 값:', filters)
   emit('apply', { ...filters })
 }
 
