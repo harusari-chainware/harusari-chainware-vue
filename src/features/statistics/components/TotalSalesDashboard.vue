@@ -525,4 +525,7 @@ canvas {
   color: #888;
   padding: 140px 0;
 }
+.primary:hover {
+  background-color: #2c91bc;
+}
 </style>

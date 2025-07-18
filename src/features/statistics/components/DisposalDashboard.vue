@@ -9,7 +9,7 @@ import {
   fetchAllFranchises
 } from '@/features/statistics/api.js'
 
-const period = ref('DAILY')
+const period = ref('WEEKLY')
 const locationType = ref('all')
 const locationId = ref('')
 const targetDate = ref(new Date(Date.now() - 86400000).toISOString().split('T')[0])
@@ -447,5 +447,8 @@ watch(locationType, () => {
 canvas {
   width: 100% !important;
   height: 300px !important;
+}
+.btn-search:hover {
+  background-color: #2c91bc;
 }
 </style>

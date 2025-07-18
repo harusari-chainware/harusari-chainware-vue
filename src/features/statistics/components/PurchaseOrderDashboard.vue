@@ -10,7 +10,7 @@ import FilterDate from "@/components/common/filters/FilterDate.vue"
 
 Chart.defaults.font.family = 'Noto Sans KR, sans-serif'
 
-const period = ref('DAILY')
+const period = ref('WEEKLY')
 const vendorId = ref('')
 const targetDate = ref(getYesterday())
 
@@ -603,6 +603,7 @@ canvas {
   flex: 0 0 50%; /* 차트가 전체 영역의 절반만 차지 */
   max-width: 50%;
 }
-
-
+.primary:hover {
+  background-color: #2c91bc;
+}
 </style>
