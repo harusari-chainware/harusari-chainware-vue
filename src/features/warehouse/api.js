@@ -25,6 +25,10 @@ export function fetchAllWarehouses() {
     return api.get('/warehouse/all').then(res => res.data.data);
 }
 
+export const fetchMyWarehouseId = () => {
+    return api.get("/warehouse/my");
+};
+
 export const fetchSubCategories = async (topCategoryName) => {
     const res = await api.get("/categories", {
         params: { topCategoryName },

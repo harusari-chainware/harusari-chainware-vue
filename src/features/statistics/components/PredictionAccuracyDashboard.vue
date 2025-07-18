@@ -420,5 +420,8 @@ canvas {
   width: 100% !important;
   display: block;
 }
+.filter-group button:hover {
+  background-color: #2c91bc;
+}
 </style>
 

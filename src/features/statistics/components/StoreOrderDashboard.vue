@@ -6,7 +6,7 @@ import FilterDate from '@/components/common/filters/FilterDate.vue'
 
 Chart.register(...registerables)
 
-const period = ref('DAILY')
+const period = ref('WEEKLY')
 const franchiseId = ref('')
 const targetDate = ref(getYesterday())
 const franchises = ref([])
@@ -519,6 +519,9 @@ canvas {
 
 .mt-6 {
   margin-top: 2rem;
+}
+.primary:hover {
+  background-color: #2c91bc;
 }
 </style>
 
