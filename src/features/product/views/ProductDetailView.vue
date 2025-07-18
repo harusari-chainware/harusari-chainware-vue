@@ -376,14 +376,9 @@ function findTopCategoryIdByCategoryId(categoryId) {
 
 onMounted(async () => {
   const res = await fetchAllTopCategories();
-  console.log('API 응답:', res.data.data.topCategories);
+
   topCategories.value = res.data.data.topCategories ?? [];
   await loadProductDetail();
-
-  console.log('product.value.categoryId:', product.value.categoryId);
-  console.log('topCategories:', topCategories.value);
-  console.log('categoryName:', categoryName.value);
-  console.log('topCategoryName:', topCategoryName.value);
 });
 
 </script>

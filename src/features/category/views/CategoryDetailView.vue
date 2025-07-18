@@ -239,7 +239,6 @@ const startEdit = () => {
   originalCategory.value = JSON.parse(JSON.stringify(category.value))
   selectedTopCategoryId.value = category.value.topCategoryId
   isEditing.value = true
-  console.log("startEdit 직전", category.value)
 }
 
 // 페이지네이션에 맞게 제품 리스트 자름
