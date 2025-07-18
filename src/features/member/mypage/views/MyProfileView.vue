@@ -51,12 +51,14 @@
             <div v-else>회원 정보를 불러올 수 없습니다.</div>
         </template>
     </DetailLayout>
+    <ConfirmModal ref="alertModal" />
 </template>
 
 <script setup>
 import { ref, onMounted, watch } from 'vue'
 import InputField from '@/components/common/fields/InputField.vue'
 import DetailLayout from '@/components/layout/DetailLayout.vue'
+import ConfirmModal from "@/features/member/mypage/components/ConfirmModal.vue";
 import { getMyProfile, updateMyInfo } from '@/features/member/api.js'
 
 const isLoading = ref(true)
@@ -64,6 +66,7 @@ const isEditMode = ref(false)
 const member = ref(null)
 const form = ref({ phoneNumber: '' })
 const rows = ref([])
+const alertModal = ref(null);
 
 function formatPhoneNumber(phoneNumber) {
     if (!phoneNumber) return '-'
@@ -130,7 +133,7 @@ const cancelEdit = () => {
 
 const handleSave = async () => {
     if (!form.value.phoneNumber) {
-        alert('전화번호를 입력해주세요.')
+        await alertModal.value.open('전화번호를 입력해주세요.')
         return
     }
 
@@ -140,12 +143,12 @@ const handleSave = async () => {
 
     try {
         await updateMyInfo(payload)
-        alert('전화번호가 수정되었습니다.')
+        await alertModal.value.open('전화번호가 수정되었습니다.')
         isEditMode.value = false
         await fetchProfile()
     } catch (err) {
         console.error('전화번호 수정 실패:', err)
-        alert('전화번호 수정에 실패했습니다.')
+        await alertModal.value.open('전화번호 수정에 실패했습니다.')
     }
 }
 
