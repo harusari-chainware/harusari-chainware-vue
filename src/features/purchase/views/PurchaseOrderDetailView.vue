@@ -18,6 +18,7 @@ import ConfirmModal from '@/components/common/ConfirmModal.vue'
 import RejectReasonModal from '@/components/common/RejectReasonModal.vue'
 import SkeletonDetail from '@/components/common/SkeletonDetail.vue'
 import StatusButton from '@/components/common/StatusButton.vue'
+import InboundModal from "@/features/purchase/components/InboundModal.vue";
 import { useAuthStore } from '@/features/auth/useAuthStore.js'
 import { useToast } from 'vue-toastification'
 
@@ -34,6 +35,7 @@ const props = defineProps({
 })
 
 const purchaseDetail = ref(null)
+const modalInbound = ref(false)
 
 const status = computed(() => purchaseDetail.value?.status || '')
 const isRequested = computed(() => status.value === 'REQUESTED')
@@ -46,7 +48,6 @@ const isVendor = computed(() => authority === 'VENDOR_MANAGER')
 const isWarehouse = computed(() => authority === 'WAREHOUSE_MANAGER')
 const isManager = computed(() => isGeneralManager.value || isSeniorManager.value)
 
-// 확인 모달
 const modal = reactive({
   visible: false,
   title: '',
@@ -54,7 +55,6 @@ const modal = reactive({
   onConfirm: () => {}
 })
 
-// 반려 모달
 const modalReject = reactive({
   visible: false,
   title: '반려 사유를 입력해주세요.',
@@ -70,7 +70,6 @@ const modalReject = reactive({
   }
 })
 
-// 취소 모달
 const modalCancel = reactive({
   visible: false,
   title: '취소 사유를 입력해주세요.',
@@ -130,7 +129,8 @@ const reload = async () => {
         productName: item.productName,
         quantity: item.quantity,
         unitPrice: item.unitPrice,
-        totalPrice: item.unitPrice * item.quantity || 0
+        totalPrice: item.unitPrice * item.quantity || 0,
+        purchaseOrderDetailId: item.purchaseOrderDetailId
       }))
     }
   } catch (e) {
@@ -141,7 +141,6 @@ const reload = async () => {
 
 onMounted(reload)
 
-// 승인
 const openApproveDialog = () => {
   modal.title = '승인하시겠습니까?'
   modal.description = '승인 후에는 발주서를 수정할 수 없습니다.'
@@ -158,17 +157,14 @@ const openApproveDialog = () => {
   }
 }
 
-// 반려
 const openRejectDialog = () => {
   modalReject.visible = true
 }
 
-// 취소
 const openCancelDialog = () => {
   modalCancel.visible = true
 }
 
-// 수정
 const openUpdateDialog = () => {
   modal.title = '발주서를 수정하시겠습니까?'
   modal.description = '수정된 정보가 반영됩니다.'
@@ -176,7 +172,7 @@ const openUpdateDialog = () => {
   modal.onConfirm = async () => {
     try {
       await updatePurchaseOrder(props.purchaseOrderId, {
-        warehouseId: purchaseDetail.value.warehouse?.id || null, // ← 여기는 실제 ID로 교체 필요
+        warehouseId: purchaseDetail.value.warehouse?.id || null,
         items: purchaseDetail.value.items.map(p => ({
           productId: p.productId,
           quantity: p.quantity,
@@ -192,7 +188,6 @@ const openUpdateDialog = () => {
   }
 }
 
-// 출고
 const openShippedDialog = () => {
   modal.title = '출고 처리하시겠습니까?'
   modal.description = '해당 발주를 출고 처리합니다.'
@@ -211,22 +206,18 @@ const openShippedDialog = () => {
 
 // 입고
 const openInboundDialog = () => {
-  modal.title = '입고 처리하시겠습니까?'
-  modal.description = '해당 발주를 입고 처리합니다.'
-  modal.visible = true
-  modal.onConfirm = async () => {
-    try {
-      const products = purchaseDetail.value.items.map(item => ({
-        purchaseOrderDetailId: item.purchaseOrderDetailId,
-        expirationDate: new Date().toISOString().slice(0, 10) // 기본값 (수정 필요)
-      }))
-      await inboundPurchaseOrder(props.purchaseOrderId, { products })
-      toast.success('입고 완료되었습니다.')
-      modal.visible = false
-      await reload()
-    } catch (e) {
-      toast.error('입고 실패: ' + (e.response?.data?.message || '서버 오류'))
-    }
+  modalInbound.value = true
+  console.log('제품 item:', purchaseDetail.value.items)
+}
+
+const handleInboundSubmit = async (products) => {
+  try {
+    await inboundPurchaseOrder(props.purchaseOrderId, { products })
+    toast.success('입고 완료되었습니다.')
+    modalInbound.value = false
+    await reload()
+  } catch (e) {
+    toast.error('입고 실패: ' + (e.response?.data?.message || '서버 오류'))
   }
 }
 </script>
@@ -283,5 +274,13 @@ const openInboundDialog = () => {
       v-model="modalCancel.visible"
       :title="modalCancel.title"
       @confirm="modalCancel.onConfirm"
+  />
+
+  <!-- 유통기한 입력용 입고 모달 -->
+  <InboundModal
+      v-if="modalInbound"
+      :items="purchaseDetail.items"
+      @submit="handleInboundSubmit"
+      @cancel="modalInbound = false"
   />
 </template>
