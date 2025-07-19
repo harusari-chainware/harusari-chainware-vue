@@ -53,9 +53,11 @@ import { onMounted, ref, computed } from 'vue'
 import { fetchAvailableWarehouses, approveOrder } from '@/features/order/api.js'
 import StatusButton from "@/components/common/StatusButton.vue";
 import GenericTable from "@/components/common/GenericTable.vue";
+import { useToast } from 'vue-toastification'
 
 const props = defineProps({ orderId: Number })
 const emit = defineEmits(['close', 'approved'])
+const toast = useToast()
 
 const warehouses = ref([])
 const selectedWarehouseId = ref(null)
@@ -69,7 +71,8 @@ onMounted(async () => {
     const res = await fetchAvailableWarehouses(props.orderId)
     warehouses.value = res.data.data
   } catch (e) {
-    alert('승인 가능 창고 조회 실패: ' + (e.response?.data?.message || e.message))
+    toast.success('승인 가능 창고 조회 실패: \n' + (e.response?.data?.message || e.message))
+    // alert('승인 가능 창고 조회 실패: ' + (e.response?.data?.message || e.message))
   }
 })
 
@@ -82,7 +85,8 @@ const handleApprove = async () => {
     emit('approved')
     emit('close')
   } catch (e) {
-    alert('주문 승인 실패: ' + (e.response?.data?.message || e.message))
+    toast.error('주문 승인 실패: \n' + (e.response?.data?.message || e.message))
+    // alert('주문 승인 실패: ' + (e.response?.data?.message || e.message))
   }
 }
 

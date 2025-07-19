@@ -56,6 +56,7 @@ import OrderRegisterDetail from '../components/OrderRegisterDetail.vue'
 import RegisterSummaryBox from '@/components/layout/registerview/RegisterSummaryBox.vue'
 import OrderRegisterFooter from '../components/OrderRegisterFooter.vue'
 import { useRouter, useRoute } from 'vue-router'
+import { useToast } from "vue-toastification";
 
 const router = useRouter()
 const form = reactive({
@@ -66,7 +67,8 @@ const form = reactive({
 
 const route = useRoute()
 const isEditMode = route.query.mode === 'edit'
-const orderId = route.query.orderId
+const orderId = route.query.orderI
+const toast = useToast()
 
 // 초기값 세팅 : 신규 등록 및 주문 수정
 onMounted(async () => {
@@ -158,15 +160,18 @@ async function submit() {
     let res;
     if (isEditMode) {
       res = await updateOrder(orderId, request)
-      alert('주문이 수정되었습니다.')
+      toast.success("주문이 수정되었습니다.")
+      // alert('주문이 수정되었습니다.')
     } else {
       res = await registerOrder(request)
-      alert('주문이 등록되었습니다.')
+      toast.success("주문이 등록되었습니다.")
+      // alert('주문이 등록되었습니다.')
     }
 
     const newOrderId = res.data.data.orderId;
     await router.push(`/order/${newOrderId}`);
   } catch (e) {
+    toast.error(`${isEditMode ? '수정' : '등록'} 실패: ` + (e.response?.data?.message || e.message))
     alert(`${isEditMode ? '수정' : '등록'} 실패: ` + (e.response?.data?.message || e.message))
   }
 }
