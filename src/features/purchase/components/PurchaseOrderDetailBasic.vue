@@ -10,18 +10,20 @@
     />
   </section>
 
+
+
   <section class="grid grid-2 gap-6">
     <PurchaseOrderDetailDrafterInfo
+        v-if="purchaseDetail"
+        :purchaseDetail="purchaseDetail"
+    />
+    <PurchaseOrderDetailVendor
         v-if="purchaseDetail"
         :purchaseDetail="purchaseDetail"
     />
   </section>
 
   <section class="grid grid-2 gap-6">
-    <PurchaseOrderDetailVendor
-        v-if="purchaseDetail"
-        :purchaseDetail="purchaseDetail"
-    />
     <PurchaseOrderDetailWarehouse
         v-if="purchaseDetail"
         :purchaseDetail="purchaseDetail"

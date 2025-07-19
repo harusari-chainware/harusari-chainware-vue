@@ -178,7 +178,12 @@ const allMenus = [
   {
     label: '폐기',
     route: '/disposal/list',
-    roles: ['GENERAL_MANAGER', 'SENIOR_MANAGER', 'WAREHOUSE_MANAGER', 'FRANCHISE_MANAGER', 'SUPER_ADMIN']
+    roles: ['GENERAL_MANAGER', 'SENIOR_MANAGER', 'SUPER_ADMIN']
+  },
+  {
+    label: '폐기',
+    route: '/disposal/register',
+    roles: [ 'WAREHOUSE_MANAGER', 'FRANCHISE_MANAGER']
   }
 ]
 
@@ -254,6 +259,8 @@ onBeforeUnmount(() => {
   height: 40px;
   object-fit: contain;
   padding-left: 1rem;
+  margin-top: 7px;
+  margin-left: -32px;
 }
 
 .top-menu {
