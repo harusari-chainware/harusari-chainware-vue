@@ -77,7 +77,6 @@ const purchaseStatusOptions = [
 
 // 검색 실행
 const applyFilters = () => {
-  console.log('[🧪 filters 값 확인]', JSON.stringify(filters, null, 2))
 
   const query = {}
 
@@ -86,8 +85,6 @@ const applyFilters = () => {
   if (filters.status) query.status = filters.status
   if (filters.createdDateRange.start) query.startDate = filters.createdDateRange.start
   if (filters.createdDateRange.end) query.endDate = filters.createdDateRange.end
-  console.log('[🚀 최종 query]', query)
-
 
   router.push({ name: 'PurchaseOrderListView', query })
 }

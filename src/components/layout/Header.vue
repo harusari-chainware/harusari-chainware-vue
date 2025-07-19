@@ -100,7 +100,6 @@ VENDOR_MANAGER
 SYSTEM
 SUPER_ADMIN
 */
-console.log('현재 유저 권한:', userRole.value)
 
 const allMenus = [
     {

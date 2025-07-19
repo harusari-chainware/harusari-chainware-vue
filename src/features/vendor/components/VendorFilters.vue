@@ -87,7 +87,6 @@ function applyFilters() {
     }
   })
 
-  console.log('[applyFilters] emit params:', params) // <= params 확인용 로그!
   emit('apply', params)
 }
 
