@@ -115,7 +115,6 @@ async function handleLogin() {
             errorMessage.value = res.message || '로그인에 실패했습니다.';
         }
     } catch (error) {
-        console.error('로그인 실패:', error);
         errorMessage.value = error.response?.data?.message || '서버와 연결할 수 없습니다.';
     } finally {
         isSubmitting.value = false;

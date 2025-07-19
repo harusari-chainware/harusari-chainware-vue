@@ -136,7 +136,6 @@ const buildParams = () => {
     if (f.joinDateRange.start) params.joinDateFrom = f.joinDateRange.start
     if (f.joinDateRange.end) params.joinDateTo = f.joinDateRange.end
 
-    console.log('params', params)
     return params
 }
 
