@@ -100,14 +100,19 @@ function getPreviousPeriodDate() {
   return base.toISOString().slice(0, 10)
 }
 
-async function waitForCanvasReady() {
-  await nextTick()
-  await new Promise(resolve => requestAnimationFrame(resolve))
+async function waitForCanvasReady(selector = '#salesPatternChart', maxRetry = 10) {
+  for (let i = 0; i < maxRetry; i++) {
+    await nextTick()
+    await new Promise(resolve => requestAnimationFrame(resolve))
+    const el = document.querySelector(selector)
+    if (el) return el
+    await new Promise(resolve => setTimeout(resolve, 30))
+  }
+  return null
 }
 
 async function drawSalesPatternChart(dynamicData) {
-  await waitForCanvasReady()
-  const canvas = document.getElementById('salesPatternChart')
+  const canvas = await waitForCanvasReady('#salesPatternChart')
   if (!canvas) {
     console.warn('⛔️ canvas 엘리먼트를 찾을 수 없습니다.')
     return
@@ -200,6 +205,8 @@ async function onPatternTabClick(p) {
   shouldRenderChart.value = false
   await nextTick()
   shouldRenderChart.value = true
+  await nextTick()
+
   await drawSalesPatternChart(dynamicData)
   isLoading.value = false
 }
@@ -220,6 +227,8 @@ async function handleSearchClick() {
   shouldRenderChart.value = false
   await nextTick()
   shouldRenderChart.value = true
+  await nextTick()
+
   await drawSalesPatternChart(dynamicData)
   isLoading.value = false
 }
@@ -336,14 +345,17 @@ onMounted(async () => {
         </div>
         <div class="chart-container">
           <div v-if="isLoading" class="chart-loading">📊 데이터 로딩 중...</div>
-          <canvas
-              :key="pattern"
-              id="salesPatternChart"
-              ref="chartCanvas"
-              width="700"
-              height="300"
-              v-show="!isLoading"
-          />
+          <div v-if="shouldRenderChart">
+            <canvas
+                :key="pattern"
+                id="salesPatternChart"
+                ref="chartCanvas"
+                width="700"
+                height="300"
+                v-show="!isLoading"
+            />
+          </div>
+
         </div>
       </div>
     </div>
@@ -524,5 +536,8 @@ canvas {
   font-weight: bold;
   color: #888;
   padding: 140px 0;
+}
+.primary:hover {
+  background-color: #2c91bc;
 }
 </style>

@@ -82,6 +82,39 @@
       </div>
     </template>
   </DetailLayout>
+  <CategoryModal
+      v-if="showCategoryModal"
+      :is-top="false"
+      :category-edit-data="selectedCategory"
+      :top-categories="topCategories"
+      @close="showCategoryModal = false"
+      @refresh="handleRefresh"
+  />
+
+  <!-- 등록/수정 완료 모달 -->
+  <CategoryDoneModal
+      v-if="doneModal.show"
+      :type="doneModal.type"
+      :is-top="doneModal.isTop"
+      @close="doneModal.show = false"
+  />
+
+  <div>
+    <CategoryErrorModal
+        v-if="ErrorOpen"
+        :message="ErrorMsg"
+        @close="ErrorOpen = false"
+    />
+  </div>
+
+  <!-- 삭제 확인 모달 -->
+  <CategoryDeleteConfirmModal
+      v-if="deleteTarget"
+      :target-id="deleteTarget.id"
+      :is-top="deleteTarget.isTop"
+      @close="deleteTarget = null"
+      @deleted="loadTopCategory"
+  />
 </template>
 
 
@@ -346,6 +379,7 @@ onMounted(() => {
   transition: all 0.15s;
   background: #f5f7fa;
   color: #357ae8;
+  border: 1px solid #357ae8;
   margin: 0 2px;
 }
 .action-btn:hover {

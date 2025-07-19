@@ -9,16 +9,17 @@ import {
   fetchAllFranchises
 } from '@/features/statistics/api.js'
 
-const period = ref('DAILY')
+const period = ref('WEEKLY')
 const locationType = ref('all')
 const locationId = ref('')
 const targetDate = ref(new Date(Date.now() - 86400000).toISOString().split('T')[0])
 const warehouses = ref([])
 const franchises = ref([])
 const searchKeyword = ref('')
+
 const isLoading = ref(false)
-const shouldRenderChart = ref(true)
 const isSearching = ref(false)
+const shouldRenderChart = ref(true)
 
 const trendChartRef = ref(null)
 const productChartRef = ref(null)
@@ -79,12 +80,21 @@ function handleSearchKeyword() {
   locationId.value = match ? match.id : ''
 }
 
+async function waitForCanvasReady(ids) {
+  let attempts = 10
+  while (attempts-- > 0) {
+    await nextTick()
+    const allExist = ids.every(id => document.getElementById(id))
+    if (allExist) return
+    await new Promise(resolve => setTimeout(resolve, 50))
+  }
+  console.warn('❗️ 일부 canvas 요소가 DOM에 생성되지 않았습니다.')
+}
+
 async function handleSearch() {
   try {
     isLoading.value = true
     isSearching.value = true
-    shouldRenderChart.value = false
-    await nextTick()
 
     const trendParams = {
       period: period.value,
@@ -151,14 +161,6 @@ async function handleSearch() {
           ]
         }
 
-    await nextTick()
-    shouldRenderChart.value = true
-    await nextTick()
-
-    setTimeout(() => {
-      drawChart('disposalTrendChart', trendData, 'line', false, trendChartRef)
-    }, 0)
-
     const productRes = await fetchDisposalRate(productParams)
     const productGrouped = {}
     for (const item of productRes) {
@@ -181,37 +183,56 @@ async function handleSearch() {
       ]
     }
 
-    setTimeout(() => {
-      drawChart('disposalProductChart', productChartData, 'bar', true, productChartRef)
-    }, 0)
+    // ✅ 차트 제거 후 재렌더링
+    shouldRenderChart.value = false
+    await nextTick()
+    shouldRenderChart.value = true
+    isLoading.value = false // ✅ canvas가 v-if로 생성되도록 먼저 false 처리
+    await nextTick()
+
+    await waitForCanvasReady(['disposalTrendChart', 'disposalProductChart'])
+
+    drawChart('disposalTrendChart', trendData, 'line', false, trendChartRef)
+    drawChart('disposalProductChart', productChartData, 'bar', true, productChartRef)
   } catch (err) {
-    console.error('폐기율 데이터 로드 실패:', err)
+    console.error('❌ 폐기율 데이터 로드 실패:', err)
   } finally {
-    setTimeout(() => (isLoading.value = false), 200)
-    setTimeout(() => (isSearching.value = false), 300)
+    isSearching.value = false
   }
 }
 
 function delayedSearch(newPeriod) {
+  if (isSearching.value) return
+  isSearching.value = true
   isLoading.value = true
   period.value = newPeriod
-  setTimeout(() => handleSearch(), 1000)
+
+  setTimeout(() => {
+    handleSearch().then(() => {
+      isSearching.value = false
+    })
+  }, 500)
 }
 
 function drawChart(id, data, type = 'line', horizontal = false, refObj) {
   const canvas = document.getElementById(id)
-  if (!canvas) return
+  if (!canvas) {
+    console.warn(`⛔️ ${id} 캔버스를 찾을 수 없습니다.`)
+    return
+  }
   const ctx = canvas.getContext('2d')
   if (!ctx) return
-  if (refObj.value && typeof refObj.value.destroy === 'function') refObj.value.destroy()
+
+  if (refObj.value && typeof refObj.value.destroy === 'function') {
+    refObj.value.destroy()
+  }
 
   const valueAxis = horizontal ? 'x' : 'y'
   const categoryAxis = horizontal ? 'y' : 'x'
 
-  // ✅ 최대값 계산 후 여유 buffer (20%) 적용
   const allValues = data.datasets.flatMap(ds => ds.data)
   const rawMax = Math.max(...allValues)
-  const suggestedMax = Math.ceil(rawMax * 1.2 * 10) / 10 || 1 // 데이터가 0만 있을 경우 1로 보정
+  const suggestedMax = Math.ceil(rawMax * 1.2 * 10) / 10 || 1
 
   refObj.value = new Chart(ctx, {
     type,
@@ -224,7 +245,8 @@ function drawChart(id, data, type = 'line', horizontal = false, refObj) {
         legend: { display: true },
         tooltip: {
           callbacks: {
-            label: ctx => `${ctx.dataset.label}: ${ctx.parsed[horizontal ? 'x' : 'y'].toFixed(2)}%`
+            label: ctx =>
+                `${ctx.dataset.label}: ${ctx.parsed[horizontal ? 'x' : 'y'].toFixed(2)}%`
           }
         }
       },
@@ -261,6 +283,7 @@ watch(locationType, () => {
 
 <template>
   <div class="dashboard">
+    <!-- 📌 필터 영역 -->
     <div class="filter-box">
       <div class="filter-grid">
         <div class="filter-item">
@@ -271,6 +294,7 @@ watch(locationType, () => {
             <option value="MONTHLY">월간</option>
           </select>
         </div>
+
         <div class="filter-item">
           <label>위치</label>
           <select v-model="locationType">
@@ -279,31 +303,43 @@ watch(locationType, () => {
             <option value="franchise">가맹점</option>
           </select>
         </div>
+
         <div class="filter-item">
           <label>선택</label>
           <select v-model="locationId" :disabled="locationType === 'all'">
             <option disabled value="">선택하세요</option>
-            <option v-for="item in locationType === 'warehouse' ? warehouses : franchises" :key="item.id" :value="item.id">
+            <option
+                v-for="item in locationType === 'warehouse' ? warehouses : franchises"
+                :key="item.id"
+                :value="item.id"
+            >
               {{ item.name }}
             </option>
           </select>
         </div>
+
         <div class="filter-item" v-if="locationType !== 'all'">
           <label>검색</label>
-          <input v-model="searchKeyword" placeholder="이름으로 검색" @input="handleSearchKeyword" />
+          <input
+              v-model="searchKeyword"
+              placeholder="이름으로 검색"
+              @input="handleSearchKeyword"
+          />
         </div>
+
         <div class="form-group">
           <FilterDate label="기준일" v-model="targetDate" />
         </div>
+
         <div class="filter-item">
-          <button class="btn-search" @click="handleSearch">
-            조회
-          </button>
+          <button class="btn-search" @click="handleSearch">조회</button>
         </div>
       </div>
     </div>
 
+    <!-- 📊 차트 영역 -->
     <div class="chart-grid">
+      <!-- 📈 폐기율 추이 -->
       <div class="chart-card col-8">
         <div class="chart-header">
           <h3>폐기율 추이</h3>
@@ -313,13 +349,19 @@ watch(locationType, () => {
             <button :class="{ active: period === 'MONTHLY' }" @click="() => delayedSearch('MONTHLY')">월간</button>
           </div>
         </div>
+
+        <!-- ✅ 로딩 중 메시지 -->
         <div v-if="isLoading" class="chart-loading">📊 데이터 로딩 중...</div>
-        <canvas v-if="shouldRenderChart" id="disposalTrendChart"></canvas>
+
+        <!-- ✅ 차트는 로딩이 끝난 뒤에만 표시 -->
+        <canvas v-if="!isLoading && shouldRenderChart" id="disposalTrendChart"></canvas>
       </div>
+
+      <!-- 📊 상품별 폐기율 -->
       <div class="chart-card col-4">
         <h3>상품별 폐기율</h3>
         <div v-if="isLoading" class="chart-loading">📦 데이터 로딩 중...</div>
-        <canvas v-if="shouldRenderChart" id="disposalProductChart"></canvas>
+        <canvas v-if="!isLoading && shouldRenderChart" id="disposalProductChart"></canvas>
       </div>
     </div>
   </div>
@@ -447,5 +489,8 @@ watch(locationType, () => {
 canvas {
   width: 100% !important;
   height: 300px !important;
+}
+.btn-search:hover {
+  background-color: #2c91bc;
 }
 </style>

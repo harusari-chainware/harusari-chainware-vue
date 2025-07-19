@@ -109,7 +109,7 @@ async function handleLogin() {
             } else if (decoded.authority === 'FRANCHISE_MANAGER') {
                 await router.push('/order/list');
             } else if (decoded.authority === 'VENDOR_MANAGER') {
-                await router.push('/purchases/list');
+                await router.push('/vendor/list');
             }
         } else {
             errorMessage.value = res.message || '로그인에 실패했습니다.';

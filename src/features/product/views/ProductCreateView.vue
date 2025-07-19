@@ -198,6 +198,10 @@ const handleDoneClose  = () => {
   doneModal.value.show = false
   router.push('/product/list')
 }
+
+const handleCancel = () => {
+  router.push('/product/list')
+}
 </script>
 
 <style scoped>

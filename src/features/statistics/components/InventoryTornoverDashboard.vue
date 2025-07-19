@@ -26,15 +26,15 @@ const productCanvasEl = ref(null)
 const trendRes = ref([])
 const productDataRaw = ref([])
 const productTab = ref('top')
+const shouldRenderProductChart = ref(true)
 
-// 👇 오류 방지용 computed
 const showTrendChart = computed(() => trendRes.value.length > 0)
 const showProductChart = computed(() => productDataRaw.value.length > 0)
 
 function getYesterday() {
   const d = new Date()
   d.setDate(d.getDate() - 1)
-  return d.toISOString().slice(0, 10)
+  return d.toISOString().split('T')[0]
 }
 
 function formatXAxisLabels(dates, period) {
@@ -104,23 +104,25 @@ function delayedSearch(newPeriod) {
   handleSearch()
 }
 
-function changeProductTab(tab) {
+async function changeProductTab(tab) {
   productTab.value = tab
-  requestAnimationFrame(() => {
-    drawProductChart()
-  })
+
+  // ✅ canvas 재생성 보장
+  shouldRenderProductChart.value = false
+  await nextTick()
+  shouldRenderProductChart.value = true
+  await nextTick()
+
+  drawProductChart()
 }
 
 function drawTrendChart() {
   const canvas = trendCanvasEl.value
   if (!canvas || typeof canvas.getContext !== 'function') return
-
   const ctx = canvas.getContext('2d')
   if (!ctx) return
 
-  if (trendChartRef.value?.destroy) {
-    trendChartRef.value.destroy()
-  }
+  trendChartRef.value?.destroy()
 
   const data = {
     labels: formatXAxisLabels(trendRes.value.map(i => i.date), period.value),
@@ -147,13 +149,10 @@ function drawTrendChart() {
 function drawProductChart() {
   const canvas = productCanvasEl.value
   if (!canvas || typeof canvas.getContext !== 'function') return
-
   const ctx = canvas.getContext('2d')
   if (!ctx) return
 
-  if (productChartRef.value?.destroy) {
-    productChartRef.value.destroy()
-  }
+  productChartRef.value?.destroy()
 
   const source = [...productDataRaw.value]
   const validData = source.filter(i => typeof i.turnoverRate === 'number' && !isNaN(i.turnoverRate))
@@ -287,6 +286,7 @@ watch(locationType, () => {
       </div>
 
       <!-- 📦 상품별 회전율 -->
+      <!-- 📦 제품별 재고 회전율 -->
       <div class="chart-card col-4">
         <div class="chart-header">
           <h3>제품별 재고 회전율</h3>
@@ -296,7 +296,11 @@ watch(locationType, () => {
           </div>
         </div>
         <div v-if="isLoading" class="chart-loading">📦 데이터 로딩 중...</div>
-        <canvas v-if="showProductChart && !isLoading" id="productTurnoverChart" ref="productCanvasEl" />
+        <canvas
+            v-if="shouldRenderProductChart && showProductChart && !isLoading"
+            id="productTurnoverChart"
+            ref="productCanvasEl"
+        />
       </div>
     </div>
   </div>
@@ -402,5 +406,8 @@ canvas {
   font-weight: bold;
   color: #888;
   padding: 100px 0;
+}
+.btn-search:hover {
+  background-color: #2c91bc;
 }
 </style>
