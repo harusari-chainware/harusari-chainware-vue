@@ -32,7 +32,6 @@ export const useAuthStore = defineStore("auth", {
                 this.setAccessToken(res.data.accessToken);
                 return res.data.accessToken;
             } catch (error) {
-                console.error("refreshToken 실패:", error);
                 this.clearAuth();
                 await router.push("/login");
                 throw error;
