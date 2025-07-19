@@ -27,7 +27,6 @@ const fetchData = async () => {
     page: props.page,
     size: props.size
   })
-  console.log(data)
   tableData.value = data.data?.contents ?? []
   totalElements.value = data.data?.totalElements ?? 0
   emit('update:totalElements', totalElements.value)

@@ -207,7 +207,6 @@ const openShippedDialog = () => {
 // 입고
 const openInboundDialog = () => {
   modalInbound.value = true
-  console.log('제품 item:', purchaseDetail.value.items)
 }
 
 const handleInboundSubmit = async (products) => {

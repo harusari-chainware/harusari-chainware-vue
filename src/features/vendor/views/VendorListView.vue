@@ -59,7 +59,6 @@ const PAGE_SIZE = 10
 watch(page, loadVendors)
 
 const handleSearch = (newFilters) => {
-  console.log('[handleSearch] newFilters:', newFilters)
 
   // filters.vendorName = newFilters.vendorName || ''
   // filters.vendorType = newFilters.vendorType || ''
@@ -79,8 +78,6 @@ const handleSearch = (newFilters) => {
   filters.vendorStatus = newFilters.vendorStatus || ''
   filters.vendorStartDate = newFilters.vendorStartDate || ''
   filters.vendorEndDate = newFilters.vendorEndDate || ''
-
-  console.log('[handleSearch] 최종 filters 상태:', filters)
 
   filters.zipcode = newFilters.zipcode || ''
   filters.addressRoad = newFilters.addressRoad || ''
@@ -118,12 +115,9 @@ async function loadVendors() {
     if (!params[key]) delete params[key]
   })
 
-  console.log('[loadVendors] 최종 API 파라미터:', params)
-
   const res = await fetchVendors(params)
   const data = res.data.data
 
-  console.log('[loadVendors] API 응답:', data)
 
   vendors.value = data.contents || []
   totalCount.value = data.totalElements || 0
