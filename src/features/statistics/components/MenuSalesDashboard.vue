@@ -21,6 +21,7 @@ const salesChart = ref(null)
 const revenueChart = ref(null)
 
 const shouldRenderChart = ref(true)
+const isLoading = ref(false)
 
 function handleSearchKeyword() {
   const match = franchises.value.find(i => i.name.includes(searchKeyword.value))
@@ -28,24 +29,29 @@ function handleSearchKeyword() {
 }
 
 async function loadData() {
-  const menuData = await fetchMenuSales({
-    periodType: periodType.value,
-    franchiseId: franchiseId.value,
-    targetDate: targetDate.value
-  })
+  isLoading.value = true
+  try {
+    const menuData = await fetchMenuSales({
+      periodType: periodType.value,
+      franchiseId: franchiseId.value,
+      targetDate: targetDate.value
+    })
 
-  const totalData = await fetchTotalSales({
-    period: periodType.value,
-    franchiseId: franchiseId.value,
-    targetDate: targetDate.value
-  })
+    const totalData = await fetchTotalSales({
+      period: periodType.value,
+      franchiseId: franchiseId.value,
+      targetDate: targetDate.value
+    })
 
-  totalQuantity.value = menuData.reduce((sum, m) => sum + m.totalQuantity, 0)
-  totalSalesAmount.value = totalData.totalSalesAmount
-  changeRate.value = totalData.changeRate
-  bestSeller.value = menuData[0]
+    totalQuantity.value = menuData.reduce((sum, m) => sum + m.totalQuantity, 0)
+    totalSalesAmount.value = totalData.totalSalesAmount
+    changeRate.value = totalData.changeRate
+    bestSeller.value = menuData[0]
 
-  updateCharts(menuData)
+    await updateCharts(menuData)
+  } finally {
+    isLoading.value = false
+  }
 }
 
 async function updateCharts(data) {
@@ -109,6 +115,12 @@ onMounted(async () => {
 
 <template>
   <div class="menu-sales-dashboard">
+    <!-- 로딩 오버레이 -->
+    <div v-if="isLoading" class="loading-overlay">
+      <p>데이터 로딩중...</p>
+    </div>
+
+    <!-- 필터 영역 -->
     <div class="filter-box">
       <div class="filter-grid">
         <div class="form-group">
@@ -133,10 +145,7 @@ onMounted(async () => {
           <input v-model="searchKeyword" @input="handleSearchKeyword" placeholder="이름으로 검색" />
         </div>
         <div class="form-group">
-          <FilterDate
-              label="기준일"
-              v-model="targetDate"
-          />
+          <FilterDate label="기준일" v-model="targetDate" />
         </div>
         <div class="form-group form-action">
           <button class="primary" @click="loadData">조회</button>
@@ -144,6 +153,7 @@ onMounted(async () => {
       </div>
     </div>
 
+    <!-- 요약 카드 -->
     <div class="summary-section">
       <div class="card">
         <p>총 판매량</p>
@@ -163,6 +173,7 @@ onMounted(async () => {
       </div>
     </div>
 
+    <!-- 차트 영역 -->
     <div class="charts">
       <div class="chart-card">
         <h3>메뉴별 판매량</h3>
@@ -263,4 +274,23 @@ button.primary {
   border-radius: 8px;
   padding: 20px;
 }
+.primary:hover {
+  background-color: #2c91bc;
+}
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(255, 255, 255, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 1.25rem;
+  font-weight: bold;
+  color: #4b5563;
+  z-index: 999;
+}
+
 </style>

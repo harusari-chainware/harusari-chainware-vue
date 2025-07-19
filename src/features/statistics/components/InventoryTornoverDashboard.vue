@@ -403,4 +403,7 @@ canvas {
   color: #888;
   padding: 100px 0;
 }
+.btn-search:hover {
+  background-color: #2c91bc;
+}
 </style>
