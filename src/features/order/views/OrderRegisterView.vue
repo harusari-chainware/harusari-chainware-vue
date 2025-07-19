@@ -67,7 +67,7 @@ const form = reactive({
 
 const route = useRoute()
 const isEditMode = route.query.mode === 'edit'
-const orderId = route.query.orderI
+const orderId = route.query.orderId
 const toast = useToast()
 
 // 초기값 세팅 : 신규 등록 및 주문 수정
@@ -172,7 +172,7 @@ async function submit() {
     await router.push(`/order/${newOrderId}`);
   } catch (e) {
     toast.error(`${isEditMode ? '수정' : '등록'} 실패: ` + (e.response?.data?.message || e.message))
-    alert(`${isEditMode ? '수정' : '등록'} 실패: ` + (e.response?.data?.message || e.message))
+    // alert(`${isEditMode ? '수정' : '등록'} 실패: ` + (e.response?.data?.message || e.message))
   }
 }
 
