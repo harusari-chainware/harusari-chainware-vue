@@ -235,10 +235,12 @@ button.primary {
   border: 1px solid #e5e7eb;
   border-radius: 8px;
   padding: 10px;
+  text-align: center;
 }
 .card h2 {
   font-size: 20px;
   margin: 10px 0;
+  text-align: center;
 }
 .trend-up {
   color: #10b981;

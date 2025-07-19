@@ -38,6 +38,6 @@ export const shippedPurchaseOrder = (purchaseOrderId) => {
 }
 
 // 추가: 입고 처리
-export const inboundPurchaseOrder = (purchaseOrderId) => {
-    return api.put(`/purchases/${purchaseOrderId}/inbound`)
+export const inboundPurchaseOrder = (purchaseOrderId, payload) => {
+    return api.put(`/purchases/${purchaseOrderId}/inbound`, payload)
 }

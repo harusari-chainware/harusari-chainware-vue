@@ -254,6 +254,8 @@ onBeforeUnmount(() => {
   height: 40px;
   object-fit: contain;
   padding-left: 1rem;
+  margin-top: 7px;
+  margin-left: -32px;
 }
 
 .top-menu {
