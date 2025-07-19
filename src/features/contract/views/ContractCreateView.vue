@@ -420,6 +420,10 @@ const handleSubmit = async () => {
     showError('계약 등록에 실패했습니다.\n' + (e?.response?.data?.message ?? e.message))
   }
 };
+
+const goBack = () => {
+  router.push('/contract/list')
+}
 </script>
 
 <style scoped>

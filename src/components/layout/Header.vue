@@ -76,7 +76,7 @@ const reloadPage = () => {
       router.push('/dashboard/prediction')
       break
     case 'VENDOR_MANAGER':
-      router.push('/purchases/list')
+      router.push('/vendor/list')
       break
     case 'WAREHOUSE_MANAGER':
       router.push('/purchases/list')
@@ -137,14 +137,12 @@ const allMenus = [
   //   roles: ['FRANCHISE_MANAGER'],
   //   group: 'franchise'
   // },
-
-  /*거래처 상세조회 수정 필요*/
-  // {
-  //   label: '거래처',
-  //   route: '/vendor/list',
-  //   roles: ['VENDOR_MANAGER'],
-  //   group: 'vendor'
-  // },
+  {
+    label: '거래처',
+    route: '/vendor/list',
+    roles: ['VENDOR_MANAGER'],
+    group: 'vendor'
+  },
   {
     label: '거래처/창고',
     route: '/warehouse/inventory/list',

@@ -42,6 +42,7 @@ const routeToMenuMap = [
   { path: '/franchise', menu: '거래처/창고' },
   // { path: '/franchise', menu: '가맹점' },
   { path: '/vendor', menu: '거래처/창고' },
+  { path: '/vendor', menu: '거래처' },
   { path: '/warehouse', menu: '거래처/창고' },
   { path: '/disposal', menu: '폐기' },
   { path: '/order', menu: '주문/반품' },
