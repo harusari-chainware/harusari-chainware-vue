@@ -68,7 +68,6 @@ const loadOrders = async () => {
       size: itemsPerPage
     }
     const { data } = await fetchOrders(params)
-    console.log('fetchOrders 응답:', data)
 
     if (!data || !data.data || !Array.isArray(data.data.contents)) {
       orders.value = []
@@ -79,17 +78,15 @@ const loadOrders = async () => {
     orders.value = data.data.contents
     totalCount.value = data.data.totalElements
   } catch (err) {
-    console.error('주문 목록 조회 실패:', err)
+    // console.error('주문 목록 조회 실패:', err)
   } finally {
     isLoading.value = false
   }
 }
 
 const handleSearch = () => {
-  console.log("검색됨")
   currentPage.value = 1
   loadOrders()
-  console.log("loadOrders 실행됨")
 }
 
 const resetFilters = () => {

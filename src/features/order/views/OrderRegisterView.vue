@@ -79,7 +79,7 @@ onMounted(async () => {
   // 수정 모드라면 기존 값 덮어쓰기
   if (isEditMode && orderId) {
     const res = await fetchOrderDetail(orderId)
-    console.log("onMount로 넘어온 데이터: ", res)
+    // console.log("onMount로 넘어온 데이터: ", res)
     const detail = res.data.data
     form.deliveryDate = detail.orderInfo.deliveryDueDate
     form.items = detail.products.map(p => ({
@@ -102,15 +102,10 @@ function openProductSearch() {
 
 // 제품 선택 처리
 function handleSelectProducts(products) {
-  console.log('[선택된 products]', products)
+  // console.log('[선택된 products]', products)
   const existingIds = new Set(form.items.map(i => i.productId))
   const newItems = products.filter(p => !existingIds.has(p.productId))
       .map(p => {
-        console.log('[product 정보]', {
-          id: p.productId,
-          quantity: p.unitQuantity,
-          spec: p.unitSpec
-        })
         return {
           productId: p.productId,
           productCode: p.productCode,
@@ -122,7 +117,7 @@ function handleSelectProducts(products) {
         }
       })
 
-  console.log('[추가될 newItems]', newItems)
+  // console.log('[추가될 newItems]', newItems)
 
   form.items.push(...newItems)
   showRightPanel.value = false
@@ -181,6 +176,6 @@ function cancel() {
 }
 
 watch(() => form.items, (newVal) => {
-  console.log('[현재 선택된 제품 목록]', newVal)
+  // console.log('[현재 선택된 제품 목록]', newVal)
 }, { deep: true })
 </script>
