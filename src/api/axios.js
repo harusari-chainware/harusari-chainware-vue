@@ -2,7 +2,8 @@ import axios from "axios";
 import router from "@/router";
 
 const api = axios.create({
-    baseURL: "https://api.chainware.site/api/v1",
+    //baseURL: "https://api.chainware.site/api/v1",
+    baseURL: "http://localhost:8080/api/v1",
     withCredentials: true,
 });
 
