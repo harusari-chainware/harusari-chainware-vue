@@ -56,6 +56,7 @@ import OrderRegisterDetail from '../components/OrderRegisterDetail.vue'
 import RegisterSummaryBox from '@/components/layout/registerview/RegisterSummaryBox.vue'
 import OrderRegisterFooter from '../components/OrderRegisterFooter.vue'
 import { useRouter, useRoute } from 'vue-router'
+import { useToast } from "vue-toastification";
 
 const router = useRouter()
 const form = reactive({
@@ -67,6 +68,7 @@ const form = reactive({
 const route = useRoute()
 const isEditMode = route.query.mode === 'edit'
 const orderId = route.query.orderId
+const toast = useToast()
 
 // 초기값 세팅 : 신규 등록 및 주문 수정
 onMounted(async () => {
@@ -77,7 +79,7 @@ onMounted(async () => {
   // 수정 모드라면 기존 값 덮어쓰기
   if (isEditMode && orderId) {
     const res = await fetchOrderDetail(orderId)
-    console.log("onMount로 넘어온 데이터: ", res)
+    // console.log("onMount로 넘어온 데이터: ", res)
     const detail = res.data.data
     form.deliveryDate = detail.orderInfo.deliveryDueDate
     form.items = detail.products.map(p => ({
@@ -100,15 +102,10 @@ function openProductSearch() {
 
 // 제품 선택 처리
 function handleSelectProducts(products) {
-  console.log('[선택된 products]', products)
+  // console.log('[선택된 products]', products)
   const existingIds = new Set(form.items.map(i => i.productId))
   const newItems = products.filter(p => !existingIds.has(p.productId))
       .map(p => {
-        console.log('[product 정보]', {
-          id: p.productId,
-          quantity: p.unitQuantity,
-          spec: p.unitSpec
-        })
         return {
           productId: p.productId,
           productCode: p.productCode,
@@ -120,7 +117,7 @@ function handleSelectProducts(products) {
         }
       })
 
-  console.log('[추가될 newItems]', newItems)
+  // console.log('[추가될 newItems]', newItems)
 
   form.items.push(...newItems)
   showRightPanel.value = false
@@ -158,16 +155,19 @@ async function submit() {
     let res;
     if (isEditMode) {
       res = await updateOrder(orderId, request)
-      alert('주문이 수정되었습니다.')
+      toast.success("주문이 수정되었습니다.")
+      // alert('주문이 수정되었습니다.')
     } else {
       res = await registerOrder(request)
-      alert('주문이 등록되었습니다.')
+      toast.success("주문이 등록되었습니다.")
+      // alert('주문이 등록되었습니다.')
     }
 
     const newOrderId = res.data.data.orderId;
     await router.push(`/order/${newOrderId}`);
   } catch (e) {
-    alert(`${isEditMode ? '수정' : '등록'} 실패: ` + (e.response?.data?.message || e.message))
+    toast.error(`${isEditMode ? '수정' : '등록'} 실패: ` + (e.response?.data?.message || e.message))
+    // alert(`${isEditMode ? '수정' : '등록'} 실패: ` + (e.response?.data?.message || e.message))
   }
 }
 
@@ -176,6 +176,6 @@ function cancel() {
 }
 
 watch(() => form.items, (newVal) => {
-  console.log('[현재 선택된 제품 목록]', newVal)
+  // console.log('[현재 선택된 제품 목록]', newVal)
 }, { deep: true })
 </script>

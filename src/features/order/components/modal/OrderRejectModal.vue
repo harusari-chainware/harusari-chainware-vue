@@ -21,6 +21,7 @@
 import { defineEmits, defineProps, ref } from 'vue'
 import { rejectOrder } from '@/features/order/api.js'
 import StatusButton from "@/components/common/StatusButton.vue";
+import {useToast} from "vue-toastification";
 
 const props = defineProps({
   orderId: {
@@ -31,10 +32,12 @@ const props = defineProps({
 
 const emit = defineEmits(['close', 'rejected'])
 const reason = ref('')
+const toast = useToast()
 
 const handleReject = async () => {
   if (!reason.value.trim()) {
-    alert('반려 사유를 입력해주세요.');
+    toast.error("반려 사유를 입력해주세요.")
+    // alert('반려 사유를 입력해주세요.');
     return;
   }
   try {
@@ -42,7 +45,8 @@ const handleReject = async () => {
     emit('rejected');
     emit('close');
   } catch (e) {
-    alert('주문 반려에 실패했습니다: ' + (e.response?.data?.message || e.message));
+    toast.error('주문 반려에 실패했습니다: \n' + (e.response?.data?.message || e.message))
+    // alert('주문 반려에 실패했습니다: ' + (e.response?.data?.message || e.message));
   }
 }
 </script>
