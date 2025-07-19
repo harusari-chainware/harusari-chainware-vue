@@ -268,7 +268,7 @@ onMounted(async () => {
 }
 
 .filter-button:hover {
-  background-color:  rgb(58, 174, 216);
+  background-color: #2c91bc;
 }
 
 .filter-button.active {
@@ -279,10 +279,6 @@ onMounted(async () => {
 .button-group button.active {
   background-color:  rgb(58, 174, 216);
   color: white;
-}
-
-.filter-button:hover {
-  background-color:  rgb(58, 174, 216);
 }
 
 .filter-button.active {
@@ -364,5 +360,8 @@ onMounted(async () => {
   width: 100% !important;
   height: 300px !important;
   display: block;
+}
+.filter-button.active:hover {
+  background-color: #2c91bc;
 }
 </style>
