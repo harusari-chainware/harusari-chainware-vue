@@ -101,15 +101,13 @@ async function onSearch() {
   await loadStatistics()
   await loadTrend()
   shouldRenderChart.value = true
-}
-
-watch(shouldRenderChart, async (visible) => {
-  if (!visible) return
   await nextTick()
-  drawVendorChart(latestStats.value)
-  drawProductChart(latestProductStats.value)
-  drawTrendChart(latestTrendStats.value)
-})
+  requestAnimationFrame(() => {
+    drawVendorChart(latestStats.value)
+    drawProductChart(latestProductStats.value)
+    drawTrendChart(latestTrendStats.value)
+  })
+}
 
 function drawVendorChart(data) {
   if (!vendorCanvas.value) return
@@ -198,16 +196,7 @@ function drawProductChart(data) {
       labels,
       datasets: [{
         data: values,
-        backgroundColor: [
-          'rgba(96, 165, 250, 0.8)', 'rgba(34, 197, 94, 0.8)',
-          'rgba(251, 191, 36, 0.8)', 'rgba(244, 114, 182, 0.8)',
-          'rgba(139, 92, 246, 0.8)', 'rgba(79, 70, 229, 0.8)',
-          'rgba(16, 185, 129, 0.8)', 'rgba(236, 72, 153, 0.8)',
-          'rgba(253, 224, 71, 0.8)', 'rgba(34, 211, 238, 0.8)',
-          'rgba(245, 158, 11, 0.8)', 'rgba(132, 204, 22, 0.8)',
-          'rgba(236, 72, 72, 0.8)', 'rgba(192, 132, 252, 0.8)',
-          'rgba(59, 130, 246, 0.8)', 'rgba(99, 102, 241, 0.8)'
-        ],
+        backgroundColor: chartColors,
         borderColor: '#fff',
         borderWidth: 2
       }]
@@ -216,19 +205,15 @@ function drawProductChart(data) {
       responsive: true,
       maintainAspectRatio: false,
       plugins: {
-        legend: {
-          display: false
-        },
+        legend: { display: false },
         tooltip: {
           callbacks: {
             label: function (ctx) {
               const value = ctx.raw
-              const lines = (ctx.label || '').split('\n')
-              const label = lines[0] || ''
-              const sub = lines[1] || ''
+              const label = (ctx.label || '').split('\n')[0]
               const ratio = ((value / total) * 100).toFixed(1)
               const amount = value.toLocaleString('ko-KR')
-              return [`${label}: ₩${amount} (${ratio}%)`, sub]
+              return [`${label}: ₩${amount} (${ratio}%)`]
             }
           }
         }
@@ -237,21 +222,6 @@ function drawProductChart(data) {
     }
   })
 }
-const chartColors = [
-  'rgba(96, 165, 250, 0.8)', 'rgba(34, 197, 94, 0.8)',
-  'rgba(251, 191, 36, 0.8)', 'rgba(244, 114, 182, 0.8)',
-  'rgba(139, 92, 246, 0.8)', 'rgba(79, 70, 229, 0.8)',
-  'rgba(16, 185, 129, 0.8)', 'rgba(236, 72, 153, 0.8)',
-  'rgba(253, 224, 71, 0.8)', 'rgba(34, 211, 238, 0.8)',
-  'rgba(245, 158, 11, 0.8)', 'rgba(132, 204, 22, 0.8)',
-  'rgba(236, 72, 72, 0.8)', 'rgba(192, 132, 252, 0.8)',
-  'rgba(59, 130, 246, 0.8)', 'rgba(99, 102, 241, 0.8)'
-]
-
-
-function formatTrendLabel(dateStr) {
-  return dateStr.slice(5).replace('-', '/')
-}
 
 function drawTrendChart(data) {
   if (!trendCanvas.value) return
@@ -259,7 +229,7 @@ function drawTrendChart(data) {
   if (!ctx) return
   if (trendChart.value) trendChart.value.destroy()
 
-  const labels = data.map(d => formatTrendLabel(d.date))
+  const labels = data.map(d => d.date.slice(5).replace('-', '/'))
   const values = trendChartView.value === 'amount'
       ? data.map(d => d.totalAmount)
       : data.map(d => d.totalCount)
@@ -296,6 +266,17 @@ function drawTrendChart(data) {
     }
   })
 }
+
+const chartColors = [
+  'rgba(96, 165, 250, 0.8)', 'rgba(34, 197, 94, 0.8)',
+  'rgba(251, 191, 36, 0.8)', 'rgba(244, 114, 182, 0.8)',
+  'rgba(139, 92, 246, 0.8)', 'rgba(79, 70, 229, 0.8)',
+  'rgba(16, 185, 129, 0.8)', 'rgba(236, 72, 153, 0.8)',
+  'rgba(253, 224, 71, 0.8)', 'rgba(34, 211, 238, 0.8)',
+  'rgba(245, 158, 11, 0.8)', 'rgba(132, 204, 22, 0.8)',
+  'rgba(236, 72, 72, 0.8)', 'rgba(192, 132, 252, 0.8)',
+  'rgba(59, 130, 246, 0.8)', 'rgba(99, 102, 241, 0.8)'
+]
 
 onMounted(async () => {
   vendors.value = await fetchAllVendors()
@@ -373,7 +354,7 @@ onMounted(async () => {
       <div class="chart-card">
         <div class="chart-header"><span>상품별 발주량</span></div>
         <div class="product-chart-container">
-          <canvas ref="productCanvas" height="240"></canvas>
+          <canvas v-if="shouldRenderChart" ref="productCanvas" height="240"></canvas>
           <div class="custom-legend">
             <div
                 class="legend-item"

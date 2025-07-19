@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, watch, nextTick } from 'vue'
+import { ref, onMounted, nextTick } from 'vue'
 import Chart from 'chart.js/auto'
 import FilterDate from "@/components/common/filters/FilterDate.vue"
 import { fetchMenuSales, fetchTotalSales, fetchAllFranchises } from '@/features/statistics/api.js'
@@ -19,6 +19,9 @@ const searchKeyword = ref('')
 
 const salesChart = ref(null)
 const revenueChart = ref(null)
+
+const salesChartCanvas = ref(null)
+const revenueChartCanvas = ref(null)
 
 const shouldRenderChart = ref(true)
 const isLoading = ref(false)
@@ -49,6 +52,8 @@ async function loadData() {
     bestSeller.value = menuData[0]
 
     await updateCharts(menuData)
+  } catch (e) {
+    console.error('❌ 데이터 로딩 실패:', e)
   } finally {
     isLoading.value = false
   }
@@ -56,54 +61,70 @@ async function loadData() {
 
 async function updateCharts(data) {
   shouldRenderChart.value = false
-  await nextTick() // canvas 제거 대기
-
+  await nextTick()
   shouldRenderChart.value = true
-  await nextTick() // canvas 재생성 대기
+  await nextTick()
+  await new Promise(resolve => requestAnimationFrame(resolve))
+
+  // ✅ ref 접근 재시도
+  let retries = 0
+  while ((!salesChartCanvas.value || !revenueChartCanvas.value) && retries < 5) {
+    console.warn('🕒 canvas ref가 아직 null입니다. 재시도 중...', retries)
+    await new Promise(resolve => setTimeout(resolve, 100))
+    retries++
+  }
+
+  if (!salesChartCanvas.value || !revenueChartCanvas.value) {
+    console.error('❌ 여전히 Canvas DOM 접근 실패')
+    return
+  }
+
+  if (salesChart.value) salesChart.value.destroy()
+  if (revenueChart.value) revenueChart.value.destroy()
 
   const labels = data.map(d => d.menuName)
   const quantities = data.map(d => d.totalQuantity)
   const revenues = data.map(d => d.totalAmount)
 
-  const ctx1 = document.getElementById('salesChart')
-  const ctx2 = document.getElementById('revenueChart')
-
-  if (!ctx1 || !ctx2) return
-
-  if (salesChart.value) salesChart.value.destroy()
-  if (revenueChart.value) revenueChart.value.destroy()
-
-  salesChart.value = new Chart(ctx1, {
-    type: 'bar',
-    data: {
-      labels,
-      datasets: [{ label: '판매량', data: quantities, backgroundColor: '#8580ef' }]
-    },
-    options: {
-      plugins: {
-        tooltip: {
-          callbacks: { label: ctx => `${ctx.parsed.y}개` }
-        }
+  try {
+    salesChart.value = new Chart(salesChartCanvas.value, {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [{ label: '판매량', data: quantities, backgroundColor: '#8580ef' }]
       },
-      scales: { y: { beginAtZero: true } }
-    }
-  })
+      options: {
+        plugins: {
+          tooltip: {
+            callbacks: { label: ctx => `${ctx.parsed.y}개` }
+          }
+        },
+        scales: { y: { beginAtZero: true } }
+      }
+    })
+  } catch (e) {
+    console.error('❌ salesChart 생성 실패:', e)
+  }
 
-  revenueChart.value = new Chart(ctx2, {
-    type: 'bar',
-    data: {
-      labels,
-      datasets: [{ label: '매출액', data: revenues, backgroundColor: '#6DACD3' }]
-    },
-    options: {
-      plugins: {
-        tooltip: {
-          callbacks: { label: ctx => `₩${ctx.parsed.y.toLocaleString()}` }
-        }
+  try {
+    revenueChart.value = new Chart(revenueChartCanvas.value, {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [{ label: '매출액', data: revenues, backgroundColor: '#6DACD3' }]
       },
-      scales: { y: { beginAtZero: true } }
-    }
-  })
+      options: {
+        plugins: {
+          tooltip: {
+            callbacks: { label: ctx => `₩${ctx.parsed.y.toLocaleString()}` }
+          }
+        },
+        scales: { y: { beginAtZero: true } }
+      }
+    })
+  } catch (e) {
+    console.error('❌ revenueChart 생성 실패:', e)
+  }
 }
 
 onMounted(async () => {
@@ -115,12 +136,7 @@ onMounted(async () => {
 
 <template>
   <div class="menu-sales-dashboard">
-    <!-- 로딩 오버레이 -->
-    <div v-if="isLoading" class="loading-overlay">
-      <p>데이터 로딩중...</p>
-    </div>
-
-    <!-- 필터 영역 -->
+    <!-- 📌 필터 영역 -->
     <div class="filter-box">
       <div class="filter-grid">
         <div class="form-group">
@@ -153,7 +169,7 @@ onMounted(async () => {
       </div>
     </div>
 
-    <!-- 요약 카드 -->
+    <!-- 📊 요약 카드 -->
     <div class="summary-section">
       <div class="card">
         <p>총 판매량</p>
@@ -173,15 +189,17 @@ onMounted(async () => {
       </div>
     </div>
 
-    <!-- 차트 영역 -->
+    <!-- 📈 차트 영역 -->
     <div class="charts">
       <div class="chart-card">
         <h3>메뉴별 판매량</h3>
-        <canvas v-if="shouldRenderChart" id="salesChart"></canvas>
+        <div v-if="isLoading" class="chart-loading">📊 데이터 로딩중...</div>
+        <canvas v-show="!isLoading && shouldRenderChart" ref="salesChartCanvas"></canvas>
       </div>
       <div class="chart-card">
         <h3>메뉴별 매출액</h3>
-        <canvas v-if="shouldRenderChart" id="revenueChart"></canvas>
+        <div v-if="isLoading" class="chart-loading">📊 데이터 로딩중...</div>
+        <canvas v-show="!isLoading && shouldRenderChart" ref="revenueChartCanvas"></canvas>
       </div>
     </div>
   </div>
@@ -193,6 +211,7 @@ onMounted(async () => {
   font-family: 'Noto Sans KR', sans-serif;
   background-color: #f9fafb;
 }
+
 .filter-box {
   background: white;
   padding: 1.5rem;
@@ -200,12 +219,14 @@ onMounted(async () => {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
   margin-bottom: 2rem;
 }
+
 .filter-grid {
   display: flex;
   flex-wrap: wrap;
   align-items: flex-end;
   gap: 1rem;
 }
+
 .form-group {
   flex: 1;
   min-width: 200px;
@@ -213,6 +234,7 @@ onMounted(async () => {
   flex-direction: column;
   gap: 0.5rem;
 }
+
 .form-group select,
 .form-group input {
   padding: 0.5rem 0.75rem;
@@ -220,11 +242,13 @@ onMounted(async () => {
   border: 1px solid #ccc;
   font-size: 14px;
 }
+
 .form-group.form-action {
   align-self: flex-end;
   margin-top: auto;
   display: flex;
 }
+
 button.primary {
   background-color: rgb(58, 174, 216);
   color: white;
@@ -235,11 +259,13 @@ button.primary {
   font-weight: bold;
   cursor: pointer;
 }
+
 .summary-section {
   display: flex;
   gap: 20px;
   margin-bottom: 30px;
 }
+
 .card {
   flex: 1;
   background: #fff;
@@ -248,24 +274,29 @@ button.primary {
   padding: 10px;
   text-align: center;
 }
+
 .card h2 {
   font-size: 20px;
   margin: 10px 0;
   text-align: center;
 }
+
 .trend-up {
   color: #10b981;
   font-weight: bold;
 }
+
 .trend-down {
   color: #ef4444;
   font-weight: bold;
 }
+
 .charts {
   display: flex;
   flex-wrap: wrap;
   gap: 20px;
 }
+
 .chart-card {
   flex: 1;
   min-width: 400px;
@@ -274,23 +305,16 @@ button.primary {
   border-radius: 8px;
   padding: 20px;
 }
+
+/* ✅ 추가된 스타일: 로딩 문구 */
+.chart-loading {
+  text-align: center;
+  font-weight: bold;
+  color: #888;
+  padding: 2rem 0;
+}
+
 .primary:hover {
   background-color: #2c91bc;
 }
-.loading-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(255, 255, 255, 0.7);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-size: 1.25rem;
-  font-weight: bold;
-  color: #4b5563;
-  z-index: 999;
-}
-
 </style>
