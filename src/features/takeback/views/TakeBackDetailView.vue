@@ -10,6 +10,10 @@ import {
 import StatusButton from "@/components/common/StatusButton.vue"
 import StatusBadge from "@/components/common/StatusBadge.vue"
 import RejectReasonModal from "@/components/common/RejectReasonModal.vue"
+import { useAuthStore } from "@/features/auth/useAuthStore.js";
+
+const authStore = useAuthStore()
+const userRole = authStore.member?.authorityName
 
 const route = useRoute()
 const takeBackId = route.params.id
@@ -61,7 +65,10 @@ onMounted(fetchDetail)
             />
           </span>
         </div>
-        <div class="right" v-if="detail?.takeBackInfo?.takeBackStatus !== 'APPROVED'">
+        <div
+            class="right"
+            v-if="authStore.authority === 'WAREHOUSE_MANAGER' && detail?.takeBackInfo?.takeBackStatus !== 'APPROVED'"
+        >
           <StatusButton type="approve" @click="handleApprove">승인</StatusButton>
           <StatusButton type="reject" @click="handleReject">반려</StatusButton>
           <StatusButton type="reset" @click="handleCollect">수거</StatusButton>

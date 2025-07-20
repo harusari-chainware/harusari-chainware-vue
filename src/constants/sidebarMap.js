@@ -54,7 +54,7 @@ export const sidebarMap = {
             title: "창고",
             icon: 'fas fa-warehouse',
             items: [
-                { name: "보유 재고 조회", route: "/warehouse/inventory/list", icon: "fas fa-cubes-stacked", roles: ["GENERAL_MANAGER", "SENIOR_MANAGER", "WAREHOUSE_MANAGER", "SUPER_ADMIN"] },
+                { name: "보유 재고 조회", route: "/warehouse/inventory/list", icon: "fas fa-cubes-stacked", roles: ["GENERAL_MANAGER", "SENIOR_MANAGER", "SUPER_ADMIN"] },
                 { name: "보유 재고 조회", route: "/warehouse-manager/inventory/list", icon: "fas fa-cubes-stacked", roles: ["WAREHOUSE_MANAGER", "SUPER_ADMIN"] },
                 { name: "보유 재고 등록", route: "/warehouse/inventory/register", icon: "fas fa-plus", roles: ["WAREHOUSE_MANAGER", "SUPER_ADMIN"] }
             ]
@@ -73,7 +73,8 @@ export const sidebarMap = {
             title: "반품",
             icon: 'fas fa-arrows-rotate',
             items: [
-                { name: "반품 조회", route: "/takeback/list", icon: "fas fa-magnifying-glass", roles: ["GENERAL_MANAGER", "SENIOR_MANAGER", "WAREHOUSE_MANAGER", "FRANCHISE_MANAGER", "SUPER_ADMIN"] }
+                { name: "반품 조회", route: "/takeback/list", icon: "fas fa-magnifying-glass", roles: ["GENERAL_MANAGER", "SENIOR_MANAGER", "FRANCHISE_MANAGER", "SUPER_ADMIN"] },
+                { name: "반품 조회", route: "/mytakeback/list", icon: "fas fa-magnifying-glass", roles: [ "WAREHOUSE_MANAGER", "FRANCHISE_MANAGER", "SUPER_ADMIN"] }
             ]
         },
         // {

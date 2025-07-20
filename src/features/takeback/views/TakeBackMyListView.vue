@@ -1,18 +1,17 @@
+<!-- src/features/takeback/views/TakeBackMyListView.vue -->
 <script setup>
-import { reactive, ref } from 'vue'
-import TakeBackList from '@/features/takeback/components/TakeBackList.vue'
-import TakeBackFilter from '@/features/takeback/components/TakeBackFilter.vue'
-import ListFiltersSection from '@/components/layout/listview/ListFiltersSection.vue'
-import ListTopActions from '@/components/layout/listview/ListTopActions.vue'
-import ListTableSection from '@/components/layout/listview/ListTableSection.vue'
+import { onMounted, reactive, ref } from 'vue'
+import { fetchMyWarehouseId } from '@/features/takeback/api.js'
+import TakeBackFilterMy from '@/features/takeback/components/TakeBackFilterMy.vue'
+import TakeBackMyList from '@/features/takeback/components/TakeBackMyList.vue'
 import Pagination from '@/components/common/Pagination.vue'
+import ListFiltersSection from '@/components/layout/listview/ListFiltersSection.vue'
+import ListTableSection from '@/components/layout/listview/ListTableSection.vue'
 
-// ✅ 누락된 warehouseName 포함!
+const warehouseId = ref(null)
+
 const filters = reactive({
-  orderNumber: '',
-  productName: '',
   franchiseName: '',
-  warehouseName: '', // ✅ 포함됨
   takeBackStatus: '',
   fromDate: '',
   toDate: ''
@@ -21,51 +20,45 @@ const filters = reactive({
 const page = ref(1)
 const size = ref(10)
 const total = ref(0)
-
-// ✅ Boolean(false) → Number(0) 로 수정
 const reloadSignal = ref(0)
 
 const onSearch = (newFilters) => {
-  Object.assign(filters, {
-    orderNumber: newFilters.orderNumber ?? '',
-    productName: newFilters.productName ?? '',
-    franchiseName: newFilters.franchiseName ?? '',
-    warehouseName: newFilters.warehouseName ?? '',
-    takeBackStatus: newFilters.takeBackStatus ?? '',
-    fromDate: newFilters.fromDate ?? '',
-    toDate: newFilters.toDate ?? ''
-  })
+  Object.assign(filters, newFilters)
   page.value = 1
-  reloadSignal.value++  // 숫자 증가로 감지
+  reloadSignal.value++
 }
 
 const onPageChange = (newPage) => {
   page.value = newPage
 }
+
+onMounted(async () => {
+  try {
+    const { data } = await fetchMyWarehouseId()
+    console.log('📦 fetchMyWarehouseId 응답:', data)
+    warehouseId.value = data.data // ✅ 여기 수정
+    console.log('🚛 내 창고 ID:', warehouseId.value)
+  } catch (e) {
+    console.error('📛 창고 ID 못 가져옴:', e)
+  }
+})
 </script>
 
 <template>
-  <main>
+  <main v-if="warehouseId">
     <section class="page-header">
-      <h1 class="page-title">반품 조회</h1>
-      <p class="page-description">반품 요청 내역을 확인할 수 있습니다.</p>
+      <h1 class="page-title">내 창고 반품 조회</h1>
+      <p class="page-description">내 창고로 들어온 반품 요청을 조회합니다.</p>
     </section>
 
     <ListFiltersSection>
-      <TakeBackFilter @search="onSearch" />
+      <TakeBackFilterMy @search="onSearch" />
     </ListFiltersSection>
 
-    <ListTopActions>
-      <template #left />
-      <template #right />
-    </ListTopActions>
-
     <ListTableSection>
-      <TakeBackList
-          :order-number="filters.orderNumber"
-          :product-name="filters.productName"
+      <TakeBackMyList
+          :warehouse-id="warehouseId"
           :franchise-name="filters.franchiseName"
-          :warehouse-name="filters.warehouseName"
           :take-back-status="filters.takeBackStatus"
           :from-date="filters.fromDate"
           :to-date="filters.toDate"
