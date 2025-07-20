@@ -78,14 +78,14 @@ const PAGE_SIZE = 10
 // 옵션 데이터 (카테고리, 거래처유형, 계약상태 등)
 const topCategories = ref([])
 const vendorTypeOptions = [
-  { label: 'SUPPLIER', value: 'SUPPLIER' },
-  { label: 'TRUST_CONTRACTOR', value: 'TRUST_CONTRACTOR' },
-  { label: 'LOGISTICS', value: 'LOGISTICS' },
-  { label: 'AGENCY', value: 'AGENCY' }
+  { label: '공급업체', value: 'SUPPLIER' },
+  { label: '위탁업체', value: 'TRUST_CONTRACTOR' },
+  { label: '물류', value: 'LOGISTICS' },
+  { label: '대행업체', value: 'AGENCY' }
 ]
 const contractStatusOptions = [
-  { label: '활성', value: 'ACTIVE' },
-  { label: '만료', value: 'EXPIRED' }
+  { label: '계약 중', value: 'ACTIVE' },
+  { label: '계약 만료', value: 'EXPIRED' }
 ]
 
 // 필터 reactive (API 파라미터 매핑)

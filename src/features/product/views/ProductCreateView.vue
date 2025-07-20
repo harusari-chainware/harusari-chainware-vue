@@ -174,9 +174,9 @@ watch(() => form.value.categoryId, (newVal) => {
 
 const storeTypeOptions = [
   { value: '', label: '선택' },
-  { value: 'ROOM_TEMPERATURE', label: 'ROOM_TEMPERATURE' },
-  { value: 'CHILLED', label: 'CHILLED' },
-  { value: 'FROZEN', label: 'FROZEN' },
+  { value: 'ROOM_TEMPERATURE', label: '상온' },
+  { value: 'CHILLED', label: '냉장' },
+  { value: 'FROZEN', label: '냉동' },
 ]
 
 const submitting = ref(false)

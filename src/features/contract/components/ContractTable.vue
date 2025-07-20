@@ -28,7 +28,7 @@
     <!-- 계약 상태 뱃지 -->
     <template #cell-contractStatus="{ value }">
       <span :class="['contract-status-badge', value === 'ACTIVE' ? 'active' : 'expired']">
-        {{ value === 'ACTIVE' ? '활성' : '만료' }}
+        {{ value === 'ACTIVE' ? '계약 중' : '계약 만료' }}
       </span>
     </template>
     <!-- 조회된 데이터 없음 메시지 -->
