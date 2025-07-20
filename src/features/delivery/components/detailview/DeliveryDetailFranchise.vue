@@ -6,7 +6,11 @@
     </InfoItem>
     <InfoItem>
       <template #label>가맹점 주소</template>
-      <template #value>{{ franchiseInfo.franchiseAddress.fullAddress }}</template>
+      <template #value>
+        {{
+          `${franchiseInfo.franchiseAddress.addressRoad}${franchiseInfo.franchiseAddress.addressDetail ? ', ' + franchiseInfo.franchiseAddress.addressDetail : ''} (${franchiseInfo.franchiseAddress.zipcode})`
+        }}
+      </template>
     </InfoItem>
     <InfoItem>
       <template #label>점주 이름</template>

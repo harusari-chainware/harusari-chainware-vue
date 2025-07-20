@@ -6,7 +6,11 @@
     </InfoItem>
     <InfoItem>
       <template #label>창고 주소</template>
-      <template #value>{{ warehouseInfo.warehouseAddress.fullAddress }}</template>
+      <template #value>
+        {{
+          `${warehouseInfo.warehouseAddress.addressRoad}${warehouseInfo.warehouseAddress.addressDetail ? ', ' + warehouseInfo.warehouseAddress.addressDetail : ''} (${warehouseInfo.warehouseAddress.zipcode})`
+        }}
+      </template>
     </InfoItem>
     <InfoItem>
       <template #label>창고 관리자</template>
