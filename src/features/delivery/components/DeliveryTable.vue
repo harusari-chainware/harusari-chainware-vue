@@ -16,13 +16,12 @@
 
     <!-- 상세보기 -->
     <template #cell-actions="{ item }">
-      상세보기
-<!--      <RouterLink-->
-<!--          :to="{ name: 'DeliveryDetailView'}"-->
-<!--          class="detail-link"-->
-<!--      >-->
-<!--        상세보기-->
-<!--      </RouterLink>-->
+      <RouterLink
+          :to="{ name: 'DeliveryDetailView', params: { deliveryId: item.deliveryId } }"
+          class="detail-link"
+      >
+        상세보기
+      </RouterLink>
     </template>
   </GenericTable>
 </template>
