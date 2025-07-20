@@ -43,42 +43,44 @@ const totalCount = ref(0)
 const currentPage = ref(1)
 const itemsPerPage = 10
 
+// 필터 상태
 const filters = reactive({
-  startDate: '',
-  endDate: '',
+  deliveryDateRange: {start: '', end: ''}, // ✅ DateRange는 객체로!
   franchiseName: '',
   warehouseName: '',
   warehouseAddress: '',
   deliveryStatus: ''
 })
 
-// 데이터 로딩 함수
+// 데이터 로딩
 const loadDeliveries = async () => {
   isLoading.value = true
   try {
     const params = {
-      ...filters,
+      franchiseName: filters.franchiseName,
+      warehouseName: filters.warehouseName,
+      warehouseAddress: filters.warehouseAddress,
+      deliveryStatus: filters.deliveryStatus,
+      startDate: filters.deliveryDateRange.start || null,
+      endDate: filters.deliveryDateRange.end || null,
       page: currentPage.value - 1,
       size: itemsPerPage
     }
-    const { data } = await fetchDeliveries(params)
 
-    if (!data || !data.data || !Array.isArray(data.data.contents)) {
-      deliveries.value = []
-      totalCount.value = 0
-      return
-    }
+    const {data} = await fetchDeliveries(params)
+    const content = data?.data?.contents ?? []
+    const total = data?.data?.totalElements ?? 0
 
-    deliveries.value = data.data.contents
-    totalCount.value = data.data.totalElements
+    deliveries.value = content
+    totalCount.value = total
   } catch (e) {
-    // console.error('배송 목록 조회 실패:', e)
+    console.error('배송 목록 조회 실패:', e)
   } finally {
     isLoading.value = false
   }
 }
 
-// 필터 검색
+// 검색
 const handleSearch = () => {
   currentPage.value = 1
   loadDeliveries()
@@ -86,8 +88,8 @@ const handleSearch = () => {
 
 // 필터 초기화
 const resetFilters = () => {
-  filters.startDate = ''
-  filters.endDate = ''
+  filters.deliveryDateRange.start = ''
+  filters.deliveryDateRange.end = ''
   filters.franchiseName = ''
   filters.warehouseName = ''
   filters.warehouseAddress = ''
@@ -95,12 +97,9 @@ const resetFilters = () => {
   loadDeliveries()
 }
 
-// page 이동 감지 → fetch
+// 페이지 감시
 watch(currentPage, loadDeliveries)
 
-// 첫 로딩
+// 마운트 시 로딩
 onMounted(loadDeliveries)
 </script>
-
-<style scoped>
-</style>
