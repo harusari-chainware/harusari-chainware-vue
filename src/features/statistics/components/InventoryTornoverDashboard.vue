@@ -276,10 +276,28 @@ watch(locationType, () => {
         <div class="chart-header">
           <h3>재고 회전율 추이</h3>
           <div class="tab-buttons">
-            <button :class="{ active: period === 'DAILY' }" @click="() => delayedSearch('DAILY')">일간</button>
-            <button :class="{ active: period === 'WEEKLY' }" @click="() => delayedSearch('WEEKLY')">주간</button>
-            <button :class="{ active: period === 'MONTHLY' }" @click="() => delayedSearch('MONTHLY')">월간</button>
+            <button
+                :class="{ active: period === 'DAILY', disabled: locationType === 'franchise' }"
+                :disabled="locationType === 'franchise'"
+                @click="() => { if (locationType !== 'franchise') delayedSearch('DAILY') }"
+            >
+              일간
+            </button>
+            <button
+                :class="{ active: period === 'WEEKLY', disabled: locationType === 'franchise' }"
+                :disabled="locationType === 'franchise'"
+                @click="() => { if (locationType !== 'franchise') delayedSearch('WEEKLY') }"
+            >
+              주간
+            </button>
+            <button
+                :class="{ active: period === 'MONTHLY' }"
+                @click="() => delayedSearch('MONTHLY')"
+            >
+              월간
+            </button>
           </div>
+
         </div>
         <div v-if="isLoading" class="chart-loading">📈 데이터 로딩 중...</div>
         <canvas v-if="showTrendChart && !isLoading" id="turnoverTrendChart" ref="trendCanvasEl" />

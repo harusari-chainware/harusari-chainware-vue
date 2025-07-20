@@ -69,7 +69,7 @@ const onShowDetail = async (id) => {
     inventory: {
       quantity: raw.inventory.quantity,
       reservedQuantity: raw.inventory.reservedQuantity,
-      modifiedAt: null, // 해당 정보가 없으면 그대로 둬도 됨
+      safetyQuantity: raw.inventory.safetyQuantity,
     },
     recentInbounds: raw.inboundHistories.slice(0, 5).map(item => ({
       date: item.inboundedAt,
