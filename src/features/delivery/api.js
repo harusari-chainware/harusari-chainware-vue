@@ -1,10 +1,11 @@
 import api from '@/api/axios.js'
 
-/* 컨텍스트 별로 각각 백엔드와 연결되는 api*/
-export function firstDummyAPI(memberId) {
-    return api.get(`/firstDummy/${memberId}`);
+// 배송 목록 조회
+export async function fetchDeliveries(params) {
+    return await api.get('/delivery', { params })
 }
 
-export function secondDummyAPI(memberId) {
-    return api.get(`/secondDummy/${memberId}`);
+// 배송 상세 조회
+export async function fetchDeliveryDetail(deliveryId) {
+    return await api.get(`/delivery/${deliveryId}`)
 }
