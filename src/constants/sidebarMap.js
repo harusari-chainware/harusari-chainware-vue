@@ -77,6 +77,7 @@ export const sidebarMap = {
                 { name: "반품 조회", route: "/mytakeback/list", icon: "fas fa-magnifying-glass", roles: [ "WAREHOUSE_MANAGER", "FRANCHISE_MANAGER"] }
             ]
         },
+
         // {
         //     title: "배송",
         //     icon: 'fas fa-truck',
@@ -85,6 +86,15 @@ export const sidebarMap = {
         //     ]
         // }
     ],
+    "반품": [
+        {
+            title: "반품",
+            icon: 'fas fa-arrows-rotate',
+            items: [
+                { name: "반품 조회", route: "/mytakeback/list", icon: "fas fa-magnifying-glass", roles: [ "WAREHOUSE_MANAGER", "FRANCHISE_MANAGER"] }
+            ]
+        },
+        ],
     "품의/발주": [
         {
             title: "품의",
