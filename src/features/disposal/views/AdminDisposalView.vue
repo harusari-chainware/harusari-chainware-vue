@@ -155,7 +155,6 @@ function selectProduct(product) {
 }
 
 onMounted(() => {
-  console.log(' 사용자 권한:', auth.authority)
   loadDisposals()
 })
 </script>

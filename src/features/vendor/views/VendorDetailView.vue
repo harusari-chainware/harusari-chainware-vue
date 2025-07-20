@@ -255,7 +255,6 @@ function copyVendorToForm(v) {
     addressRoad: v.vendorAddress?.addressRoad || '',
     addressDetail: v.vendorAddress?.addressDetail || ''
   }
-  console.log('[form.agreementOriginalFileName]', form.agreementOriginalFileName)
 }
 
 function formatPhone(phone) {
@@ -284,8 +283,6 @@ async function downloadAgreement() {
   try {
     const res = await fetchVendorAgreementDownloadUrl(form.vendorId)
     const presignedUrl = res.data.data.presignedUrl
-
-    console.log('[downloadAgreement] presignedUrl:', presignedUrl)
 
     const a = document.createElement('a')
     a.href = presignedUrl
@@ -384,7 +381,6 @@ onMounted(async () => {
     return
   }
   const res = await fetchVendorById(vendorId)
-  console.log('[fetchVendorById] 응답:', res.data.data)
   vendor.value = res.data.data
   copyVendorToForm(vendor.value)
 })

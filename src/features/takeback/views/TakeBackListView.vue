@@ -1,17 +1,18 @@
 <script setup>
-import { ref, onMounted } from 'vue'
+import { reactive, ref } from 'vue'
 import TakeBackList from '@/features/takeback/components/TakeBackList.vue'
 import TakeBackFilter from '@/features/takeback/components/TakeBackFilter.vue'
-
 import ListFiltersSection from '@/components/layout/listview/ListFiltersSection.vue'
 import ListTopActions from '@/components/layout/listview/ListTopActions.vue'
 import ListTableSection from '@/components/layout/listview/ListTableSection.vue'
 import Pagination from '@/components/common/Pagination.vue'
 
-const filters = ref({
+// ✅ 누락된 warehouseName 포함!
+const filters = reactive({
   orderNumber: '',
   productName: '',
   franchiseName: '',
+  warehouseName: '',  // ✅ 추가
   takeBackStatus: '',
   fromDate: '',
   toDate: ''
@@ -20,12 +21,21 @@ const filters = ref({
 const page = ref(1)
 const size = ref(10)
 const total = ref(0)
-const lastFilters = ref({})
+
+const reloadSignal = ref(false)
 
 const onSearch = (newFilters) => {
-  filters.value = { ...newFilters }
-  lastFilters.value = { ...newFilters }
+  Object.assign(filters, {
+    orderNumber: newFilters.orderNumber ?? '',
+    productName: newFilters.productName ?? '',
+    franchiseName: newFilters.franchiseName ?? '',
+    warehouseName: newFilters.warehouseName ?? '',
+    takeBackStatus: newFilters.takeBackStatus ?? '',
+    fromDate: newFilters.fromDate ?? '',
+    toDate: newFilters.toDate ?? ''
+  })
   page.value = 1
+  reloadSignal.value++
 }
 
 const onPageChange = (newPage) => {
@@ -35,34 +45,36 @@ const onPageChange = (newPage) => {
 
 <template>
   <main>
-    <!-- 페이지 헤더 -->
     <section class="page-header">
       <h1 class="page-title">반품 조회</h1>
       <p class="page-description">반품 요청 내역을 확인할 수 있습니다.</p>
     </section>
 
-    <!-- 검색 필터 -->
     <ListFiltersSection>
       <TakeBackFilter @search="onSearch" />
     </ListFiltersSection>
 
-    <!-- 상단 액션 (필요 시 버튼 배치 가능) -->
     <ListTopActions>
       <template #left />
       <template #right />
     </ListTopActions>
 
-    <!-- 테이블 -->
     <ListTableSection>
       <TakeBackList
-          :filters="filters"
+          :order-number="filters.orderNumber"
+          :product-name="filters.productName"
+          :franchise-name="filters.franchiseName"
+          :warehouse-name="filters.warehouseName"
+          :take-back-status="filters.takeBackStatus"
+          :from-date="filters.fromDate"
+          :to-date="filters.toDate"
           :page="page - 1"
           :size="size"
+          :reload-signal="reloadSignal"
           @update:totalElements="total = $event"
       />
     </ListTableSection>
 
-    <!-- 페이지네이션 -->
     <Pagination
         v-model="page"
         :total-items="total"
