@@ -15,8 +15,12 @@
     </template>
 
     <!-- 보관상태 -->
+<!--    <template #cell-storeType="{ value }">-->
+<!--      <span>{{ value }}</span>-->
+<!--    </template>-->
+
     <template #cell-storeType="{ value }">
-      <span>{{ value }}</span>
+      <span>{{ getStoreTypeLabel(value) }}</span>
     </template>
 
     <template #cell-productStatus="{ value, item }">
@@ -141,6 +145,17 @@ const getCategoryName = (categoryId) => {
   const topOnly = props.categories.find(tc => String(tc.topCategoryId) === String(categoryId));
   if (topOnly) return topOnly.topCategoryName || topOnly.categoryName || '';
   return '-';
+}
+
+const storeTypeOptions = [
+  { label: '상온', value: 'ROOM_TEMPERATURE' },
+  { label: '냉장', value: 'CHILLED' },
+  { label: '냉동', value: 'FROZEN' }
+];
+
+function getStoreTypeLabel(value) {
+  const option = storeTypeOptions.find(opt => opt.value === value);
+  return option ? option.label : value || '-';
 }
 
 function formatDate(dateString) {

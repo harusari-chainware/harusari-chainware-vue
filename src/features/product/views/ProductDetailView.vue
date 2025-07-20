@@ -60,10 +60,27 @@
             <label>규격</label>
             <input type="text" v-model="product.unitSpec" :readonly="!isEditing" />
           </div>
+
           <div class="info-item">
             <label>보관상태</label>
-            <input type="text" v-model="product.storeType" :readonly="!isEditing" />
+            <template v-if="isEditing">
+              <select v-model="product.storeType" class="modal-input">
+                <option disabled value="">보관상태 선택</option>
+                <option v-for="option in storeTypeOptions" :key="option.value" :value="option.value">
+                  {{ option.label }}
+                </option>
+              </select>
+            </template>
+            <template v-else>
+              <input type="text" :value="getStoreTypeLabel(product.storeType)" readonly />
+            </template>
           </div>
+
+<!--          <div class="info-item">-->
+<!--            <label>보관상태</label>-->
+<!--            <input type="text" v-model="product.storeType" :readonly="!isEditing" />-->
+<!--          </div>-->
+
           <div class="info-item">
             <label>유통기한</label>
             <input v-if="isEditing" v-model="product.shelfLife" class="modal-input" />
@@ -284,6 +301,17 @@ const handleSave = async () => {
   } catch (e) {
     showError("저장 실패: " + (e?.response?.data?.message || e.message));
   }
+};
+
+const storeTypeOptions = [
+  { label: '상온', value: 'ROOM_TEMPERATURE' },
+  { label: '냉장', value: 'CHILLED' },
+  { label: '냉동', value: 'FROZEN' }
+];
+
+const getStoreTypeLabel = (value) => {
+  const option = storeTypeOptions.find(opt => opt.value === value);
+  return option ? option.label : value || '-';
 };
 
 // const handleDelete = async () => {

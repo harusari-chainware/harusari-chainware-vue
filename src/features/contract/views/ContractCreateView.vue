@@ -50,9 +50,11 @@
               <label>사업자 등록번호</label>
               <input v-model="form.vendorTaxId" class="input" readonly />
               <label>거래처 유형</label>
-              <input v-model="form.vendorType" class="input" readonly />
-              <label>계약 상태</label>
-              <input v-model="form.vendorStatus" class="input" readonly />
+              <input :value="getVendorTypeLabel(form.vendorType)" class="input" readonly />
+<!--              <input v-model="form.vendorType" class="input" readonly />-->
+              <label>거래처 계약 상태</label>
+              <input :value="getVendorStatusLabel(form.vendorStatus)" class="input" readonly />
+<!--              <input v-model="form.vendorStatus" class="input" readonly />-->
             </div>
           </div>
 
@@ -99,7 +101,8 @@
               <label>카테고리</label>
               <input v-model="form.subCategoryName" class="input" readonly />
               <label>보관상태</label>
-              <input v-model="form.storeType" class="input" readonly />
+              <input :value="getStoreTypeLabel(form.storeType)" class="input" readonly />
+<!--              <input v-model="form.storeType" class="input" readonly />-->
             </div>
             <div class="row">
 
@@ -230,6 +233,39 @@ const ErrorMsg = ref('')
 function showError(msg) {
   ErrorMsg.value = msg
   ErrorOpen.value = true
+}
+
+const vendorTypeOptions = [
+  { value: 'SUPPLIER', label: '공급업체' },
+  { value: 'TRUST_CONTRACTOR', label: '위수탁업체' },
+  { value: 'LOGISTICS', label: '물류' },
+  { value: 'AGENCY', label: '대행업체' }
+]
+
+const getVendorTypeLabel = (value) => {
+  const option = vendorTypeOptions.find(opt => opt.value === value)
+  return option ? option.label : value || '-'
+}
+
+const vendorStatusOptions = [
+  { value: 'IN_PROGRESS', label: '계약 진행 중' },
+  { value: 'TERMINATED', label: '계약 만료' }
+]
+
+const getVendorStatusLabel = (value) => {
+  const option = vendorStatusOptions.find(opt => opt.value === value)
+  return option ? option.label : value || '-'
+}
+
+const storeTypeOptions = [
+  { label: '상온', value: 'ROOM_TEMPERATURE' },
+  { label: '냉장', value: 'CHILLED' },
+  { label: '냉동', value: 'FROZEN' }
+]
+
+const getStoreTypeLabel = (value) => {
+  const option = storeTypeOptions.find(opt => opt.value === value)
+  return option ? option.label : value || '-'
 }
 
 // 등록 성공시

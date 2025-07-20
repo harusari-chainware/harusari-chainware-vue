@@ -14,15 +14,17 @@
             </div>
             <div class="form-group">
               <label>거래처 유형</label>
-              <input type="text" :value="contract.vendorStatus" readonly />
+              <input type="text" :value="getVendorTypeLabel(contract.vendorType)" readonly />
+<!--              <input type="text" :value="contract.vendorType" readonly />-->
             </div>
             <div class="form-group">
               <label>사업자 등록번호</label>
               <input type="text" :value="contract.vendorTaxId" readonly />
             </div>
             <div class="form-group">
-              <label>계약 상태</label>
-              <input type="text" :value="contract.contractStatus" readonly class="modal-input" />
+              <label>거래처 계약 상태</label>
+              <input type="text" :value="getVendorStatusLabel(contract.vendorStatus)" readonly />
+<!--              <input type="text" :value="contract.vendorStatus" readonly class="modal-input" />-->
             </div>
           </div>
         </div>
@@ -39,10 +41,17 @@
             <label>카테고리</label>
             <input type="text" :value="contract.categoryName" readonly />
           </div>
+
           <div class="form-group">
             <label>보관 상태</label>
-            <input type="text" :value="contract.storeType" readonly />
+            <input type="text" :value="getStoreTypeLabel(contract.storeType)" readonly />
           </div>
+
+<!--          <div class="form-group">-->
+<!--            <label>보관 상태</label>-->
+<!--            <input type="text" :value="contract.storeType" readonly />-->
+<!--          </div>-->
+
           <div class="form-group">
             <label>기본 단가</label>
             <input type="text" :value="formatPrice(contract.basePrice)" readonly />
@@ -137,8 +146,12 @@
         </div>
         <div class="form-group">
           <label>계약 상태</label>
-          <input type="text" :value="edit.contractStatus" readonly />
+          <input type="text" :value="getContractStatusLabel(contract.contractStatus)" readonly />
         </div>
+<!--        <div class="form-group">-->
+<!--          <label>계약 상태</label>-->
+<!--          <input type="text" :value="edit.contractStatus" readonly />-->
+<!--        </div>-->
         <div class="form-group">
           <label>등록일시</label>
           <input type="text" :value="contract.createdAt" readonly />
@@ -223,6 +236,49 @@ watch(
     },
     { immediate: true }
 )
+
+const vendorTypeOptions = [
+  { value: 'SUPPLIER', label: '공급업체' },
+  { value: 'TRUST_CONTRACTOR', label: '위탁업체' },
+  { value: 'LOGISTICS', label: '물류' },
+  { value: 'AGENCY', label: '대행업체' }
+]
+
+function getVendorTypeLabel(value) {
+  const found = vendorTypeOptions.find(opt => opt.value === value)
+  return found ? found.label : value || '-'
+}
+
+const vendorStatusOptions = [
+  { value: 'IN_PROGRESS', label: '계약 진행 중' },
+  { value: 'TERMINATED', label: '계약 만료' }
+]
+
+function getVendorStatusLabel(value) {
+  const found = vendorStatusOptions.find(opt => opt.value === value)
+  return found ? found.label : value || '-'
+}
+
+const contractStatusOptions = [
+  { label: '계약 중', value: 'ACTIVE' },
+  { label: '계약 만료', value: 'EXPIRED' }
+]
+
+function getContractStatusLabel(value) {
+  const option = contractStatusOptions.find(opt => opt.value === value)
+  return option ? option.label : value || '-'
+}
+
+const storeTypeOptions = [
+  { label: '상온', value: 'ROOM_TEMPERATURE' },
+  { label: '냉장', value: 'CHILLED' },
+  { label: '냉동', value: 'FROZEN' }
+]
+
+function getStoreTypeLabel(value) {
+  const found = storeTypeOptions.find(opt => opt.value === value);
+  return found ? found.label : value || '-';
+}
 
 // 편집 시작
 function startEdit() {
