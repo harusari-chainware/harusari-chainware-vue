@@ -1,17 +1,69 @@
-<!-- src/features/takeback/components/TakeBackList.vue -->
 <script setup>
-import { ref, watch, onMounted } from 'vue'
+import { ref, watch } from 'vue'
 import { fetchTakeBacks } from '../api.js'
 
 const props = defineProps({
-  filters: Object,
+  orderNumber: String,
+  productName: String,
+  franchiseName: String,
+  warehouseName: String,
+  takeBackStatus: String,
+  fromDate: String,
+  toDate: String,
   page: Number,
-  size: Number
+  size: Number,
+  reloadSignal: Number // ✅ 새로 추가
 })
+
 const emit = defineEmits(['update:totalElements'])
 
 const tableData = ref([])
 const totalElements = ref(0)
+
+const fetchData = async () => {
+  const rawParams = {
+    orderNumber: props.orderNumber,
+    productName: props.productName,
+    franchiseName: props.franchiseName,
+    warehouseName: props.warehouseName,
+    takeBackStatus: props.takeBackStatus,
+    fromDate: props.fromDate,
+    toDate: props.toDate,
+    page: props.page,
+    size: props.size
+  }
+
+  const filteredParams = Object.fromEntries(
+      Object.entries(rawParams).filter(([_, value]) => value !== '' && value !== null && value !== undefined)
+  )
+
+  try {
+    const { data } = await fetchTakeBacks(filteredParams)
+    tableData.value = data.data?.contents ?? []
+    totalElements.value = data.data?.totalElements ?? 0
+    emit('update:totalElements', totalElements.value)
+  } catch (err) {
+    console.error('📛 fetchTakeBacks error:', err)
+    tableData.value = []
+    totalElements.value = 0
+  }
+}
+
+watch(
+    () => JSON.stringify([
+      props.orderNumber,
+      props.productName,
+      props.franchiseName,
+      props.takeBackStatus,
+      props.fromDate,
+      props.toDate,
+      props.page,
+      props.size,
+      props.reloadSignal // ✅ 추가됨
+    ]),
+    fetchData,
+    { immediate: true }
+)
 
 const statusMap = {
   REQUESTED: { text: '요청됨', class: 'status-requested' },
@@ -20,20 +72,6 @@ const statusMap = {
   REJECTED: { text: '반려됨', class: 'status-rejected' },
   CANCELED: { text: '취소됨', class: 'status-canceled' }
 }
-
-const fetchData = async () => {
-  const { data } = await fetchTakeBacks({
-    ...props.filters,
-    page: props.page,
-    size: props.size
-  })
-  tableData.value = data.data?.contents ?? []
-  totalElements.value = data.data?.totalElements ?? 0
-  emit('update:totalElements', totalElements.value)
-}
-
-watch(() => [props.filters, props.page, props.size], fetchData, { deep: true })
-onMounted(fetchData)
 
 const formatDate = (str) => {
   const d = new Date(str)

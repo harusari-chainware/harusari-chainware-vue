@@ -104,7 +104,15 @@ onBeforeUnmount(() => {
 })
 
 const onSearch = () => {
-  emit('search', { ...filters.value })
+  emit('search', {
+    orderNumber: '',
+    productName: '',
+    franchiseName: filters.value.franchiseName,
+    warehouseName: filters.value.warehouseName,
+    takeBackStatus: filters.value.takeBackStatus,
+    fromDate: filters.value.fromDate,
+    toDate: filters.value.toDate
+  })
 }
 
 const onReset = () => {
@@ -122,7 +130,17 @@ const onReset = () => {
   isWarehouseDropdownVisible.value = false
   isFranchiseDropdownVisible.value = false
   dateRange.value = { start: '', end: '' }
-  emit('search', { ...filters.value })
+
+  // ✅ 상위 컴포넌트에서 사용하는 전체 필드 초기화
+  emit('search', {
+    orderNumber: '',
+    productName: '',
+    franchiseName: '',
+    warehouseName: '',
+    takeBackStatus: '',
+    fromDate: '',
+    toDate: ''
+  })
 }
 </script>
 
