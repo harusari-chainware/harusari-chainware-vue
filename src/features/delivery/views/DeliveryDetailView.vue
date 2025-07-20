@@ -105,7 +105,7 @@ const loadDeliveryDetail = async () => {
   try {
     const res = await fetchDeliveryDetail(deliveryId)
     const data = res.data.data
-    console.log(data)
+    //console.log(data)
 
     deliveryData.deliveryInfo = data.deliveryInfo
     deliveryData.warehouseInfo = data.warehouseInfo

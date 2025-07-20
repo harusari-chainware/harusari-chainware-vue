@@ -63,7 +63,7 @@ import {useAuthStore} from "@/features/auth/useAuthStore.js";
 
 const authStore = useAuthStore()
 const userRole = computed(() => authStore.authority || '')
-console.log('모달창 유저 권한:', userRole.value)
+//console.log('모달창 유저 권한:', userRole.value)
 
 const props = defineProps({
   deliveryId: Number,
