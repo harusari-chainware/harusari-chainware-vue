@@ -35,9 +35,9 @@ const fetchData = async () => {
   )
 
   try {
-    console.log('📦 요청 파라미터:', filteredParams)
+    //console.log('📦 요청 파라미터:', filteredParams)
     const res = await fetchTakeBacks(filteredParams)
-    console.log('📥 응답 데이터:', res)
+    //console.log('📥 응답 데이터:', res)
 
     // ✅ 여기 수정
     tableData.value = res.data?.data?.contents ?? []

@@ -35,11 +35,11 @@ const onPageChange = (newPage) => {
 onMounted(async () => {
   try {
     const { data } = await fetchMyWarehouseId()
-    console.log('📦 fetchMyWarehouseId 응답:', data)
+    //console.log('📦 fetchMyWarehouseId 응답:', data)
     warehouseId.value = data.data // ✅ 여기 수정
-    console.log('🚛 내 창고 ID:', warehouseId.value)
+    //console.log('🚛 내 창고 ID:', warehouseId.value)
   } catch (e) {
-    console.error('📛 창고 ID 못 가져옴:', e)
+   // console.error('📛 창고 ID 못 가져옴:', e)
   }
 })
 </script>
