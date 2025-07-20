@@ -38,7 +38,7 @@ watch(() => filters.topCategoryId, async (newTopId) => {
     const sub = await fetchSubCategories(selectedTop.topCategoryName)
     subCategories.value = sub ?? []
   } catch (e) {
-    console.warn('하위 카테고리 로딩 실패:', e)
+    //console.warn('하위 카테고리 로딩 실패:', e)
     subCategories.value = []
   }
 })
