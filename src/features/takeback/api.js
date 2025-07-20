@@ -1,13 +1,6 @@
 import api from '@/api/axios.js'
 
 /* 컨텍스트 별로 각각 백엔드와 연결되는 api */
-export function firstDummyAPI(memberId) {
-    return api.get(`/firstDummy/${memberId}`);
-}
-
-export function secondDummyAPI(memberId) {
-    return api.get(`/secondDummy/${memberId}`);
-}
 
 export function fetchTakeBacks(params) {
     return api.get('/takeback', { params });
@@ -36,3 +29,8 @@ export function fetchAllWarehouses() {
 export function fetchAllFranchises() {
     return api.get('/franchises/all').then(res => res.data.data);
 }
+
+
+export const fetchMyWarehouseId = () => {
+    return api.get("/warehouse/my");
+};

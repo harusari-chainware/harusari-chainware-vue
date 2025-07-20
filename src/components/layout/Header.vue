@@ -144,10 +144,16 @@ const allMenus = [
     },
     {
         label: '거래처/창고',
-        route: '/warehouse/inventory/list',
+        route: '/warehouse-manager/inventory/list',
         roles: ['WAREHOUSE_MANAGER'],
         group: 'warehouse'
     },
+  {
+    label: '반품',
+    route: '/mytakeback/list',
+    roles: ['WAREHOUSE_MANAGER'],
+    group: 'warehouse'
+  },
 
     {
         label: '주문/반품',
