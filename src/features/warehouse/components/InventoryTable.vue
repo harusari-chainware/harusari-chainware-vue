@@ -1,9 +1,10 @@
 <script setup>
 defineProps({ items: Array })
 
-const getQuantityClass = (q) => {
-  if (q <= 30) return 'danger'
-  if (q <= 50) return 'warning'
+const getQuantityClass = (item) => {
+  const safety = item.safetyQuantity ?? 0
+  if (item.quantity <= safety) return 'danger'
+  if (item.quantity <= safety + 20) return 'warning'
   return 'normal'
 }
 
@@ -34,7 +35,7 @@ const formatDate = (dt) => {
         <td>{{ item.productName }}</td>
         <td>{{ item.productCode }}</td>
         <td>
-          <div :class="['quantity', getQuantityClass(item.quantity)]">
+          <div :class="['quantity', getQuantityClass(item)]">
             {{ item.quantity }} {{ item.unitSpec }}
           </div>
           <div class="reserved">예약: {{ item.reservedQuantity }} {{ item.unitSpec }}</div>

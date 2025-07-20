@@ -49,8 +49,18 @@ const formatDate = (str) => {
         <section class="info-table">
           <h4>재고 정보</h4>
           <table class="plain-table">
-            <tr><th>현재 수량</th><td>{{ data.inventory?.quantity ?? '-' }}</td><th>예약 수량</th><td>{{ data.inventory?.reservedQuantity ?? '-' }}</td></tr>
-            <tr><th>가용 수량</th><td>{{ (data.inventory?.quantity ?? 0) - (data.inventory?.reservedQuantity ?? 0) }}</td><th>최종 수정일</th><td>{{ formatDate(data.inventory?.modifiedAt) }}</td></tr>
+            <tr>
+              <th>현재 수량</th>
+              <td>{{ data.inventory?.quantity ?? '-' }}</td>
+              <th>예약 수량</th>
+              <td>{{ data.inventory?.reservedQuantity ?? '-' }}</td>
+            </tr>
+            <tr>
+              <th>가용 수량</th>
+              <td>{{ (data.inventory?.quantity ?? 0) - (data.inventory?.reservedQuantity ?? 0) }}</td>
+              <th>안전 재고</th>
+              <td>{{ data.inventory?.safetyQuantity ?? '-' }}</td>
+            </tr>
           </table>
           <hr class="section-divider" />
         </section>
