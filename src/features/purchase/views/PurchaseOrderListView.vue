@@ -18,7 +18,7 @@ const purchaseOrders = ref([])
 const isLoading = ref(false)
 const totalCount = ref(0)
 
-const sortKey = ref(route.query.sortKey || 'createdAt')
+// const sortKey = ref(route.query.sortKey || 'createdAt')
 const sortOrder = ref(route.query.sortOrder || 'desc')
 const currentPage = ref(Number(route.query.page || 1))
 const itemsPerPage = 10
@@ -36,7 +36,7 @@ const fetchPurchaseOrders = async () => {
       ...route.query,
       page: currentPage.value - 1,
       size: itemsPerPage,
-      sortKey: sortKey.value,
+      // sortKey: sortKey.value,
       sortOrder: sortOrder.value
     })
 
@@ -61,7 +61,8 @@ onMounted(() => {
 })
 
 watch(
-    [() => currentPage.value, () => sortKey.value, () => sortOrder.value, () => route.query],
+    // [() => currentPage.value, () => sortKey.value, () => sortOrder.value, () => route.query],
+    [() => currentPage.value, () => sortOrder.value, () => route.query],
     fetchPurchaseOrders,
     { immediate: true }
 )
@@ -83,7 +84,7 @@ const sortOptions = [
     </template>
 
     <template #top-actions-right>
-      <SortDropdown v-model="sortKey" :options="['createdAt', 'dueDate']" />
+<!--      <SortDropdown v-model="sortKey" :options="['createdAt', 'dueDate']" />-->
       <SortOrderSelect v-model="sortOrder" />
     </template>
 
