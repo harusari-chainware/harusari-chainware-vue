@@ -9,3 +9,13 @@ export async function fetchDeliveries(params) {
 export async function fetchDeliveryDetail(deliveryId) {
     return await api.get(`/delivery/${deliveryId}`)
 }
+
+// 배송 시작
+export const startDelivery = (deliveryId, requestData) => {
+    return api.put(`/delivery/${deliveryId}/start`, requestData)
+}
+
+// 배송 완료
+export const completeDelivery = (deliveryId) => {
+    return api.put(`/delivery/${deliveryId}/complete`)
+}
