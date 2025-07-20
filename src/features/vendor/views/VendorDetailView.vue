@@ -14,6 +14,7 @@
     </template>
 
     <template #basic>
+      <div class="card">
       <!-- 거래처 유형 / 상태 -->
       <div class="section-title">거래처 유형 / 거래 상태</div>
       <div class="info-grid">
@@ -34,7 +35,11 @@
           </select>
         </div>
       </div>
+      </div>
+    </template>
 
+    <template #detail>
+      <div class="card">
       <!-- 거래처 담당자 -->
       <div class="section-title">거래처 담당자</div>
       <div class="contact-row">
@@ -47,7 +52,10 @@
           <div class="readonly-field">{{ formatPhone(form.phoneNumber) || '000-0000-0000' }}</div>
         </div>
       </div>
+      </div>
 
+
+      <div class="card">
       <!-- 거래처 정보 -->
       <div class="section-title">거래처 정보</div>
 
@@ -146,6 +154,7 @@
             {{ formatDateTime(form.modifiedAt) || '-' }}
           </div>
         </div>
+      </div>
       </div>
     </template>
   </DetailLayout>
@@ -246,7 +255,6 @@ function copyVendorToForm(v) {
     addressRoad: v.vendorAddress?.addressRoad || '',
     addressDetail: v.vendorAddress?.addressDetail || ''
   }
-  console.log('[form.agreementOriginalFileName]', form.agreementOriginalFileName)
 }
 
 function formatPhone(phone) {
@@ -275,8 +283,6 @@ async function downloadAgreement() {
   try {
     const res = await fetchVendorAgreementDownloadUrl(form.vendorId)
     const presignedUrl = res.data.data.presignedUrl
-
-    console.log('[downloadAgreement] presignedUrl:', presignedUrl)
 
     const a = document.createElement('a')
     a.href = presignedUrl
@@ -375,13 +381,21 @@ onMounted(async () => {
     return
   }
   const res = await fetchVendorById(vendorId)
-  console.log('[fetchVendorById] 응답:', res.data.data)
   vendor.value = res.data.data
   copyVendorToForm(vendor.value)
 })
 </script>
 
 <style scoped>
+.card {
+  background: #ffffff;
+  border: 1px solid #e0e6ed;
+  border-radius: 8px;
+  padding: 24px;
+  margin-bottom: 24px;
+  box-shadow: 0 2px 4px rgba(15, 34, 58, 0.03);
+}
+
 .input {
   width: 100%;
   border: 1px solid #d7d7d7;
@@ -391,21 +405,13 @@ onMounted(async () => {
   margin-bottom: 4px;
   background: #fff;
 }
-.input {
-  width: 100%;
-  border: 1px solid #d7d7d7;
-  border-radius: 4px;
-  padding: 8px 12px;
-  font-size: 1rem;
-  margin-bottom: 4px;
-  background: #fff;
-}
+
 .readonly-field {
-  background: #dbdbdb;
-  color: #1c1c1c;
-  border-radius: 5px;
-  padding: 8px 12px;
-  font-size: 1rem;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  background: #f9f9f9;
+  font-size: 14px;
 }
 .row-btn-group {
   display: grid;

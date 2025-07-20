@@ -12,7 +12,7 @@
 </template>
 
 <script setup>
-console.log("search 창 열림")
+// console.log("search 창 열림")
 import RegisterRightPanel from "@/components/layout/registerview/RegisterRightPanel.vue";
 
 const emit = defineEmits(['select'])

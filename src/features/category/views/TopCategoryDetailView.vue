@@ -379,6 +379,7 @@ onMounted(() => {
   transition: all 0.15s;
   background: #f5f7fa;
   color: #357ae8;
+  border: 1px solid #357ae8;
   margin: 0 2px;
 }
 .action-btn:hover {

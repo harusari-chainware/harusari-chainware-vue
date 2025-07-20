@@ -19,7 +19,6 @@ watch(
     () => authStore.authority,
     (value) => {
       authorityType.value = value
-      console.log('[권한 확인]', value)
     },
     { immediate: true }
 )

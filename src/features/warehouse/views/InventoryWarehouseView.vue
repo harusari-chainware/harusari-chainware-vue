@@ -6,7 +6,6 @@ import { setAuthStore } from '@/api/axios.js'
 // ✅ 인증 store 주입
 const authStore = useAuthStore()
 setAuthStore(authStore)
-console.log('🔐 AUTH HEADER:', authStore?.authority)
 import {
   fetchInventories,
   fetchInventoryDetail,

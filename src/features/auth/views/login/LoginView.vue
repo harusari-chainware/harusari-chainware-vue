@@ -109,13 +109,12 @@ async function handleLogin() {
             } else if (decoded.authority === 'FRANCHISE_MANAGER') {
                 await router.push('/order/list');
             } else if (decoded.authority === 'VENDOR_MANAGER') {
-                await router.push('/purchases/list');
+                await router.push('/vendor/list');
             }
         } else {
             errorMessage.value = res.message || '로그인에 실패했습니다.';
         }
     } catch (error) {
-        console.error('로그인 실패:', error);
         errorMessage.value = error.response?.data?.message || '서버와 연결할 수 없습니다.';
     } finally {
         isSubmitting.value = false;

@@ -7,7 +7,6 @@
           placeholder="거래처명 입력"
           @update:model-value="val => updateVendor('name', val)"
           @search="() => {
-            console.log('[OrderInfo] 거래처 검색 버튼 클릭됨')
             emit('searchVendor')
           }"
       />

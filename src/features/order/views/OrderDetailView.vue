@@ -65,10 +65,12 @@ import OrderRejectModal from '../components/modal/OrderRejectModal.vue'
 import OrderDetailBasic from '../components/OrderDetailBasic.vue'
 import OrderDetailDetail from '../components/OrderDetailDetail.vue'
 import { fetchOrderDetail } from '../api.js'
+import { useToast } from "vue-toastification";
 
 const router = useRouter()
 const authStore = useAuthStore()
 const userRole = computed(() => authStore.authority)
+const toast = useToast()
 
 const showCancelModal = ref(false)
 const showApproveModal = ref(false)
@@ -132,7 +134,8 @@ const openCancelModal = () => {
 }
 
 const handleCancelComplete = () => {
-  alert('주문이 취소되었습니다.')
+  toast.success("주문이 취소되었습니다.")
+  // alert('주문이 취소되었습니다.')
   loadOrderDetail()
 }
 
@@ -147,7 +150,7 @@ const openApproveModal = () => {
 };
 
 const handleApproveComplete = () => {
-  alert('주문이 승인되었습니다.')
+  toast.success("주문이 승인되었습니다.")
   loadOrderDetail()
 };
 
@@ -162,7 +165,7 @@ const openRejectModal = () => {
 }
 
 const handleRejectComplete = () => {
-  alert('주문이 반려되었습니다.')
+  toast.success("주문이 반려되었습니다.")
   loadOrderDetail()
 }
 
