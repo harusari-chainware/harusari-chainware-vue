@@ -29,8 +29,12 @@
     </template>
 
     <template #cell-vendorType="{ value }">
-      {{ value || '-' }}
+      {{ getVendorTypeLabel(value) }}
     </template>
+
+<!--    <template #cell-vendorType="{ value }">-->
+<!--      {{ value || '-' }}-->
+<!--    </template>-->
 
     <template #cell-vendorStatus="{ value }">
       <span
@@ -99,6 +103,18 @@ const formatDate = (dateString) => {
   const date = new Date(dateString)
   if (isNaN(date.getTime())) return '-'
   return date.toISOString().slice(0, 10)
+}
+
+const vendorTypeOptions = [
+  { label: '공급업체', value: 'SUPPLIER' },
+  { label: '위탁업체', value: 'TRUST_CONTRACTOR' },
+  { label: '물류', value: 'LOGISTICS' },
+  { label: '대행업체', value: 'AGENCY' }
+]
+
+const getVendorTypeLabel = (value) => {
+  const match = vendorTypeOptions.find(option => option.value === value)
+  return match ? match.label : '-'
 }
 </script>
 

@@ -99,10 +99,10 @@ function resetFilters() {
 }
 
 const vendorTypeOptions = [
-  { label: 'SUPPLIER', value: 'SUPPLIER' },
-  { label: 'TRUST_CONTRACTOR', value: 'TRUST_CONTRACTOR' },
-  { label: 'LOGISTICS', value: 'LOGISTICS' },
-  { label: 'AGENCY', value: 'AGENCY' }
+  { label: '공급업체', value: 'SUPPLIER' },
+  { label: '위탁업체', value: 'TRUST_CONTRACTOR' },
+  { label: '물류', value: 'LOGISTICS' },
+  { label: '대행업체', value: 'AGENCY' }
 ]
 const vendorStatusOptions = [
   { label: '계약 진행 중', value: 'IN_PROGRESS' },
