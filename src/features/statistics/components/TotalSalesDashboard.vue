@@ -284,31 +284,61 @@ onMounted(async () => {
     <div class="card-grid">
       <div class="stat-card">
         <div class="stat-title">
-          {{ period === 'DAILY' ? '오늘 매출' : period === 'WEEKLY' ? '이번 주 매출' : '이번 달 매출' }}
+          {{
+            period === 'DAILY'
+                ? '작일 매출'
+                : period === 'WEEKLY'
+                    ? '최근 주간 매출'
+                    : '최근 월간 매출'
+          }}
         </div>
         <div class="stat-value">{{ formatCurrency(todaySales) }}</div>
         <div class="stat-description">
-          {{ period === 'DAILY' ? '오늘 기준' : period === 'WEEKLY' ? '이번 주 기준' : '이번 달 기준' }}
+          {{
+            period === 'DAILY'
+                ? '작일 기준'
+                : period === 'WEEKLY'
+                    ? '최근 주간 기준'
+                    : '최근 월간 기준'
+          }}
         </div>
       </div>
 
       <div class="stat-card">
         <div class="stat-title">
-          {{ period === 'DAILY' ? '어제 매출' : period === 'WEEKLY' ? '지난 주 매출' : '지난 달 매출' }}
+          {{
+            period === 'DAILY'
+                ? '재작일 매출'
+                : period === 'WEEKLY'
+                    ? '직전 주간 매출'
+                    : '직전 월간 매출'
+          }}
         </div>
         <div class="stat-value">{{ formatCurrency(yesterdaySales) }}</div>
         <div class="stat-description">
-          {{ period === 'DAILY' ? '어제 기준' : period === 'WEEKLY' ? '지난 주 기준' : '지난 달 기준' }}
+          {{
+            period === 'DAILY'
+                ? '재작일 기준'
+                : period === 'WEEKLY'
+                    ? '직전 주간 기준'
+                    : '직전 월간 기준'
+          }}
         </div>
       </div>
 
       <div class="stat-card">
-        <div class="stat-title">전일 대비 증감률</div>
+        <div class="stat-title">증감률</div>
         <div class="stat-value" :class="growthRate >= 0 ? 'positive' : 'negative'">
           {{ growthRate.toFixed(1) }}%
         </div>
         <div class="stat-description">
-          {{ period === 'DAILY' ? '전일 대비' : period === 'WEEKLY' ? '전 주 대비' : '전 달 대비' }}
+          {{
+            period === 'DAILY'
+                ? '작일 대비'
+                : period === 'WEEKLY'
+                    ? '최근 주간 대비'
+                    : '최근 월간 대비'
+          }}
         </div>
       </div>
 
