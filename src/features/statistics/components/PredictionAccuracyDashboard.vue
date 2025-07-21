@@ -202,8 +202,8 @@ onMounted(async () => {
     <!-- 예측 유형 탭 -->
     <div class="prediction-tab-bar">
       <button :class="{ active: predictionType === 'sales' }" @click="predictionType = 'sales'; handleSearch()">매출</button>
-      <button :class="{ active: predictionType === 'order' }" @click="predictionType = 'order'; handleSearch()">주문 수량</button>
-      <button :class="{ active: predictionType === 'purchase' }" @click="predictionType = 'purchase'; handleSearch()">발주 수량</button>
+      <button :class="{ active: predictionType === 'order_quantity' }" @click="predictionType = 'order_quantity'; handleSearch()">주문 수량</button>
+      <button :class="{ active: predictionType === 'purchase_quantity' }" @click="predictionType = 'purchase_quantity'; handleSearch()">발주 수량</button>
     </div>
 
     <!-- 차트 + 정확도 카드 -->
