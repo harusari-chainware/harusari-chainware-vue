@@ -158,15 +158,15 @@ onMounted(fetchDetail)
     </div>
 
     <!-- 증빙 자료 -->
-    <h3 class="card-title">증빙 자료</h3>
-    <div>
-      <img
-          v-for="item in detail?.productInfos"
-          :src="item.takeBackImage"
-          alt="반품 이미지"
-          class="evidence-image"
-      />
-    </div>
+<!--    <h3 class="card-title">증빙 자료</h3>-->
+<!--    <div>-->
+<!--      <img-->
+<!--          v-for="item in detail?.productInfos"-->
+<!--          :src="item.takeBackImage"-->
+<!--          alt="반품 이미지"-->
+<!--          class="evidence-image"-->
+<!--      />-->
+<!--    </div>-->
 
     <!-- ✅ 반려 모달 -->
     <RejectReasonModal
