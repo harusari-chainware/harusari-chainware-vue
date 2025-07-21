@@ -3,7 +3,7 @@
       title="거래처 상세 정보 조회"
       description="거래처 상세 정보를 확인/수정할 수 있습니다."
   >
-    <template #actions>
+    <template v-if="isManager" #actions>
       <template v-if="!isEditing">
         <StatusButton type="primary" @click="startEdit">수정</StatusButton>
       </template>
@@ -185,7 +185,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, reactive } from 'vue'
+import {ref, onMounted, reactive, computed} from 'vue'
 import { useRoute } from 'vue-router'
 import DetailLayout from '@/components/layout/DetailLayout.vue'
 import StatusButton from '@/components/common/StatusButton.vue'
@@ -194,6 +194,7 @@ import VendorDeleteConfirmModal from "@/features/vendor/components/VendorDeleteC
 import VendorErrorModal from "@/features/vendor/components/VendorErrorModal.vue";
 import VendorDoneModal from "@/features/vendor/components/VendorDoneModal.vue";
 import FilterDate from "@/components/common/filters/FilterDate.vue";
+import {useAuthStore} from "@/features/auth/useAuthStore.js";
 
 const isEditing = ref(false)
 const vendor = ref({})
@@ -213,6 +214,17 @@ const form = reactive({
   modifiedAt: '',
   vendorId: null,
 })
+
+const authStore = useAuthStore()
+const authority = authStore.authority
+
+const isGeneralManager = computed(() => authority === 'GENERAL_MANAGER')
+const isSeniorManager = computed(() => authority === 'SENIOR_MANAGER')
+const isSuperAdmin = computed(() => authority === 'SUPER_ADMIN')
+
+const isManager = computed(() =>
+    isGeneralManager.value || isSeniorManager.value || isSuperAdmin.value
+)
 
 const ErrorOpen = ref(false)
 const ErrorMsg = ref('')

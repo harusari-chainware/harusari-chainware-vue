@@ -126,9 +126,9 @@ const getCategoryName = (categoryId) => {
 
 // ENUM 옵션
 const storeTypeOptions = [
-  { label: 'ROOM_TEMPERATURE', value: 'ROOM_TEMPERATURE' },
-  { label: 'CHILLED', value: 'CHILLED' },
-  { label: 'FROZEN', value: 'FROZEN' }
+  { label: '상온', value: 'ROOM_TEMPERATURE' },
+  { label: '냉장', value: 'CHILLED' },
+  { label: '냉동', value: 'FROZEN' }
 ]
 const productStatusOptions = [
   { label: '활성', value: 'ACTIVE' },
